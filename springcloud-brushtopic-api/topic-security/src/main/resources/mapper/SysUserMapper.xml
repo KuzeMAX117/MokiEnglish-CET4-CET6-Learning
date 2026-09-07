@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hao.topic.security.mapper.SysUserMapper">
+
+    
+    <select id="selectUserListVo" resultType="com.hao.topic.model.vo.system.SysUserListVo">
+        select u.id,
+        u.account,
+        u.avatar,
+        u.email,
+        u.status,
+        u.member_time as memberTime,
+        u.create_time as createTime,
+        r.name as roleName
+        from sys_user u
+        left join sys_user_role ur on u.id = ur.user_id and ur.is_deleted = 0
+        left join sys_role r on ur.role_id = r.id and r.is_deleted = 0
+        where u.is_deleted = 0
+        <if test="account != null and account != ''">
+            and u.account like concat('%', #{account}, '%')
+        </if>
+        <if test="roleName != null and roleName != ''">
+            and r.name = #{roleName}
+        </if>
+        <if test="beginCreateTime != null and beginCreateTime != ''">
+            and date_format(u.create_time,'%Y%m%d') &gt;= date_format(#{beginCreateTime},'%Y%m%d')
+        </if>
+        <if test="endCreateTime != null and endCreateTime != ''">
+            and date_format(u.create_time,'%Y%m%d') &lt;= date_format(#{endCreateTime},'%Y%m%d')
+        </if>
+        <if test="beginMemberTime != null and beginMemberTime != ''">
+            and date_format(u.member_time,'%Y%m%d') &gt;= date_format(#{beginCreateTime},'%Y%m%d')
+        </if>
+        <if test="endMemberTime != null and endMemberTime != ''">
+            and date_format(u.member_time,'%Y%m%d') &lt;= date_format(#{endMemberTime},'%Y%m%d')
+        </if>
+        order by u.create_time desc
+        <if test="pageNum != null and pageSize != null">
+            limit #{pageNum}, #{pageSize}
+        </if>
+    </select>
+
+    
+    <select id="countUserList" resultType="int">
+        select count(*)
+        from sys_user u
+        left join sys_user_role ur on u.id = ur.user_id and ur.is_deleted = 0
+        left join sys_role r on ur.role_id = r.id and r.is_deleted = 0
+        where u.is_deleted = 0
+        <if test="account != null and account != ''">
+            and u.account like concat('%', #{account}, '%')
+        </if>
+        <if test="roleName != null and roleName != ''">
+            and r.name = #{roleName}
+        </if>
+        <if test="beginCreateTime != null and beginCreateTime != ''">
+            and date_format(u.create_time,'%Y%m%d') &gt;= date_format(#{beginCreateTime},'%Y%m%d')
+        </if>
+        <if test="endCreateTime != null and endCreateTime != ''">
+            and date_format(u.create_time,'%Y%m%d') &lt;= date_format(#{endCreateTime},'%Y%m%d')
+        </if>
+        <if test="beginMemberTime != null and beginMemberTime != ''">
+            and date_format(u.member_time,'%Y%m%d') &gt;= date_format(#{beginMemberTime},'%Y%m%d')
+        </if>
+        <if test="endMemberTime != null and endMemberTime != ''">
+            and date_format(u.member_time,'%Y%m%d') &lt;= date_format(#{endMemberTime},'%Y%m%d')
+        </if>
+    </select>
+    
+    <select id="getByRoleName" resultType="com.hao.topic.model.entity.system.SysRole">
+        select *
+        from sys_role
+        where name = #{roleName}
+          and is_deleted = 0
+    </select>
+
+    
+    <select id="countUserDay7" resultType="com.hao.topic.model.vo.topic.TopicDataVo">
+        SELECT CURDATE() - INTERVAL (n) DAY AS date,
+               COALESCE(COUNT(u.id), 0)     AS count
+        FROM (SELECT 0 AS n
+              UNION ALL
+              SELECT 1
+              UNION ALL
+              SELECT 2
+              UNION ALL
+              SELECT 3
+              UNION ALL
+              SELECT 4
+              UNION ALL
+              SELECT 5
+              UNION ALL
+              SELECT 6) numbers
+                 LEFT JOIN sys_user u
+                           ON DATE(u.create_time) = CURDATE() - INTERVAL n DAY
+        GROUP BY date
+        ORDER BY date;
+    </select>
+
+</mapper>

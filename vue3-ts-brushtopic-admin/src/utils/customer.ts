@@ -1,0 +1,21 @@
+
+export function getWaterBallSVG(percent: number, count: number, color = '#4592ff', size = 100) {
+  const h = size;
+  const w = size;
+  const waterHeight = h * (1 - percent / count);
+  const waveY = waterHeight;
+  const wave = `M0,${waveY} Q${w / 4},${waveY - 8} ${w / 2},${waveY} T${w},${waveY} L${w},${h} L0,${h} Z`;
+  
+  const svg = `<svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <clipPath id="clipCircle">
+        <circle cx="${w / 2}" cy="${h / 2}" r="${w / 2 - 2}" />
+      </clipPath>
+    </defs>
+    <circle cx="${w / 2}" cy="${h / 2}" r="${w / 2 - 2}" fill="#ebebeb" stroke="${color}" stroke-width="0"/>
+    <g clip-path="url(#clipCircle)">
+      <path d="${wave}" fill="${color}" fill-opacity="1"/>
+    </g>
+  </svg>`;
+  return 'image://data:image/svg+xml;base64,' + window.btoa(unescape(encodeURIComponent(svg)));
+}

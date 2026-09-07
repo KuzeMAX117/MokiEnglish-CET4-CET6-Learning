@@ -1,0 +1,36 @@
+package com.hao.topic.topic.service;
+
+import com.hao.topic.model.vo.ai.AiTrendVo;
+import com.hao.topic.model.vo.system.SysUserTrentVo;
+import com.hao.topic.model.vo.topic.*;
+
+import java.util.List;
+import java.util.Map;
+
+public interface TopicDataService {
+    Map<String, Object> webHomeCount();
+
+    List<TopicUserRankVo> rank(Integer type);
+
+    TopicUserRankVo userRank(Integer type);
+
+    Map<String, Object> adminHomeCount();
+
+    List<TopicCategoryDataVo> adminHomeCategory();
+
+    TopicTrendVo topicTrend();
+
+    SysUserTrentVo userTrend();
+
+    AiTrendVo aiTrend();
+
+    Map<String, Object> userHomeData();
+
+    List<TopicCategoryUserDataVo> userHomeCategory();
+
+    List<TopicDataVo> userTopicDateCount(String date);
+
+    List<TopicTodayVo> topicTodayVo();
+
+    void flushTopic(Long id);
+}

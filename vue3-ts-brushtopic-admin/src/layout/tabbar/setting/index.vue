@@ -1,0 +1,405 @@
+<script setup lang="ts">
+import { useUserStore } from '@/stores/modules/user'
+const userStore = useUserStore()
+import { useSettingStore } from '@/stores/modules/setting';
+import { apiGetNoticeList, apiGetNoticeHas, apiReadNotice } from '@/api/system/notice'
+const settingStore = useSettingStore()
+import Hao from '@/assets/images/H.png'
+import { ref, h, onMounted } from 'vue'
+import { message } from 'ant-design-vue';
+import { BellOutlined, DownOutlined, SettingOutlined, MenuFoldOutlined, MenuUnfoldOutlined, FullscreenOutlined, ReloadOutlined } from '@ant-design/icons-vue';
+
+import { ColorPicker } from 'vue3-colorpicker'
+import 'vue3-colorpicker/style.css'
+import { useRouter } from 'vue-router';
+const $router = useRouter()
+import {
+  ExclamationCircleOutlined
+} from '@ant-design/icons-vue';
+import Modal from 'ant-design-vue/es/modal/Modal';
+
+const updateRefsh = () => {
+  
+  window.location.reload()
+  
+  userStore.getUserInfo()
+}
+
+const fullScreen = () => {
+  
+  const full = document.fullscreenElement
+  
+  if (!full) {
+    
+    document.documentElement.requestFullscreen()
+  } else {
+    
+    document.exitFullscreen()
+  }
+}
+
+const drawer = ref(false)
+
+const viewSetting = () => {
+  drawer.value = true
+}
+
+const defaultTheme = ref({
+  themeColor: '#1677ff',
+  isDark: false,
+  fold: false,
+  isCompact: false,
+})
+
+const saveTheme = () => {
+  
+  localStorage.setItem("settingTheme", JSON.stringify({
+    fold: settingStore.fold,
+    isDark: settingStore.isDark,
+    themeColor: settingStore.themeColor,
+    isCompact: settingStore.isCompact,
+  }))
+  message.success("保存配置成功")
+}
+
+const resetTheme = () => {
+  
+  localStorage.removeItem("settingTheme")
+  
+  settingStore.themeColor = defaultTheme.value.themeColor
+  settingStore.isDark = defaultTheme.value.isDark
+  settingStore.fold = defaultTheme.value.fold
+  settingStore.isCompact = defaultTheme.value.isCompact
+  message.info("重置配置成功")
+}
+
+const handleErrorImg = (event: any) => {
+  event.target.src = Hao
+};
+
+const notifications = ref<any[]>([]);
+const notificationsLoding = ref(false)
+
+const getNoticeList = () => {
+  notificationsLoding.value = true
+  apiGetNoticeList().then(res => {
+    notifications.value = res.data
+  }).finally(() => {
+    notificationsLoding.value = false
+  })
+}
+
+const getClassName = (status: number) => {
+
+  const map = <any>{
+    0: 'member',
+    1: 'feedback',
+    2: 'reply',
+    3: 'topic',
+  }
+  return map[status] || 'member'
+}
+
+const getType = (status: number) => {
+  const map = <any>{
+    0: '会员支付',
+    1: '意见反馈',
+    2: '回复内容',
+    3: '题目反馈'
+  }
+  return map[status] || '会员'
+}
+
+const isPopoverOpen = ref(false)
+const handlePopoverChange = () => {
+  isPopoverOpen.value = !isPopoverOpen.value
+  if (isPopoverOpen.value) {
+    getNoticeList()
+  }
+}
+
+const hasNotice = ref(false)
+
+const getNotice = async () => {
+  const res = await apiGetNoticeHas()
+  hasNotice.value = res.data
+}
+
+const markAsRead = async (index: number, id: number) => {
+  
+  await apiReadNotice([id])
+  notifications.value[index].read = true
+}
+
+const handleAllRead = async () => {
+  Modal.confirm({
+    title: '确定要全部已读吗？',
+    icon: h(ExclamationCircleOutlined),
+    content: '已读所有通知后不可恢复请仔细查看通知',
+    okText: '确定',
+    cancelText: '取消',
+    async onOk() {
+      await apiReadNotice(notifications.value.map(item => item.id))
+      
+      isPopoverOpen.value = false
+      hasNotice.value = false
+      message.success("全部已读")
+    },
+    onCancel() {
+      console.log('Cancel');
+    },
+  });
+}
+onMounted(() => {
+  getNotice()
+})
+</script>
+<template>
+  
+  <a-drawer v-model:open="drawer" title="主题设置">
+    
+    <a-form-item label="主题颜色">
+      <ColorPicker v-model:pure-color="settingStore.themeColor" />
+    </a-form-item>
+    <a-form-item label="暗黑模式">
+      
+      <a-switch v-model:checked="settingStore.isDark">
+        <template #checkedChildren>
+          <BulbFilled />
+        </template>
+        <template #unCheckedChildren>
+          <BulbOutlined />
+        </template>
+      </a-switch>
+    </a-form-item>
+    <a-form-item label="折叠菜单">
+      <a-switch v-model:checked="settingStore.fold">
+        <template #checkedChildren>
+          <MenuUnfoldOutlined />
+        </template>
+        <template #unCheckedChildren>
+          <MenuFoldOutlined />
+        </template>
+      </a-switch>
+    </a-form-item>
+    <a-form-item label="紧凑模式">
+      <a-switch v-model:checked="settingStore.isCompact">
+        <template #checkedChildren>
+          <NodeCollapseOutlined />
+        </template>
+        <template #unCheckedChildren>
+          <NodeExpandOutlined />
+        </template>
+      </a-switch>
+    </a-form-item>
+    <a-form-item>
+      <a-space :size="10" class="space">
+        <a-button type="primary" @click="saveTheme" plain>保存配置</a-button>
+        <a-button @click="resetTheme">重置配置</a-button>
+      </a-space>
+    </a-form-item>
+  </a-drawer>
+  <a-space>
+    
+    <a-button :icon="h(ReloadOutlined)" shape="circle" @click="updateRefsh"></a-button>
+    <a-button :icon="h(FullscreenOutlined)" shape="circle" @click="fullScreen"></a-button>
+    
+    <a-popover placement="bottom" trigger="click" :open="isPopoverOpen" @openChange="handlePopoverChange">
+      
+      <template #content>
+        <div class="bell-box">
+          
+          <div class="bell-top">
+            <span class="tz">通知</span>
+            
+          </div>
+          
+          <div class="bell-content">
+            <a-spin :spinning="notificationsLoding">
+              <div v-if="notifications.length > 0" class="notification-list">
+                <div v-for="(item, index) in notifications" :key="index" class="notification-item">
+                  <div class="notification-content">
+                    <div class="notification-title">
+                      <span class="notification-type" :class="getClassName(item.status)">
+                        {{ getType(item.status) }}
+                      </span>
+                      <span class="notification-time">{{ item.timeDesc }}</span>
+                    </div>
+                    <div class="notification-message">{{ item.account + ": " + item.content }}</div>
+                  </div>
+                  <div class="notification-actions">
+                    <a-button type="link" size="small" @click="markAsRead(index, item.id)" v-if="!item.read">
+                      已读
+                    </a-button>
+                  </div>
+                </div>
+              </div>
+              <a-empty v-else description="暂无通知" />
+            </a-spin>
+          </div>
+          
+          <div class="bell-bottom" v-if="notifications.length > 0">
+            <a-link type="primary" @click="handleAllRead">全部已读</a-link>
+          </div>
+        </div>
+      </template>
+      <a-badge :dot="hasNotice" :offset="[-5, 2]">
+        <a-button :icon="h(BellOutlined)" shape="circle"></a-button>
+      </a-badge>
+    </a-popover>
+    
+    <a-button @click="viewSetting" :icon="h(SettingOutlined)" shape="circle"></a-button>
+    
+    <template v-if="userStore.userInfo?.avatar">
+      <img class="user-avatar" @error="handleErrorImg" :src="userStore.userInfo.avatar" alt="" />
+    </template>
+    <template v-else>
+      <a-avatar class="user-avatar" :style="{ backgroundColor: '#1677ff' }">
+        {{ userStore.userInfo?.account?.charAt(0)?.toUpperCase() }}
+      </a-avatar>
+    </template>
+    
+    <a-dropdown class="dropdown">
+      <span class="name">
+        {{ userStore.userInfo?.nickname || userStore.userInfo?.account }}
+        <DownOutlined />
+      </span>
+      <template #overlay>
+        <a-menu>
+          <a-menu-item @click="$router.push('/profile')">个人中心</a-menu-item>
+          <a-menu-item
+            @click="userStore.clearUserInfo(), $router.push('/login'), message.success('退出登录')">退出登录</a-menu-item>
+        </a-menu>
+      </template>
+    </a-dropdown>
+  </a-space>
+</template>
+<style lang="scss" scoped>
+.space {
+  padding-top: 5px;
+}
+
+.dropdown {
+  margin-right: 22px;
+}
+
+.bell-box {
+  width: 300px;
+
+  .bell-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 520;
+
+    .tz:hover {
+      cursor: pointer;
+    }
+
+    .clear:hover {
+      cursor: pointer;
+      color: red;
+    }
+  }
+
+  .bell-bottom {
+    height: 28px;
+    border-top: 1px solid #eceef0;
+    display: flex;
+    align-items: end;
+    justify-content: center;
+
+    &:hover {
+      cursor: pointer;
+      color: #1677ff;
+    }
+  }
+}
+
+.name {
+  color: #8c8c8c;
+}
+
+.bell-content {
+  margin-top: 10px;
+
+  .notification-list {
+    height: 300px;
+    overflow-y: auto;
+    padding: 0;
+    margin: 0;
+  }
+
+  .notification-item {
+    padding: 10px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    transition: all 0.3s;
+
+  }
+
+  .notification-content {
+    flex: 1;
+  }
+
+  .notification-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+
+  .notification-type {
+    font-weight: 500;
+    font-size: 13px;
+    padding: 2px 6px;
+    border-radius: 4px;
+
+    &.feedback {
+      background-color: #e6f7ff;
+      color: #1677ff;
+    }
+
+    &.member {
+      background-color: #fff3e0;
+      color: #fa8c16;
+    }
+
+    &.reply {
+      background-color: #f0fff0; 
+      color: #52c41a; 
+    }
+
+    &.topic {
+      background-color: #f3e8ff;
+      color: #7e3af2;
+    }
+
+  }
+
+  .notification-time {
+    font-size: 12px;
+    color: #999;
+  }
+
+  .notification-message {
+    font-size: 13px;
+    color: $base-personal-color;
+    line-height: 1.5;
+    word-break: break-all;
+  }
+
+  .notification-actions {
+    margin-left: 8px;
+  }
+}
+
+.user-avatar {
+  width: 28px;
+  height: 28px;
+  margin: 0px 10px;
+  border-radius: 50%;
+}
+</style>

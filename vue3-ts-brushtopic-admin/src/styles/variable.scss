@@ -1,0 +1,62 @@
+
+
+:root {
+  
+  --base-background: #f6f7fb;
+  --base-content-background: #f9fafb;
+  --base-menu-background: #fff;
+  --base-tabbar-background: #fff;
+  --base-table-background: #fff;
+  --base-webkit-background: #f2f3f4;
+  --base-webkit-track: #fff;
+  --base-personal-color: black;
+  --base-login-background: #fff;
+}
+
+.dark {
+  --base-background: #001529;
+  --base-content-background: #001529;
+  --base-menu-background: #001529;
+  --base-tabbar-background: #001529;
+  --base-table-background: #001529;
+  --base-webkit-background: #001529;
+  --base-webkit-track: #001529;
+  --base-personal-color: white;
+  --base-login-background: #141414;
+}
+
+$base-background: var(--base-background);
+
+$base-login-background: var(--base-login-background);
+
+$base-menu-width: 190px;
+
+$base-menu-background: var(--base-menu-background);
+
+$base-menu-min-width: 80px;
+
+$base-menu-logo-height: 55px;
+
+$base-tabbar-height: 55px;
+
+$base-content-background: var(--base-content-background);
+
+$base-menu-active-color: #fff;
+
+$base-menu-active-background: #1677ff;
+
+$base-tabbar-background: var(--base-tabbar-background);
+
+$base-personal-color: var(--base-personal-color);
+
+$base-webkit-background: var(--base-webkit-background);
+
+$base-webkit-track: var(--base-webkit-track);
+
+$base-webkit-scrollbar: 4px;
+
+$base-webkit-height: 4px;
+
+$base-webkit-radius: 10px;
+
+$base-table-backgroud: var(--base-table-background);

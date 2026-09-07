@@ -1,0 +1,316 @@
+<template>
+  <div class="profile-container">
+    <a-row :gutter="[24, 24]">
+      
+      <a-col :xs="24" :sm="24" :md="8" :lg="8" :xl="6">
+        <a-card :bordered="false" class="user-card">
+          <div class="avatar-container">
+            <a-avatar :size="120" :src="userInfo.avatar">
+              <template #icon>
+                <UserOutlined />
+              </template>
+            </a-avatar>
+            <div class="avatar-upload">
+              <a-upload ::maxCount="1" v-model:file-list="fileList" name="avatar" style="opacity: 0;"
+                list-type="picture-card" :show-upload-list="false" :headers="headers" :action="uploadUrl"
+                :before-upload="beforeUpload" @change="handleChange">
+              </a-upload>
+            </div>
+          </div>
+          <div class="user-info">
+            <div class="user">
+              <UserOutlined /> 账户：<span class="desc">{{ userInfo.account }}</span>
+            </div>
+            <div class="user" v-if="userInfo.nickname">
+              <SmileOutlined /> 昵称：<span class="desc">{{ userInfo.nickname }}</span>
+            </div>
+            <div class="user" v-if="userInfo.email">
+              <MailOutlined /> 邮箱：<span class="desc">{{ userInfo.email }}</span>
+            </div>
+            
+            <div class="user" v-if="userInfo.createTime">
+              <CalendarOutlined />
+              账号注册时间: <span class="desc">{{ userInfo.createTime }}</span>
+            </div>
+            <div class="user" v-if="userInfo.memberTime">
+              <StarOutlined />
+              会员注册时间: <span class="desc">{{ userInfo.memberTime }}</span>
+            </div>
+            <div class="user">
+              <SafetyCertificateOutlined />
+              
+              账号状态：
+              <a-tag :color="userInfo.status === 0 ? '#1677ff' : 'error'">
+                <CheckCircleOutlined v-if="userInfo.status === 0" />
+                <CloseCircleOutlined v-else />
+                {{ userInfo.status === 0 ? '正常' : '停用' }}
+              </a-tag>
+            </div>
+          </div>
+        </a-card>
+      </a-col>
+
+      
+      <a-col :xs="24" :sm="24" :md="16" :lg="16" :xl="18">
+        <a-card :bordered="false" title="个人信息">
+          <a-tabs default-active-key="1">
+            <a-tab-pane key="1" tab="基本信息">
+              <a-form :model="formState" :rules="rules" ref="formRef" layout="vertical">
+                <a-form-item label="昵称" name="nickname">
+                  <a-input :maxlength="8" v-model:value="formState.nickname" placeholder="请谨慎修改账户昵称修改昵称后会影响展示效果" />
+                </a-form-item>
+                <a-form-item label="邮箱" name="email">
+                  <a-input v-model:value="formState.email" placeholder="请输入邮箱">
+                    <template #suffix>
+                      <a-button type="primary" @click="sendEmail">发送验证码</a-button>
+                    </template>
+                  </a-input>
+                </a-form-item>
+                
+                <a-form-item label="验证码" name="code">
+                  <a-input v-model:value="formState.code" placeholder="请输入验证码" />
+                </a-form-item>
+                <a-form-item label="密码" name="password">
+                  <a-input-password v-model:value="formState.password" placeholder="请输入密码" />
+                </a-form-item>
+                <a-form-item>
+                  <a-space :size="10">
+                    <a-button type="primary" @click="submitForm">保存修改</a-button>
+                    <a-button @click="() => $router.push('/')">返回</a-button>
+                  </a-space>
+                </a-form-item>
+              </a-form>
+            </a-tab-pane>
+            <a-tab-pane key="2" tab="修改密码">
+              <a-form :model="passwordForm" :rules="passwordRules" ref="passwordFormRef" layout="vertical">
+                <a-form-item label="当前密码" name="oldPassword">
+                  <a-input-password v-model:value="passwordForm.oldPassword" placeholder="请输入当前密码" />
+                </a-form-item>
+                <a-form-item label="新密码" name="newPassword">
+                  <a-input-password v-model:value="passwordForm.newPassword" placeholder="请输入新密码" />
+                </a-form-item>
+                <a-form-item label="确认新密码" name="confirmPassword">
+                  <a-input-password v-model:value="passwordForm.confirmPassword" placeholder="请确认新密码" />
+                </a-form-item>
+                <a-form-item>
+                  <a-space :size="10">
+                    <a-button type="primary" @click="changePassword">修改密码</a-button>
+                    <a-button @click="() => $router.push('/')">返回</a-button>
+                  </a-space>
+                </a-form-item>
+              </a-form>
+            </a-tab-pane>
+          </a-tabs>
+        </a-card>
+      </a-col>
+    </a-row>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, reactive, onMounted } from 'vue';
+import { message } from 'ant-design-vue';
+import type { FormInstance } from 'ant-design-vue';
+import { apiGetUserInfoDetail, apiSendEmail, apiSaveUserAvatar, apiUpdateUserInfo, apiUpdatePassword } from '@/api/auth/index'
+import { useUserStore } from '@/stores/modules/user'
+const userStore = useUserStore()
+import { useRouter } from 'vue-router';
+import type { UploadChangeParam, UploadProps } from 'ant-design-vue';
+
+const { VITE_SERVE } = import.meta.env
+
+const uploadUrl = VITE_SERVE + '/api/system/user/avatar'
+
+const headers = { authorization: userStore.token };
+
+const beforeUpload = (file: UploadProps['fileList'][number]) => {
+  const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+  if (!isJpgOrPng) {
+    message.error('图片格式错误');
+  }
+  const isLt2M = file.size / 1024 / 1024 < 2;
+  if (!isLt2M) {
+    message.error('图片大小不能超过2M');
+  }
+  return isJpgOrPng && isLt2M;
+};
+
+const handleChange = async (info: UploadChangeParam) => {
+  
+  if (info.file.status === 'uploading') {
+    loading.value = true;
+    return;
+  }
+  
+  if (info.file.status === 'done') {
+    userInfo.value.avatar = info.file.response.data
+    
+    userStore.userInfo.avatar = info.file.response.data
+    userInfo.value.avatar = info.file.response.data
+    
+    await apiSaveUserAvatar({ avatar: info.file.response.data, id: userStore.userInfo.id })
+    loading.value = false;
+    message.success('上传成功');
+  }
+  
+  if (info.file.status === 'error') {
+    loading.value = false;
+    message.error('上传失败');
+  }
+};
+
+const $router = useRouter()
+const getUserInfo = async () => {
+  apiGetUserInfoDetail(userStore.userInfo.id).then((res) => {
+    
+    
+    userInfo.value = res
+    formState.nickname = userInfo.value.nickname
+  })
+};
+
+const userInfo = ref({
+  account: '',
+  avatar: '',
+  email: '',
+  memberTime: '',
+  nickname: '',
+  status: 0,
+  password: null,
+  createTime: ''
+});
+
+const fileList = ref([]);
+
+const loading = ref<boolean>(false);
+
+const formState = reactive({
+  nickname: '',
+  email: '',
+  password: null,
+  code: ''
+});
+
+const passwordForm = reactive({
+  oldPassword: '',
+  newPassword: '',
+  confirmPassword: ''
+});
+
+const formRef = ref<FormInstance>();
+const passwordFormRef = ref<FormInstance>();
+
+const rules = {
+  nickname: [{ required: true, message: '请输入昵称', trigger: 'blur' },
+  { min: 2, message: '昵称长度不能少于2个字符', trigger: 'blur' },
+  { max: 10, message: '昵称长度不能超过10个字符', trigger: 'blur' }
+  ],
+  email: [
+    { type: 'email', message: '请输入有效的邮箱地址', trigger: 'blur' }
+  ],
+  password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+};
+
+const passwordRules = {
+  oldPassword: [{ required: true, message: '请输入当前密码', trigger: 'blur' }],
+  newPassword: [
+    { required: true, message: '请输入新密码', trigger: 'blur' },
+    { min: 6, message: '密码长度不能少于6个字符', trigger: 'blur' }
+  ],
+  confirmPassword: [
+    { required: true, message: '请确认新密码', trigger: 'blur' },
+    {
+      validator: (rule: any, value: string) => {
+        if (value !== passwordForm.newPassword) {
+          return Promise.reject('两次输入的密码不一致');
+        }
+        return Promise.resolve();
+      },
+      trigger: 'blur'
+    }
+  ]
+};
+
+const submitForm = () => {
+  formRef.value?.validate().then(async () => {
+    
+    await apiUpdateUserInfo({
+      id: userStore.userInfo.id,
+      nickname: formState.nickname,
+      email: formState.email,
+      password: formState.password
+    })
+    message.success('个人信息更新成功');
+    
+    userStore.logout()
+  }).catch(error => {
+    console.log('验证失败:', error);
+  });
+};
+
+const changePassword = () => {
+  passwordFormRef.value?.validate().then(async () => {
+    
+    await apiUpdatePassword({
+      id: userStore.userInfo.id,
+      password: passwordForm.oldPassword,
+      newPassword: passwordForm.newPassword,
+      confirmPassword: passwordForm.confirmPassword
+    })
+    message.success('密码修改成功');
+    
+    userStore.logout()
+  }).catch(error => {
+    console.log('验证失败:', error);
+  });
+};
+
+const sendEmail = async () => {
+  await apiSendEmail(formState.email)
+  message.success('邮件发送成功');
+}
+
+onMounted(() => {
+  getUserInfo();
+});
+</script>
+
+<style scoped lang="scss">
+.profile-container {
+  padding: 24px;
+}
+
+.user-card {
+  text-align: center;
+  height: 100%;
+}
+
+.avatar-container {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 20px;
+}
+
+.avatar-upload {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+}
+
+.user-info {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  font-size: 14px;
+  color: #666;
+}
+
+.user {
+  margin-bottom: 15px;
+}
+
+.desc {
+  color: $base-personal-color;
+}
+</style>

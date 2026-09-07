@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hao.topic.ai.mapper.AiRecordMapper">
+    
+    <select id="countAiFrequency"  resultType="java.lang.Long">
+        select sum(count) from ai_record
+        <where>
+            <if test="date != null and date != ''">
+                ai_time = #{date}
+            </if>
+        </where>
+    </select>
+    
+    <select id="countAiDay7" resultType="com.hao.topic.model.vo.topic.TopicDataVo">
+        WITH RECURSIVE dates AS (SELECT CURDATE() - INTERVAL 6 DAY AS date_value
+                                 UNION ALL
+                                 SELECT date_value + INTERVAL 1 DAY
+                                 FROM dates
+                                 WHERE date_value &lt; CURDATE())
+        SELECT d.date_value              AS date,
+               COALESCE(SUM(r.count), 0) AS count
+        FROM dates d
+                 LEFT JOIN ai_record r ON r.ai_time = d.date_value
+        GROUP BY d.date_value
+        ORDER BY d.date_value;
+    </select>
+
+    
+    <select id="countAi" resultType="java.lang.Long">
+        select sum(count)
+        from ai_record
+        where user_id = #{currentId}
+    </select>
+</mapper>

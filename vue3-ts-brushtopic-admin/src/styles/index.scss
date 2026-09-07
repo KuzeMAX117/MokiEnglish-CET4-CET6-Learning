@@ -1,0 +1,21 @@
+
+@import url(./reset.scss); 
+
+body {
+  margin: 0;
+  overflow: hidden;
+}
+
+::-webkit-scrollbar {
+  width: $base-webkit-scrollbar;
+  height: $base-webkit-height;
+}
+
+::-webkit-scrollbar-track {
+  background: $base-webkit-track;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: $base-webkit-background;
+  border-radius: $base-webkit-radius;
+}

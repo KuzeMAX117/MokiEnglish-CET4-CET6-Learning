@@ -1,0 +1,23 @@
+package com.hao.topic.security.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.hao.topic.model.dto.system.SysUserListDto;
+import com.hao.topic.model.entity.system.SysRole;
+import com.hao.topic.model.entity.system.SysUser;
+import com.hao.topic.model.vo.system.SysUserListVo;
+import com.hao.topic.model.vo.topic.TopicDataVo;
+import org.apache.ibatis.annotations.Mapper;
+
+import java.util.List;
+
+@Mapper
+public interface SysUserMapper extends BaseMapper<SysUser> {
+    List<SysUserListVo> selectUserListVo(SysUserListDto sysUserListDto);
+
+    int countUserList(SysUserListDto sysUserListDto);
+
+    SysRole getByRoleName(String roleName);
+
+    List<TopicDataVo> countUserDay7();
+
+}
