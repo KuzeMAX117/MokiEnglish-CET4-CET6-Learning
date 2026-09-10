@@ -3,16 +3,20 @@ package com.hao.topic.ai.controller;
 import com.alibaba.dashscope.audio.ttsv2.SpeechSynthesisParam;
 import com.alibaba.dashscope.audio.ttsv2.SpeechSynthesizer;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.hao.topic.ai.agent.EssayAgent;
+import com.hao.topic.ai.agent.EssayAgentResult;
 import com.hao.topic.ai.properties.TtsProperties;
 import com.hao.topic.ai.service.ModelService;
 import com.hao.topic.common.result.Result;
 import com.hao.topic.model.dto.ai.AiHistoryDto;
 import com.hao.topic.model.dto.ai.ChatDto;
+import com.hao.topic.model.dto.ai.EssayCorrectDto;
 import com.hao.topic.model.dto.ai.TranslationCorrectDto;
 import com.hao.topic.model.dto.ai.TtsDto;
 import com.hao.topic.model.entity.system.SysUser;
 import com.hao.topic.model.vo.ai.AiHistoryContent;
 import com.hao.topic.model.vo.ai.AiHistoryListVo;
+import com.hao.topic.model.vo.ai.EssayCorrectionVo;
 import com.hao.topic.model.vo.ai.TranslationCorrectionVo;
 import com.hao.topic.model.vo.topic.TopicDataVo;
 import com.hao.topic.security.utils.DateUtils;
@@ -30,12 +34,14 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("ai/model")
 @AllArgsConstructor
 public class ModelController {
     private final ModelService modelService;
+    private final EssayAgent essayAgent;
 
     
 
@@ -124,5 +130,30 @@ public class ModelController {
     @PostMapping("/translate/correct")
     public Result<TranslationCorrectionVo> correctTranslation(@RequestBody TranslationCorrectDto dto) {
         return Result.success(modelService.correctTranslation(dto));
+    }
+
+    @PostMapping("/essay/correct")
+    public Result<EssayCorrectionVo> correctEssay(@RequestBody EssayCorrectDto dto) {
+        EssayAgentResult agentResult = essayAgent.execute(dto.getEssay(), dto.getTopic(), dto.getLevel());
+        EssayCorrectionVo vo = new EssayCorrectionVo();
+        vo.setScore(agentResult.getScore());
+        vo.setBand(agentResult.getBand());
+        vo.setBandDescription(agentResult.getBandDescription());
+        vo.setOverall(agentResult.getOverall());
+        vo.setDimensions(agentResult.getDimensions());
+        vo.setGrammarErrors(agentResult.getGrammarErrors());
+        vo.setGrammarErrorCount(agentResult.getGrammarErrorCount());
+        vo.setVocabularySuggestions(agentResult.getVocabularySuggestions());
+        vo.setVocabularyScore(agentResult.getVocabularyScore());
+        vo.setStrengths(agentResult.getStrengths());
+        vo.setWeaknesses(agentResult.getWeaknesses());
+        vo.setToolChain(agentResult.getToolChain());
+        vo.setTotalTimeMs(agentResult.getTotalTimeMs());
+        return Result.success(vo);
+    }
+
+    @GetMapping("/essay/tools")
+    public Result<List<Map<String, String>>> listAgentTools() {
+        return Result.success(essayAgent.listTools());
     }
 }

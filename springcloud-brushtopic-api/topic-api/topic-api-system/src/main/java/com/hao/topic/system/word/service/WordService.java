@@ -11,6 +11,7 @@ import com.hao.topic.model.vo.word.WordItemVo;
 import com.hao.topic.model.vo.word.WordStatsVo;
 
 import java.util.List;
+import java.util.Map;
 
 public interface WordService {
     List<WordBookVo> listBooks();
@@ -39,4 +40,13 @@ public interface WordService {
 
     /** 用户生词本：移除一个收藏单词 */
     void removeCollection(Long userId, String word);
+
+    /** 获取连续打卡排行榜（总榜） */
+    List<Map<String, Object>> getStreakRank();
+
+    /** 获取今日打卡排行榜（日榜） */
+    List<Map<String, Object>> getTodayStreakRank();
+
+    /** 获取当前用户连续打卡信息 */
+    Map<String, Object> getUserStreak(Long userId);
 }

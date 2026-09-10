@@ -32,4 +32,9 @@ public class RabbitConstant {
     public static final String AI_ANSWER_EXCHANGE = "ai.answer.exchange";
     public static final String AI_ANSWER_QUEUE_NAME = "ai.answer.queue";
     public static final String AI_ANSWER_ROUTING_KEY_NAME = "ai.answer.routing.key";
+
+    // 打卡学习消息
+    public static final String WORD_STUDY_EXCHANGE = "word.study.exchange";
+    public static final String WORD_STUDY_QUEUE_NAME = "word.study.queue";
+    public static final String WORD_STUDY_ROUTING_KEY_NAME = "word.study.routing.key";
 }

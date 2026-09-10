@@ -24,4 +24,12 @@ public class RedisConstant {
     public static final String TOPIC_RANK_TODAY_PREFIX = "topic:rank:today:";
     
     public static final String USER_RANK_PREFIX = "user:rank:";
+
+    // 连续打卡天数排行
+    public static final String WORD_STREAK_RANK = "word:streak:rank";           // 总榜（累计连续天数）
+    public static final String WORD_STREAK_TODAY_RANK = "word:streak:today:";  // 日榜（今日打卡人数）
+    public static final String USER_STREAK_KEY_PREFIX = "user:streak:";
+    public static final String USER_LAST_STUDY_KEY_PREFIX = "user:lastStudy:";
+    public static final String STREAK_LOCK_KEY_PREFIX = "streak:lock:";
+    public static final Long STREAK_LOCK_EXPIRE_TIME = 1L;
 }

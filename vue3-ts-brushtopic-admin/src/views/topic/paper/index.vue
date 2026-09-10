@@ -60,12 +60,14 @@ const statusMap: any = {
   2: { text: '草稿', color: 'orange' }
 }
 
-/** 板块顺序与达标线（与后端 SECTION_TARGET 一致） */
+/** 板块顺序与达标线 — 按四六级试卷规范
+ * PartⅠ 写作 / PartⅡ 听力 (答题卡 1) / PartⅢ 阅读 (答题卡 2) / PartⅣ 翻译 (答题卡 2)
+ */
 const sectionMeta = [
-  { key: 'writing', name: '写作', target: 1 },
-  { key: 'listening', name: '听力', target: 25 },
-  { key: 'reading', name: '阅读', target: 30 },
-  { key: 'translation', name: '翻译', target: 1 }
+  { key: 'writing',   name: 'PartⅠ写作',    target: 1 },
+  { key: 'listening', name: 'PartⅡ听力',    target: 9, hint: '答题卡 1' },
+  { key: 'reading',   name: 'PartⅢ阅读',    target: 7, hint: '答题卡 2' },
+  { key: 'translation', name: 'PartⅣ翻译',   target: 1, hint: '答题卡 2' }
 ]
 
 const columns = [
@@ -360,10 +362,12 @@ onMounted(() => {
           <span>{{ record.examYear }}年{{ record.examHalf === 2 ? '下' : '上' }}半年</span>
         </template>
         <template v-if="column.key === 'sectionCounts'">
-          <a-space :size="4">
+          <a-space :size="4" :wrap="true">
             <a-tag v-for="s in sectionMeta" :key="s.key"
-              :color="(record.sectionCounts?.[s.key] || 0) >= s.target ? 'green' : 'orange'">
+              :color="(record.sectionCounts?.[s.key] || 0) >= s.target ? 'green' : 'orange'"
+              :title="s.hint">  
               {{ s.name }} {{ record.sectionCounts?.[s.key] || 0 }}/{{ s.target }}
+              <span v-if="s.hint" style="font-size:10px;opacity:.7;">{{ s.hint }}</span>
             </a-tag>
           </a-space>
         </template>

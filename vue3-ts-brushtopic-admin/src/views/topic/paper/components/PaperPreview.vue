@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { FileTextOutlined, CheckOutlined } from '@ant-design/icons-vue'
+import { FileTextOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons-vue'
 import type { PaperManageSectionType, PaperTopicItemType } from '@/api/topic/paper/type'
 
 const props = defineProps<{
@@ -25,13 +25,13 @@ const sectionNameMap: Record<string, string> = {
 
 const subSectionNameMap: Record<string, string> = {
   writing: '写作',
-  news: '新闻报道',
-  conversation: '长对话',
-  passage: '听力篇章',
-  cloze: '选词填空',
-  matching: '长篇匹配',
-  reading_1: '仔细阅读 (一)',
-  reading_2: '仔细阅读 (二)',
+  news: 'Section A 新闻报道',
+  conversation: 'Section B 长对话',
+  passage: 'Section C 听力篇章',
+  cloze: 'Section A 选词填空',
+  matching: 'Section B 段落匹配',
+  reading_1: 'Section C Passage One',
+  reading_2: 'Section C Passage Two',
   translation: '翻译'
 }
 
@@ -53,6 +53,8 @@ const sectionDisplayName = (sec: PaperManageSectionType) => {
 }
 
 const currentSection = computed(() => props.sections[props.activeIndex])
+
+const isCloze = computed(() => currentSection.value?.subSection === 'cloze')
 
 const currentArticle = computed(() => {
   if (!currentSection.value) return ''
@@ -80,6 +82,37 @@ const formatArticle = (text: string) =>
 
 const isCorrectOpt = (topic: PaperTopicItemType, label: string) =>
   !!topic.correctOption && topic.correctOption.toUpperCase() === label.toUpperCase()
+
+/** 解析选项 JSON 字符串 */
+const parseOptions = (optStr: string): Array<{ label: string; content: string }> => {
+  try {
+    return JSON.parse(optStr)
+  } catch {
+    return []
+  }
+}
+
+/** 选词填空：词库标记 */
+const CLOZE_BANK_MARKER = '__CLOZE_WORD_BANK__'
+
+/** 选词填空：从 topics 中提取词库（bank marker topic 的 options） */
+const clozeWordBank = computed(() => {
+  if (!isCloze.value || !currentSection.value) return []
+  const bankTopic = currentSection.value.topics.find((t) => t.topicName === CLOZE_BANK_MARKER)
+  return bankTopic?.options || []
+})
+
+/** 选词填空：空位列表（排除 bank marker） */
+const clozeBlanks = computed(() => {
+  if (!isCloze.value || !currentSection.value) return []
+  return currentSection.value.topics.filter((t) => t.topicName !== CLOZE_BANK_MARKER)
+})
+
+/** 根据答案字母查找词库中对应的单词 */
+const clozeWordByLabel = (label: string) => {
+  const w = clozeWordBank.value.find((w) => w.label === label)
+  return w?.content || ''
+}
 </script>
 <template>
   <div class="paper-preview">
@@ -88,12 +121,12 @@ const isCorrectOpt = (topic: PaperTopicItemType, label: string) =>
       <span class="preview-title">{{ paperTitle || '试卷预览' }}</span>
     </div>
 
-    <!-- Section 标签导航（与前台同款） -->
+    <!-- Section 标签导航 -->
     <div class="section-tabs">
       <div v-for="(sec, idx) in sections" :key="idx" class="section-tab" :class="{ active: activeIndex === idx }"
         @click="switchSection(idx)">
         <span class="tab-label">{{ sectionDisplayName(sec) }}</span>
-        <span class="tab-badge">{{ sec.topics.length }}</span>
+        <span class="tab-badge">{{ sec.subSection === 'cloze' ? clozeBlanks.length : sec.topics.length }}</span>
       </div>
       <div v-if="sections.length === 0" class="empty-tabs">暂无题目，右侧录入后这里会实时显示</div>
     </div>
@@ -110,52 +143,76 @@ const isCorrectOpt = (topic: PaperTopicItemType, label: string) =>
         </div>
       </div>
 
-      <!-- 题目面板 -->
-      <div class="question-panel">
-        <div class="question-scroll">
-          <div v-if="currentSection.topics.length === 0" class="empty-tip">该板块暂无题目</div>
-          <div v-for="(topic, tIdx) in currentSection.topics" :key="tIdx" class="question-card">
-            <div class="question-tag">
-              <span class="question-no">第 {{ startNo + tIdx + 1 }} 题</span>
-              <span v-if="topic.questionType" class="type-tag">{{ typeNameMap[topic.questionType] || topic.questionType
-                }}</span>
-            </div>
-            <div class="question-name" v-html="formatArticle(topic.topicName || '（题干为空）')"></div>
-
-            <!-- 选项列表 -->
-            <div v-if="topic.options && topic.options.length > 0" class="option-list">
-              <div v-for="opt in topic.options" :key="opt.label" class="option-item"
-                :class="isCorrectOpt(topic, opt.label) ? 'reveal-answer' : ''">
-                <span class="option-label">{{ opt.label }}</span>
-                <span class="option-content">{{ opt.content }}</span>
-                <CheckOutlined v-if="isCorrectOpt(topic, opt.label)" class="opt-mark correct" />
+      <!-- ====== 选词填空预览 ====== -->
+      <template v-if="isCloze">
+        <div class="question-panel">
+          <div class="question-scroll">
+            <!-- 词库展示 -->
+            <div v-if="clozeWordBank.length > 0" class="cloze-word-bank-preview">
+              <div class="bank-title">Word Bank</div>
+              <div class="bank-grid">
+                <div v-for="w in clozeWordBank" :key="w.label" class="bank-item">
+                  <span class="bank-label">{{ w.label }}</span>
+                  <span class="bank-word">{{ w.content }}</span>
+                </div>
               </div>
             </div>
+            <div v-else class="empty-tip">暂无词库</div>
 
-            <!-- 答案与解析（预览显示，方便录入核对） -->
-            <div class="reveal-box">
-              <div class="reveal-answer">
-                <span class="reveal-label">正确答案:</span>
-                <span v-if="topic.correctOption" class="reveal-value">{{ topic.correctOption }}</span>
-                <span v-else class="reveal-missing">未填写</span>
-              </div>
-              <div v-if="topic.answer" class="reveal-analysis">
-                <span class="reveal-label">参考答案:</span>
-                <span class="answer-text" v-html="formatArticle(topic.answer)"></span>
-              </div>
-              <div v-if="topic.analysis" class="reveal-analysis">
-                <span class="reveal-label">解析:</span>
-                <span class="answer-text" v-html="formatArticle(topic.analysis)"></span>
+            <!-- 空位答案列表 -->
+            <div v-if="clozeBlanks.length > 0" class="cloze-blanks-preview">
+              <div class="blanks-title">答案</div>
+              <div class="blanks-grid">
+                <div v-for="(blank, bi) in clozeBlanks" :key="bi" class="blank-answer-item">
+                  <span class="blank-no">{{ startNo + bi + 1 }}</span>
+                  <span class="blank-answer-label">{{ blank.correctOption || '—' }}</span>
+                  <span v-if="blank.correctOption" class="blank-answer-word">{{ clozeWordByLabel(blank.correctOption) }}</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </template>
+
+      <!-- ====== 其他题型：下拉框预览 ====== -->
+      <template v-else>
+        <div class="question-panel">
+          <div class="question-scroll">
+            <div v-if="currentSection.topics.length === 0" class="empty-tip">该板块暂无题目</div>
+            <div v-for="(topic, tIdx) in currentSection.topics" :key="tIdx" class="question-card">
+              <div class="question-tag">
+                <span class="question-no">第 {{ startNo + tIdx + 1 }} 题</span>
+                <CheckCircleOutlined v-if="topic.correctOption" class="status-icon correct" />
+                <span v-else class="answered-tag">未作答</span>
+              </div>
+              <div class="question-name" v-html="formatArticle(topic.topicName || '（题干为空）')"></div>
+
+              <!-- 下拉框预览区 -->
+              <div v-if="topic.options && topic.options.length > 0" class="topic-selector-preview">
+                <a-select
+                  :value="topic.correctOption"
+                  disabled
+                  style="width: 280px"
+                >
+                  <a-select-option v-for="opt in topic.options" :key="opt.label" :value="opt.label">
+                    {{ opt.label }}. {{ opt.content }}
+                  </a-select-option>
+                </a-select>
+              </div>
+
+              <!-- 解析 -->
+              <div v-if="topic.analysis" class="analysis-box">
+                <div class="reveal-label">解析:</div>
+                <div class="answer-text" v-html="formatArticle(topic.analysis)"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
     </div>
   </div>
 </template>
-<style lang="scss" scoped>
-/* 局部复刻前台 global.css 设计变量，保证样式与 PaperExam.vue 一致 */
+  <style lang="scss" scoped>
 .paper-preview {
   --primary: #4257B2;
   --primary-hover: #364899;
@@ -292,7 +349,17 @@ const isCorrectOpt = (topic: PaperTopicItemType, label: string) =>
     flex: 1;
     padding: 16px;
     overflow-y: auto;
+    overflow-x: hidden;
     min-height: 0;
+    // 隐藏滚动条但保持滚动功能
+    scrollbar-width: none; // Firefox
+    -ms-overflow-style: none; // IE and Edge
+    -webkit-overflow-scrolling: touch; // iOS惯性滚动
+    &::-webkit-scrollbar {
+      display: none; // Chrome, Safari, Opera
+    }
+    // 启用触摸滑动
+    touch-action: pan-y;
 
     .article-text {
       font-size: var(--exam-font-size, 15px);
@@ -315,7 +382,17 @@ const isCorrectOpt = (topic: PaperTopicItemType, label: string) =>
   .question-scroll {
     padding: 16px;
     overflow-y: auto;
+    overflow-x: hidden;
     height: 100%;
+    // 隐藏滚动条但保持滚动功能
+    scrollbar-width: none; // Firefox
+    -ms-overflow-style: none; // IE and Edge
+    -webkit-overflow-scrolling: touch; // iOS惯性滚动
+    &::-webkit-scrollbar {
+      display: none; // Chrome, Safari, Opera
+    }
+    // 启用触摸滑动
+    touch-action: pan-y;
 
     .empty-tip {
       text-align: center;
@@ -344,7 +421,15 @@ const isCorrectOpt = (topic: PaperTopicItemType, label: string) =>
         color: var(--text-muted);
       }
 
-      .type-tag {
+      .status-icon {
+        font-size: calc(14px + var(--font-offset, 0px));
+
+        &.correct {
+          color: var(--success);
+        }
+      }
+
+        .answered-tag {
         font-size: calc(11px + var(--font-offset, 0px));
         color: var(--primary);
         background: rgba(66, 87, 178, 0.1);
@@ -362,97 +447,126 @@ const isCorrectOpt = (topic: PaperTopicItemType, label: string) =>
     }
   }
 
-  .option-list {
-    .option-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 14px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: var(--page-bg);
-      margin-bottom: 8px;
+  /* 下拉框预览区 */
+  .topic-selector-preview {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 
-      &.reveal-answer {
-        border-color: rgba(40, 167, 69, 0.3);
-        background: rgba(40, 167, 69, 0.06);
-
-        .option-label {
-          border-color: var(--success);
-          color: var(--success);
-          background: rgba(40, 167, 69, 0.1);
-        }
+    :deep(.ant-select) {
+      .ant-select-selector {
+        background: var(--card-bg);
+        border-color: var(--border);
+        border-radius: 8px;
       }
 
-      .option-label {
-        width: 26px;
-        height: 26px;
-        border-radius: 50%;
-        border: 1px solid var(--border);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: calc(12px + var(--font-offset, 0px));
-        font-weight: 700;
-        color: var(--text-muted);
-        flex-shrink: 0;
-      }
-
-      .option-content {
-        flex: 1;
-        font-size: var(--exam-font-size, 13px);
-        color: var(--text-body);
-        line-height: 1.5;
-        word-break: break-word;
-      }
-
-      .opt-mark {
-        &.correct {
-          color: var(--success);
-        }
+      .ant-select-selection-item {
+        font-weight: 600;
+        color: var(--primary);
       }
     }
   }
 
-  .reveal-box {
+  .analysis-box {
     margin-top: 12px;
     padding: 10px 14px;
     border-radius: 10px;
     background: var(--card-bg);
     border: 1px dashed var(--border);
 
-    .reveal-answer {
-      display: flex;
-      align-items: center;
-      gap: 6px;
+    .reveal-label {
+      font-size: calc(12px + var(--font-offset, 0px));
+      color: var(--text-muted);
       margin-bottom: 4px;
-
-      .reveal-label {
-        font-size: calc(12px + var(--font-offset, 0px));
-        color: var(--text-muted);
-      }
-
-      .reveal-value {
-        font-size: calc(13px + var(--font-offset, 0px));
-        font-weight: 700;
-        color: var(--success);
-      }
-
-      .reveal-missing {
-        font-size: calc(12px + var(--font-offset, 0px));
-        color: var(--error);
-      }
     }
 
-    .reveal-analysis {
+    .answer-text {
       font-size: calc(12px + var(--font-offset, 0px));
       color: var(--text-body);
       line-height: 1.7;
       word-break: break-word;
+    }
+  }
 
-      .reveal-label {
-        color: var(--text-muted);
-        margin-right: 4px;
+  /* 选词填空预览样式 */
+  .cloze-word-bank-preview {
+    margin-bottom: 16px;
+
+    .bank-title {
+      font-size: calc(13px + var(--font-offset, 0px));
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+
+    .bank-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 6px;
+
+      .bank-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 8px;
+        background: var(--page-bg);
+        border: 1px solid var(--border);
+
+        .bank-label {
+          font-size: calc(12px + var(--font-offset, 0px));
+          font-weight: 700;
+          color: var(--primary);
+          min-width: 16px;
+        }
+
+        .bank-word {
+          font-size: calc(13px + var(--font-offset, 0px));
+          color: var(--text-body);
+        }
+      }
+    }
+  }
+
+  .cloze-blanks-preview {
+    .blanks-title {
+      font-size: calc(13px + var(--font-offset, 0px));
+      font-weight: 700;
+      color: var(--text-title);
+      margin-bottom: 10px;
+    }
+
+    .blanks-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 8px;
+
+      .blank-answer-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 10px;
+        background: var(--page-bg);
+        border: 1px solid var(--border);
+
+        .blank-no {
+          font-size: calc(12px + var(--font-offset, 0px));
+          font-weight: 700;
+          color: var(--text-muted);
+          min-width: 20px;
+        }
+
+        .blank-answer-label {
+          font-size: calc(14px + var(--font-offset, 0px));
+          font-weight: 700;
+          color: var(--success);
+        }
+
+        .blank-answer-word {
+          font-size: calc(12px + var(--font-offset, 0px));
+          color: var(--text-body);
+        }
       }
     }
   }

@@ -142,7 +142,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, reactive, nextTick } from 'vue'
+import { computed, onMounted, onUnmounted, ref, reactive, nextTick, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import {
@@ -453,6 +453,21 @@ const readTimeStr = computed(() => {
   const s = readSeconds.value % 60
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
 })
+
+watch(
+  () => route.params.id,
+  () => {
+    selectedWord.value = null
+    isSaved.value = false
+    lookupResult.phonetic = ''
+    lookupResult.meaning = '点击单词查看释义'
+    lookupResult.example = ''
+    lookupResult.exampleCn = ''
+    hideTooltip()
+    closeTranslatePopup()
+    readSeconds.value = 0
+  },
+)
 
 onMounted(() => {
   collectionStore.load()
