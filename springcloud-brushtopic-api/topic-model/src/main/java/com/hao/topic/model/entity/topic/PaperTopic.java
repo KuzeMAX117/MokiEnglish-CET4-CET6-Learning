@@ -20,6 +20,7 @@ public class PaperTopic {
     
 
     private String section;
+    private String subSection;
     private Long sorted;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")

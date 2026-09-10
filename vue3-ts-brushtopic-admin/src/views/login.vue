@@ -13,7 +13,7 @@ const getCaptchaImage = async () => {
   apiGetCode().then((res) => {
     
     
-    codeImage.value = URL.createObjectURL(new Blob([res], { type: 'image/png' }))
+    codeImage.value = URL.createObjectURL(new Blob([res as any], { type: 'image/png' }))
   })
 }
 
@@ -51,7 +51,7 @@ const login = () => {
     
     
     
-    adminRef.value.validate().then(async (valid) => {
+    adminRef.value.validate().then(async (valid: boolean) => {
       if (valid) {
         loginLoading.value = true
         

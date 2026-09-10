@@ -1,7 +1,117 @@
+@import "tailwindcss";
+
+/* =========================================================
+   全局设计变量（Quizlet 风格亮色主题）
+   规范：页面/组件中的颜色、圆角、阴影一律引用 var(--xxx)，
+   禁止在业务代码里散落写死色值。
+   ========================================================= */
+:root {
+  /* ---------- 品牌色 ---------- */
+  --primary: #4257B2;
+  --primary-hover: #364899;
+  --primary-light: rgba(66, 87, 178, 0.08);
+
+  /* ---------- 页面背景&卡片 ---------- */
+  --page-bg: #ffffff;
+  --card-bg: #F7F8FA;
+
+  /* ---------- 文字层级 ---------- */
+  --text-title: #1A1A1A;
+  --text-body: #444444;
+  --text-muted: #70757A;
+
+  /* ---------- 边框、分割线 ---------- */
+  --border: #E8EAED;
+
+  /* ---------- 马卡龙标签辅助色（仅小标签用，不铺大区域） ---------- */
+  --tag-1: #D6E4FF;
+  --tag-2: #F3E8FF;
+  --tag-3: #FFE8D6;
+  --tag-4: #E6FFFA;
+
+  /* ---------- 做题功能语义色，不要修改 ---------- */
+  --success: #28A745;
+  --success-light: rgba(40, 167, 69, 0.12);
+  --error: #DC3545;
+  --error-light: rgba(220, 53, 69, 0.12);
+  --warning: #F0AD4E;
+  --warning-light: rgba(240, 173, 78, 0.12);
+
+  /* ---------- 间距系统（8px基数） ---------- */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  /* ---------- 圆角系统 ---------- */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  /* ---------- 阴影（极轻，Quizlet风格） ---------- */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  /* ---------- 字体 ---------- */
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans', sans-serif;
+  --font-offset: 0px;
+}
+
+/* =========================================================
+   主题变体 — 护眼淡黄 (eye-care)
+   ========================================================= */
+html[data-theme="eye-care"] {
+  --page-bg: #FBF6E9;
+  --card-bg: #F5EDDA;
+  --text-title: #3B3325;
+  --text-body: #55493A;
+  --text-muted: #8A7E6B;
+  --border: #E4D9C1;
+  --primary-light: rgba(66, 87, 178, 0.07);
+  --shadow-card: 0 1px 3px rgba(80, 60, 20, 0.06);
+  --shadow-hover: 0 4px 12px rgba(80, 60, 20, 0.08);
+  /* 马卡龙标签色暖化，与淡黄背景协调 */
+  --tag-1: #E3E7F5;
+  --tag-2: #EDE4F3;
+  --tag-3: #F6E7D8;
+  --tag-4: #E1EDE6;
+}
+
+/* =========================================================
+   主题变体 — 夜间模式 (night)
+   ========================================================= */
+html[data-theme="night"] {
+  --page-bg: #1A1D24;
+  --card-bg: #23272F;
+  --text-title: #E5EAF3;
+  --text-body: #C3CADF;
+  --text-muted: #7C86A6;
+  --border: #2E333D;
+  --primary: #6B83D4;
+  --primary-hover: #5A72C3;
+  --primary-light: rgba(107, 131, 212, 0.12);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.25);
+  --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.35);
+  /* 马卡龙标签改为暗色半透明，避免亮色块在夜间刺眼 */
+  --tag-1: rgba(107, 131, 212, 0.22);
+  --tag-2: rgba(167, 139, 250, 0.22);
+  --tag-3: rgba(251, 146, 60, 0.20);
+  --tag-4: rgba(45, 212, 191, 0.18);
+  /* 语义背景色加深透明度，保证在深背景上的对比 */
+  --success-light: rgba(40, 167, 69, 0.20);
+  --error-light: rgba(220, 53, 69, 0.20);
+  --warning-light: rgba(240, 173, 78, 0.20);
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+html {
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 html,
@@ -11,40 +121,46 @@ body,
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
-    'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-  background: #0b0f1a;
-  color: #e5eaf3;
+  font-family: var(--font-family);
+  background: var(--page-bg);
+  color: var(--text-body);
+  -webkit-font-smoothing: antialiased;
 }
 
 a {
-  color: #22d3ee;
+  color: var(--primary);
   text-decoration: none;
 }
 
+a:hover {
+  color: var(--primary-hover);
+}
+
+/* ---------- 滚动条（用 muted 色系派生，保持低调） ---------- */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #8b5cf6, #22d3ee);
+  background: rgba(112, 117, 122, 0.28);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #a78bfa, #67e8f9);
+  background: rgba(112, 117, 122, 0.45);
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(112, 117, 122, 0.08);
 }
 
+/* ---------- Markdown 正文（AI 回答/解析等） ---------- */
 .md-body {
   line-height: 1.75;
-  font-size: 14px;
+  font-size: calc(14px + var(--font-offset, 0px));
   word-break: break-word;
-  color: #e5eaf3;
+  color: var(--text-body);
 }
 
 .md-body h1,
@@ -53,19 +169,19 @@ a {
 .md-body h4 {
   margin: 16px 0 8px;
   font-weight: 600;
-  color: #f1f5fb;
+  color: var(--text-title);
 }
 
 .md-body h1 {
-  font-size: 20px;
+  font-size: calc(20px + var(--font-offset, 0px));
 }
 
 .md-body h2 {
-  font-size: 18px;
+  font-size: calc(18px + var(--font-offset, 0px));
 }
 
 .md-body h3 {
-  font-size: 16px;
+  font-size: calc(16px + var(--font-offset, 0px));
 }
 
 .md-body p {
@@ -79,21 +195,21 @@ a {
 }
 
 .md-body code {
-  background: rgba(139, 92, 246, 0.15);
+  background: var(--primary-light);
   padding: 2px 6px;
   border-radius: 4px;
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-  font-size: 13px;
-  color: #67e8f9;
+  font-size: calc(13px + var(--font-offset, 0px));
+  color: var(--primary-hover);
 }
 
 .md-body pre {
-  background: #161d30;
+  background: var(--card-bg);
   padding: 12px 16px;
   border-radius: 8px;
   overflow-x: auto;
   margin: 8px 0;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border);
 }
 
 .md-body pre code {
@@ -103,12 +219,12 @@ a {
 }
 
 .md-body blockquote {
-  border-left: 4px solid #8b5cf6;
+  border-left: 4px solid var(--primary);
   padding: 4px 12px;
   margin: 8px 0;
-  background: rgba(139, 92, 246, 0.1);
+  background: var(--primary-light);
   border-radius: 4px;
-  color: #b9c2d6;
+  color: var(--text-muted);
 }
 
 .md-body table {
@@ -119,25 +235,19 @@ a {
 
 .md-body th,
 .md-body td {
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--border);
   padding: 6px 12px;
   text-align: left;
 }
 
 .md-body th {
-  background: rgba(139, 92, 246, 0.12);
+  background: var(--card-bg);
 }
 
+/* ---------- 通用卡片（Quizlet 风格，极轻阴影） ---------- */
 .glass-card {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(12px);
-  border-radius: 14px;
-}
-
-.neon-text {
-  background: linear-gradient(90deg, #8b5cf6, #22d3ee);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  background: var(--page-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
 }

@@ -9,11 +9,14 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 public class AdminGatewayApplication {
     public static void main(String[] args) {
         SpringApplication.run(AdminGatewayApplication.class, args);
-        System.out.println("  _   _             \n" +
-                " | | | | __ _  ___  \n" +
-                " | |_| |/ _` |/ _ \\ \n" +
-                " |  _  | (_| | (_) |\n" +
-                " |_| |_|\\__,_|\\___/ \n" +
-                " >>> 管理端网关启动成功 <<<\n");
+        System.out.println("""
+                
+                    ("`-/")_.-'"``-._
+                     . . `; -._    )-;-,_`)
+                    (v_,)'  _  )`-.\\  ``-'
+                   _.- _..-_/ / ((.'
+                 ((,.-'   ((,/
+                """);
+        System.out.println("=====/*AVA:所有都准备就绪，就差你了！*/======");
     }
 }

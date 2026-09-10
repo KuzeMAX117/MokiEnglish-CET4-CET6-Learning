@@ -18,7 +18,7 @@ const initBubbleChart = () => {
       
       return idx * 100;
     },
-    animationEasingUpdate: 'bounceIn',
+    animationEasingUpdate: 'bounceIn' as const,
     series: [{
       type: 'graph',
       layout: 'force',

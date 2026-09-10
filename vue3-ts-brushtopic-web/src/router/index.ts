@@ -11,6 +11,12 @@ const router = createRouter({
       meta: { title: '登录' },
     },
     {
+      path: '/paper/:id/exam',
+      name: 'PaperExam',
+      component: () => import('@/views/PaperExam.vue'),
+      meta: { title: '真题答题' },
+    },
+    {
       path: '/',
       component: () => import('@/layouts/MainLayout.vue'),
       redirect: '/home',
@@ -28,40 +34,70 @@ const router = createRouter({
           meta: { title: '排行榜' },
         },
         {
-          path: 'database',
-          name: 'Database',
-          component: () => import('@/views/Database.vue'),
-          meta: { title: '题库' },
-        },
-        {
-          path: 'subject/:id',
-          name: 'Subject',
-          component: () => import('@/views/Subject.vue'),
-          meta: { title: '专题' },
-        },
-        {
           path: 'paper',
           name: 'PaperList',
           component: () => import('@/views/PaperList.vue'),
           meta: { title: '真题试卷' },
         },
         {
-          path: 'paper/:id/exam',
-          name: 'PaperExam',
-          component: () => import('@/views/PaperExam.vue'),
-          meta: { title: '真题答题' },
+          path: 'vocabulary',
+          name: 'Vocabulary',
+          component: () => import('@/views/Vocabulary.vue'),
+          meta: { title: '背单词' },
         },
         {
-          path: 'topic/:id',
-          name: 'TopicDetail',
-          component: () => import('@/views/TopicDetail.vue'),
-          meta: { title: '刷题' },
+          path: 'vocabulary/review',
+          name: 'WordReview',
+          component: () => import('@/views/WordReview.vue'),
+          meta: { title: '单词复习' },
+        },
+        {
+          path: 'vocabulary/article',
+          name: 'VocabArticleReader',
+          component: () => import('@/views/VocabArticleReader.vue'),
+          meta: { title: 'AI 短文阅读' },
+        },
+        {
+          path: 'reading',
+          name: 'ReadingList',
+          component: () => import('@/views/ReadingList.vue'),
+          meta: { title: '文章阅读' },
+        },
+        {
+          path: 'reading/:id',
+          name: 'ReadingDetail',
+          component: () => import('@/views/ReadingDetail.vue'),
+          meta: { title: '阅读文章' },
+        },
+        {
+          path: 'writing',
+          name: 'WritingList',
+          component: () => import('@/views/WritingList.vue'),
+          meta: { title: '作文批改' },
+        },
+        {
+          path: 'writing/:id',
+          name: 'WritingEditor',
+          component: () => import('@/views/WritingEditor.vue'),
+          meta: { title: '写作练习' },
+        },
+        {
+          path: 'translation',
+          name: 'TranslationList',
+          component: () => import('@/views/TranslationList.vue'),
+          meta: { title: '翻译练习' },
+        },
+        {
+          path: 'translation/:id',
+          name: 'TranslationPractice',
+          component: () => import('@/views/TranslationPractice.vue'),
+          meta: { title: '翻译练习' },
         },
         {
           path: 'ai',
           name: 'AiChat',
           component: () => import('@/views/AiChat.vue'),
-          meta: { title: 'AI 问答' },
+          meta: { title: 'AI 练习' },
         },
         {
           path: 'user',
@@ -87,7 +123,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
-  document.title = to.meta.title ? `${to.meta.title} · HaoAi 刷题` : 'HaoAi 刷题'
+  document.title = to.meta.title ? `${to.meta.title} · CET备考` : 'CET备考'
   const userStore = useUserStore()
   if (!userStore.isLogin && to.name !== 'Login') {
     return { name: 'Login', query: { redirect: to.fullPath } }

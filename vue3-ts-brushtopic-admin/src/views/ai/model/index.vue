@@ -267,7 +267,7 @@ const sendPrompt = async () => {
         
         headers: {
           "Content-Type": "application/json",
-          "Authorization": userStore.token,
+          "Authorization": userStore.token || '',
         },
         
         signal: currentController.signal,
@@ -409,8 +409,7 @@ const readAloud = (content: any) => {
     
     headers: {
       "Content-Type": "application/json",
-      "Authorization": userStore.token,
-
+      "Authorization": userStore.token || '',
     },
     body: JSON.stringify({
       text: content

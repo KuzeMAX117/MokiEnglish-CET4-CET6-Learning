@@ -12,8 +12,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.server.ServerWebExchange;
-import reactor.core.publisher.Mono;
 
 @Slf4j
 @RestControllerAdvice
@@ -24,26 +22,26 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UsernameNotFoundException.class)
     @ResponseStatus(HttpStatus.OK)
-    public Mono<Result<String>> handleUsernameNotFoundException(UsernameNotFoundException e, ServerWebExchange exchange) {
-        return Mono.just(Result.fail(e.getMessage()));
+    public Result<String> handleUsernameNotFoundException(UsernameNotFoundException e) {
+        return Result.fail(e.getMessage());
     }
 
     
 
     @ExceptionHandler(BadCredentialsException.class)
     @ResponseStatus(HttpStatus.OK)
-    public Mono<Result<String>> handleBadCredentialsException(BadCredentialsException e, ServerWebExchange exchange) {
+    public Result<String> handleBadCredentialsException(BadCredentialsException e) {
         log.error("用户名或密码错误: {}", e.getMessage());
-        return Mono.just(Result.fail(ResultCodeEnum.PASSWORD_ERROR));
+        return Result.fail(ResultCodeEnum.PASSWORD_ERROR);
     }
 
     
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.OK)
-    public Mono<Result<String>> handleException(Exception e, ServerWebExchange exchange) {
+    public Result<String> handleException(Exception e) {
         log.error("系统异常: ", e);
-        return Mono.just(Result.fail(e.getMessage()));
+        return Result.fail(e.getMessage());
     }
 
     

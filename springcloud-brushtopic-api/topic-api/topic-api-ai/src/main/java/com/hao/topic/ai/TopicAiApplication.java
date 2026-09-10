@@ -25,12 +25,20 @@ import org.springframework.scheduling.annotation.EnableAsync;
 public class TopicAiApplication {
 
     public static void main(String[] args) {
+        // 覆盖原生 DashScope SDK 默认旧域名，使 sk-ws- 密钥可正常鉴权
+        String dashscopeBaseUrl = System.getenv("DASHSCOPE_BASE_URL");
+        if (dashscopeBaseUrl != null && !dashscopeBaseUrl.isEmpty()) {
+            System.setProperty("dashscope.base.http.api.url", dashscopeBaseUrl);
+        }
         SpringApplication.run(TopicAiApplication.class, args);
-        System.out.println("  _   _             \n" +
-                " | | | | __ _  ___  \n" +
-                " | |_| |/ _` |/ _ \\ \n" +
-                " |  _  | (_| | (_) |\n" +
-                " |_| |_|\\__,_|\\___/ \n" +
-                " >>> AI服务启动成功 <<<\n");
+        System.out.println("""
+                
+                    ("`-/")_.-'"``-._
+                     . . `; -._    )-;-,_`)
+                    (v_,)'  _  )`-.\\  ``-'
+                   _.- _..-_/ / ((.'
+                 ((,.-'   ((,/
+                """);
+        System.out.println("=====/*AVA:所有都准备就绪，就差你了！*/======");
     }
 }

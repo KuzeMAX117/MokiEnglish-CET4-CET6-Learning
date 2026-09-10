@@ -23,7 +23,7 @@ public class PaperController {
     
 
     @GetMapping("/list")
-    @PreAuthorize("hasAuthority('admin') || hasAuthority('member')")
+    @PreAuthorize("hasAuthority('admin') || hasAuthority('member') || hasAuthority('user')")
     public Result<List<PaperVo>> list(@RequestParam Integer level) {
         return Result.success(paperService.paperList(level));
     }
@@ -31,7 +31,7 @@ public class PaperController {
     
 
     @GetMapping("/detail/{id}")
-    @PreAuthorize("hasAuthority('admin') || hasAuthority('member')")
+    @PreAuthorize("hasAuthority('admin') || hasAuthority('member') || hasAuthority('user')")
     public Result<PaperDetailVo> detail(@PathVariable Long id) {
         return Result.success(paperService.paperDetail(id));
     }
@@ -39,7 +39,7 @@ public class PaperController {
     
 
     @PostMapping("/answer")
-    @PreAuthorize("hasAuthority('admin') || hasAuthority('member')")
+    @PreAuthorize("hasAuthority('admin') || hasAuthority('member') || hasAuthority('user')")
     public Result<PaperAnswerVo> answer(@RequestBody PaperAnswerDto paperAnswerDto) {
         return Result.success(paperService.answer(paperAnswerDto));
     }
@@ -47,8 +47,17 @@ public class PaperController {
     
 
     @GetMapping("/progress/{paperId}")
-    @PreAuthorize("hasAuthority('admin') || hasAuthority('member')")
+    @PreAuthorize("hasAuthority('admin') || hasAuthority('member') || hasAuthority('user')")
     public Result<List<PaperProgressVo>> progress(@PathVariable Long paperId) {
         return Result.success(paperService.progress(paperId));
+    }
+
+    
+
+    @PostMapping("/reset/{paperId}")
+    @PreAuthorize("hasAuthority('admin') || hasAuthority('member') || hasAuthority('user')")
+    public Result<Boolean> reset(@PathVariable Long paperId) {
+        paperService.resetProgress(paperId);
+        return Result.success(true);
     }
 }

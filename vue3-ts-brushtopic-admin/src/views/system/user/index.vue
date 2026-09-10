@@ -326,7 +326,7 @@ const fileList = ref([]);
 
 const loading = ref<boolean>(false);
 
-const beforeUpload = (file: UploadProps['fileList'][number]) => {
+const beforeUpload = (file: any) => {
   const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
   if (!isJpgOrPng) {
     message.error('图片格式错误');

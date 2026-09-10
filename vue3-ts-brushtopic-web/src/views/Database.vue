@@ -137,21 +137,20 @@ onMounted(getCategory)
     align-items: center;
     justify-content: center;
     gap: 12px;
-    font-size: 28px;
+    font-size: calc(28px + var(--font-offset, 0px));
     font-weight: 800;
-    color: #e5eaf3;
+    color: var(--text-title);
 
     .head-icon {
-      font-size: 30px;
-      color: #a78bfa;
-      filter: drop-shadow(0 0 12px rgba(139, 92, 246, 0.6));
+      font-size: calc(30px + var(--font-offset, 0px));
+      color: var(--primary);
     }
   }
 
   .head-sub {
     margin-top: 8px;
-    font-size: 14px;
-    color: #7c86a6;
+    font-size: calc(14px + var(--font-offset, 0px));
+    color: var(--text-muted);
     letter-spacing: 1px;
   }
 }
@@ -167,25 +166,25 @@ onMounted(getCategory)
     border-radius: 12px;
 
     :deep(.ant-input-affix-wrapper) {
-      background: rgba(18, 24, 40, 0.6);
-      border-color: rgba(255, 255, 255, 0.12);
+      background: var(--card-bg);
+      border-color: var(--border);
       border-radius: 12px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+      box-shadow: var(--shadow-card);
 
       &:hover,
       &:focus-within {
-        border-color: rgba(139, 92, 246, 0.6);
-        box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.15);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px var(--primary-light);
       }
     }
 
     :deep(.ant-input) {
       background: transparent;
-      color: #e5eaf3;
+      color: var(--text-title);
     }
 
     :deep(.ant-btn) {
-      background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+      background: var(--primary);
       border: none;
       border-radius: 0 12px 12px 0;
     }
@@ -193,9 +192,8 @@ onMounted(getCategory)
 }
 
 .category-tabs {
-  background: rgba(18, 24, 40, 0.5);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
   border-radius: 14px;
   padding: 8px 24px 0;
   margin-bottom: 24px;
@@ -204,22 +202,22 @@ onMounted(getCategory)
     margin-bottom: 0;
 
     &::before {
-      border-bottom-color: rgba(255, 255, 255, 0.06);
+      border-bottom-color: var(--border);
     }
   }
 
   :deep(.ant-tabs-tab) {
-    color: #9aa4bd;
-    font-size: 14px;
+    color: var(--text-body);
+    font-size: calc(14px + var(--font-offset, 0px));
     padding: 14px 18px;
 
     &:hover {
-      color: #a78bfa;
+      color: var(--primary-hover);
     }
   }
 
   :deep(.ant-tabs-tab-active .ant-tabs-tab-btn) {
-    color: #22d3ee;
+    color: var(--primary);
     font-weight: 600;
   }
 }
@@ -231,9 +229,8 @@ onMounted(getCategory)
 }
 
 .subject-card {
-  background: rgba(18, 24, 40, 0.6);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
   border-radius: 14px;
   padding: 18px 20px;
   display: flex;
@@ -244,11 +241,11 @@ onMounted(getCategory)
 
   &:hover {
     transform: translateY(-4px);
-    border-color: rgba(139, 92, 246, 0.5);
-    box-shadow: 0 12px 36px rgba(139, 92, 246, 0.18);
+    border-color: var(--primary);
+    box-shadow: var(--shadow-hover);
 
     .enter-icon {
-      background: linear-gradient(135deg, #8b5cf6, #22d3ee);
+      background: var(--primary);
       color: #fff;
       border-color: transparent;
     }
@@ -279,7 +276,7 @@ onMounted(getCategory)
         align-items: center;
         justify-content: center;
         color: #fff;
-        font-size: 22px;
+        font-size: calc(22px + var(--font-offset, 0px));
         font-weight: 700;
       }
 
@@ -306,15 +303,15 @@ onMounted(getCategory)
 
     .content {
       .title {
-        font-size: 16px;
-        color: #e5eaf3;
+        font-size: calc(16px + var(--font-offset, 0px));
+        color: var(--text-title);
         font-weight: 600;
         margin-bottom: 6px;
       }
 
       .info {
-        font-size: 12px;
-        color: #7c86a6;
+        font-size: calc(12px + var(--font-offset, 0px));
+        color: var(--text-muted);
         display: flex;
         align-items: center;
         gap: 5px;
@@ -326,16 +323,16 @@ onMounted(getCategory)
     width: 30px;
     height: 30px;
     border-radius: 9px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #7c86a6;
+    color: var(--text-muted);
     transition: all 0.3s;
   }
 }
 
 :deep(.ant-empty-description) {
-  color: #7c86a6;
+  color: var(--text-muted);
 }
 </style>

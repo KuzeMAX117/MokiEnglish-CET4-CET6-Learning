@@ -108,25 +108,24 @@ onMounted(() => {
   gap: 8px;
   padding: 8px 16px;
   border-radius: 10px;
-  font-size: 14px;
-  color: #9aa4bd;
+  font-size: calc(14px + var(--font-offset, 0px));
+  color: var(--text-muted);
   cursor: pointer;
   transition: all 0.25s;
   margin-bottom: 16px;
 
   &:hover {
-    color: #22d3ee;
-    background: rgba(255, 255, 255, 0.06);
+    color: var(--primary);
+    background: var(--primary-light);
   }
 }
 
 .subject-box {
-  background: rgba(18, 24, 40, 0.6);
-  backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
   border-radius: 18px;
   padding: 28px 32px;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--shadow-card);
 
   .subject-top {
     position: relative;
@@ -153,7 +152,7 @@ onMounted(() => {
         height: 260px;
         top: -120px;
         right: 0;
-        background: radial-gradient(circle, #8b5cf6, transparent 70%);
+        background: radial-gradient(circle, var(--primary-light), transparent 70%);
       }
 
       .g2 {
@@ -161,17 +160,11 @@ onMounted(() => {
         height: 220px;
         bottom: -120px;
         left: 20%;
-        background: radial-gradient(circle, #22d3ee, transparent 70%);
+        background: radial-gradient(circle, var(--primary-light), transparent 70%);
       }
 
       .grid-overlay {
-        position: absolute;
-        inset: 0;
-        background-image:
-          linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-        background-size: 32px 32px;
-        mask-image: radial-gradient(circle at 80% 20%, #000 0%, transparent 70%);
+        display: none;
       }
     }
 
@@ -185,14 +178,14 @@ onMounted(() => {
         border-radius: 16px;
         object-fit: cover;
         margin-right: 20px;
-        border: 2px solid rgba(255, 255, 255, 0.12);
-        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+        border: 2px solid var(--border);
+        box-shadow: var(--shadow-card);
       }
 
       .avatar-none {
-        background: linear-gradient(135deg, #8b5cf6, #22d3ee);
+        background: var(--primary);
         color: #fff;
-        font-size: 38px;
+        font-size: calc(38px + var(--font-offset, 0px));
         font-weight: 700;
         display: flex;
         align-items: center;
@@ -211,28 +204,28 @@ onMounted(() => {
         gap: 10px;
 
         .title-icon {
-          color: #a78bfa;
-          font-size: 18px;
+          color: var(--primary);
+          font-size: calc(18px + var(--font-offset, 0px));
         }
 
         .title {
-          font-size: 22px;
-          color: #e5eaf3;
+          font-size: calc(22px + var(--font-offset, 0px));
+          color: var(--text-title);
           margin: 0;
           font-weight: 700;
         }
       }
 
       .desc {
-        font-size: 14px;
-        color: #9aa4bd;
+        font-size: calc(14px + var(--font-offset, 0px));
+        color: var(--text-muted);
         margin: 10px 0 14px;
         line-height: 1.6;
       }
 
       .count {
-        font-size: 13px;
-        color: #7c86a6;
+        font-size: calc(13px + var(--font-offset, 0px));
+        color: var(--text-muted);
         display: flex;
         align-items: center;
         gap: 6px;
@@ -257,21 +250,20 @@ onMounted(() => {
         width: 4px;
         height: 18px;
         border-radius: 2px;
-        background: linear-gradient(180deg, #8b5cf6, #22d3ee);
-        box-shadow: 0 0 10px rgba(139, 92, 246, 0.6);
+        background: var(--primary);
       }
 
       span {
-        font-size: 16px;
+        font-size: calc(16px + var(--font-offset, 0px));
         font-weight: 600;
-        color: #e5eaf3;
+        color: var(--text-title);
       }
 
       .head-count {
-        font-size: 12px;
-        color: #7c86a6;
+        font-size: calc(12px + var(--font-offset, 0px));
+        color: var(--text-muted);
         font-weight: 400;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid var(--border);
         border-radius: 8px;
         padding: 1px 10px;
       }
@@ -283,19 +275,19 @@ onMounted(() => {
         align-items: center;
         padding: 15px 18px;
         border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.06);
+        border: 1px solid var(--border);
         margin-bottom: 10px;
         cursor: pointer;
         transition: all 0.25s;
-        background: rgba(255, 255, 255, 0.02);
+        background: var(--card-bg);
 
         &:hover {
-          border-color: rgba(139, 92, 246, 0.5);
-          background: rgba(139, 92, 246, 0.08);
+          border-color: var(--primary);
+          background: var(--primary-light);
           transform: translateX(4px);
 
           .topic-go {
-            background: linear-gradient(135deg, #8b5cf6, #22d3ee);
+            background: var(--primary);
             color: #fff;
             border-color: transparent;
           }
@@ -303,18 +295,18 @@ onMounted(() => {
 
         .topic-no {
           width: 44px;
-          font-size: 15px;
-          color: #6b7693;
+          font-size: calc(15px + var(--font-offset, 0px));
+          color: var(--text-muted);
           font-weight: 700;
         }
 
         .topic-name {
           flex: 1;
-          font-size: 14px;
-          color: #e5eaf3;
+          font-size: calc(14px + var(--font-offset, 0px));
+          color: var(--text-title);
 
           .file-icon {
-            color: #a78bfa;
+            color: var(--primary);
             margin-right: 10px;
           }
         }
@@ -323,11 +315,11 @@ onMounted(() => {
           width: 28px;
           height: 28px;
           border-radius: 8px;
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          border: 1px solid var(--border);
           display: flex;
           align-items: center;
           justify-content: center;
-          color: #7c86a6;
+          color: var(--text-muted);
           transition: all 0.25s;
         }
       }
@@ -336,7 +328,7 @@ onMounted(() => {
 }
 
 :deep(.ant-empty-description) {
-  color: #7c86a6;
+  color: var(--text-muted);
   padding: 20px 0;
 }
 </style>

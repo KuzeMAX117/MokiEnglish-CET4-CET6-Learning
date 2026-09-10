@@ -10,10 +10,12 @@ public class PaperTopicVo {
 
     private String options;
     private String questionType;
-    
-
+    private String article;
+    private String subSection;
     private String section;
-    
+
+    private String correctOption;
+    private String analysis;
 
     private Integer sorted;
 }

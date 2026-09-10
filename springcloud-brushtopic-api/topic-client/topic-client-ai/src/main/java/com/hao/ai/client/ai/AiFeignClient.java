@@ -1,12 +1,16 @@
 package com.hao.ai.client.ai;
 
 import com.hao.topic.common.auth.TokenInterceptor;
+import com.hao.topic.common.result.Result;
 import com.hao.topic.model.vo.topic.TopicDataVo;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
+import java.util.Map;
 
 @FeignClient(name = "service-ai", configuration = TokenInterceptor.class)
 public interface AiFeignClient {
@@ -26,5 +30,8 @@ public interface AiFeignClient {
 
     @GetMapping("/ai/model/countAi/{currentId}")
     Long countAi(@PathVariable Long currentId);
+
+    @PostMapping("/ai/model/translate")
+    Result<String> translateText(@RequestBody Map<String, String> body);
 
 }

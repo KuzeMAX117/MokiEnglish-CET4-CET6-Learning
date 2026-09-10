@@ -41,6 +41,7 @@ public class SecurityConfig {
                         .requestMatchers("/system/role/**").permitAll()  
                         .requestMatchers("/system/user/**").permitAll()  
                         .requestMatchers("/ai/model/**").permitAll()          
+                        .requestMatchers("/ai/article/**").permitAll()
                         .requestMatchers("/topic/category/audit").permitAll()          
                         .requestMatchers("/topic/subject/audit").permitAll()          
                         .requestMatchers("/topic/label/audit").permitAll()          

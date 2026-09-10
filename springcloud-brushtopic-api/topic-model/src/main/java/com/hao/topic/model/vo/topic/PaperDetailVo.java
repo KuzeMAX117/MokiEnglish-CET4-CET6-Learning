@@ -16,9 +16,8 @@ public class PaperDetailVo {
 
     @Data
     public static class PaperSectionVo {
-        
-
         private String section;
+        private String subSection;
         private List<PaperTopicVo> topics;
     }
 }

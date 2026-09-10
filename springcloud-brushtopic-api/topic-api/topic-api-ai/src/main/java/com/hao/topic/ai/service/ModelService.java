@@ -2,6 +2,7 @@ package com.hao.topic.ai.service;
 
 import com.hao.topic.model.dto.ai.AiHistoryDto;
 import com.hao.topic.model.dto.ai.ChatDto;
+import com.hao.topic.model.dto.ai.TranslationCorrectDto;
 import com.hao.topic.model.dto.ai.TtsDto;
 import com.hao.topic.model.dto.audit.TopicAudit;
 import com.hao.topic.model.dto.audit.TopicAuditCategory;
@@ -9,6 +10,7 @@ import com.hao.topic.model.dto.audit.TopicAuditLabel;
 import com.hao.topic.model.dto.audit.TopicAuditSubject;
 import com.hao.topic.model.vo.ai.AiHistoryContent;
 import com.hao.topic.model.vo.ai.AiHistoryListVo;
+import com.hao.topic.model.vo.ai.TranslationCorrectionVo;
 import com.hao.topic.model.vo.topic.TopicDataVo;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Flux;
@@ -46,5 +48,9 @@ public interface ModelService {
     List<TopicDataVo> countAiDay7();
 
     Long countAi(Long currentId);
+
+    String translateText(String text);
+
+    TranslationCorrectionVo correctTranslation(TranslationCorrectDto dto);
 
 }

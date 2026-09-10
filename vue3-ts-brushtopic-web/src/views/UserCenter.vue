@@ -265,8 +265,8 @@ const handleLogout = () => {
   border-radius: 18px;
   padding: 34px 40px;
   overflow: hidden;
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(34, 211, 238, 0.12));
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: var(--primary-light);
+  border: 1px solid var(--border);
 
   .bg-glow-inner {
     position: absolute;
@@ -284,7 +284,7 @@ const handleLogout = () => {
       height: 320px;
       top: -140px;
       right: 5%;
-      background: radial-gradient(circle, #8b5cf6, transparent 70%);
+      background: radial-gradient(circle, var(--primary-light), transparent 70%);
     }
 
     .g2 {
@@ -292,17 +292,11 @@ const handleLogout = () => {
       height: 260px;
       bottom: -130px;
       left: 15%;
-      background: radial-gradient(circle, #22d3ee, transparent 70%);
+      background: radial-gradient(circle, var(--primary-light), transparent 70%);
     }
 
     .grid-overlay {
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-      background-size: 36px 36px;
-      mask-image: radial-gradient(circle at 80% 30%, #000 0%, transparent 75%);
+      display: none;
     }
   }
 
@@ -316,24 +310,24 @@ const handleLogout = () => {
     .avatar-ring {
       border-radius: 50%;
       padding: 3px;
-      background: conic-gradient(#8b5cf6, #22d3ee, #8b5cf6);
-      box-shadow: 0 0 32px rgba(139, 92, 246, 0.45);
+      background: var(--primary);
+      box-shadow: var(--shadow-card);
       display: inline-flex;
 
       .avatar {
-        border: 2px solid rgba(11, 15, 26, 0.6);
+        border: 2px solid var(--page-bg);
       }
 
       .avatar-none {
-        background: linear-gradient(135deg, #8b5cf6, #22d3ee);
-        font-size: 32px;
+        background: var(--primary);
+        font-size: calc(32px + var(--font-offset, 0px));
         font-weight: 700;
       }
     }
 
     .user-info-box {
       .user-nickname {
-        font-size: 26px;
+        font-size: calc(26px + var(--font-offset, 0px));
         font-weight: 800;
         letter-spacing: 0.5px;
       }
@@ -344,21 +338,20 @@ const handleLogout = () => {
         gap: 8px;
         margin-top: 8px;
         padding: 4px 14px;
-        background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(34, 211, 238, 0.2));
-        border: 1px solid rgba(139, 92, 246, 0.45);
+        background: var(--primary-light);
+        border: 1px solid var(--primary);
         border-radius: 14px;
 
         .dot {
           width: 7px;
           height: 7px;
           border-radius: 50%;
-          background: #22d3ee;
-          box-shadow: 0 0 8px #22d3ee;
+          background: var(--primary);
         }
 
         .role-text {
-          font-size: 13px;
-          color: #e5eaf3;
+          font-size: calc(13px + var(--font-offset, 0px));
+          color: var(--text-title);
         }
       }
     }
@@ -366,10 +359,7 @@ const handleLogout = () => {
 }
 
 .neon-text {
-  background: linear-gradient(90deg, #a78bfa, #22d3ee);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--text-title);
 }
 
 .body-content {
@@ -382,30 +372,28 @@ const handleLogout = () => {
   }
 
   .panel {
-    background: rgba(18, 24, 40, 0.6);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--card-bg);
+    border: 1px solid var(--border);
     border-radius: 14px;
     padding: 20px 24px;
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
+    box-shadow: var(--shadow-card);
 
     .panel-title {
       display: flex;
       align-items: center;
       gap: 10px;
-      font-size: 15px;
+      font-size: calc(15px + var(--font-offset, 0px));
       font-weight: 600;
-      color: #e5eaf3;
+      color: var(--text-title);
       padding-bottom: 12px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      border-bottom: 1px solid var(--border);
       margin-bottom: 8px;
 
       .indicator {
         width: 4px;
         height: 16px;
         border-radius: 2px;
-        background: linear-gradient(180deg, #8b5cf6, #22d3ee);
-        box-shadow: 0 0 8px rgba(139, 92, 246, 0.6);
+        background: var(--primary);
       }
     }
 
@@ -421,11 +409,11 @@ const handleLogout = () => {
         padding-left: 6px;
 
         .label {
-          color: #22d3ee;
+          color: var(--primary);
         }
 
         .arrow {
-          color: #22d3ee;
+          color: var(--primary);
         }
       }
 
@@ -438,53 +426,53 @@ const handleLogout = () => {
           width: 36px;
           height: 36px;
           border-radius: 10px;
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: var(--card-bg);
+          border: 1px solid var(--border);
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 16px;
+          font-size: calc(16px + var(--font-offset, 0px));
 
           &.fav {
-            color: #fbbf24;
-            background: rgba(251, 191, 36, 0.12);
-            border-color: rgba(251, 191, 36, 0.3);
+            color: var(--warning);
+            background: var(--warning-light);
+            border-color: var(--warning);
           }
 
           &.feedback {
-            color: #2dd4bf;
-            background: rgba(45, 212, 191, 0.1);
-            border-color: rgba(45, 212, 191, 0.3);
+            color: var(--primary);
+            background: var(--primary-light);
+            border-color: var(--primary);
           }
 
           &.profile {
-            color: #a78bfa;
-            background: rgba(139, 92, 246, 0.12);
-            border-color: rgba(139, 92, 246, 0.3);
+            color: var(--primary);
+            background: var(--primary-light);
+            border-color: var(--primary);
           }
 
           &.password {
-            color: #f87171;
-            background: rgba(248, 113, 113, 0.1);
-            border-color: rgba(248, 113, 113, 0.3);
+            color: var(--error);
+            background: var(--error-light);
+            border-color: var(--error);
           }
 
           &.avatar-icon {
-            color: #22d3ee;
-            background: rgba(34, 211, 238, 0.1);
-            border-color: rgba(34, 211, 238, 0.3);
+            color: var(--primary);
+            background: var(--primary-light);
+            border-color: var(--primary);
           }
         }
 
         .label {
-          font-size: 14px;
-          color: #c3cadf;
+          font-size: calc(14px + var(--font-offset, 0px));
+          color: var(--text-body);
           transition: all 0.25s;
         }
       }
 
       .arrow {
-        color: #4b5678;
+        color: var(--text-muted);
         transition: all 0.25s;
       }
     }
@@ -498,14 +486,14 @@ const handleLogout = () => {
       border-radius: 12px;
       height: 46px;
       font-weight: 600;
-      background: rgba(239, 68, 68, 0.12);
-      border-color: rgba(239, 68, 68, 0.4);
-      color: #f87171;
+      background: var(--error-light);
+      border-color: var(--error);
+      color: var(--error);
 
       &:hover {
-        background: rgba(239, 68, 68, 0.2);
-        border-color: rgba(239, 68, 68, 0.6);
-        color: #fca5a5;
+        background: var(--error);
+        border-color: var(--error);
+        color: #fff;
       }
     }
   }

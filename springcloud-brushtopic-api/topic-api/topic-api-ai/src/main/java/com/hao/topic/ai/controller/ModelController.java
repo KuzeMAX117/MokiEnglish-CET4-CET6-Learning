@@ -8,10 +8,12 @@ import com.hao.topic.ai.service.ModelService;
 import com.hao.topic.common.result.Result;
 import com.hao.topic.model.dto.ai.AiHistoryDto;
 import com.hao.topic.model.dto.ai.ChatDto;
+import com.hao.topic.model.dto.ai.TranslationCorrectDto;
 import com.hao.topic.model.dto.ai.TtsDto;
 import com.hao.topic.model.entity.system.SysUser;
 import com.hao.topic.model.vo.ai.AiHistoryContent;
 import com.hao.topic.model.vo.ai.AiHistoryListVo;
+import com.hao.topic.model.vo.ai.TranslationCorrectionVo;
 import com.hao.topic.model.vo.topic.TopicDataVo;
 import com.hao.topic.security.utils.DateUtils;
 import lombok.AllArgsConstructor;
@@ -107,5 +109,20 @@ public class ModelController {
     @GetMapping("/countAi/{currentId}")
     Long countAi(@PathVariable Long currentId) {
         return modelService.countAi(currentId);
+    }
+
+    
+
+    @PostMapping("/translate")
+    public Result<String> translateText(@RequestBody java.util.Map<String, String> body) {
+        String text = body.get("text");
+        return Result.success(modelService.translateText(text));
+    }
+
+    
+
+    @PostMapping("/translate/correct")
+    public Result<TranslationCorrectionVo> correctTranslation(@RequestBody TranslationCorrectDto dto) {
+        return Result.success(modelService.correctTranslation(dto));
     }
 }

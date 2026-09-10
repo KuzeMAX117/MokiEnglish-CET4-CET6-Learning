@@ -12,11 +12,11 @@
       
       <div class="brand-area">
         <div class="brand-logo">
-          <span class="logo-glyph">H</span>
+          <span class="logo-glyph">C</span>
           <span class="logo-pulse"></span>
         </div>
-        <h1 class="title neon-text">HaoAi 刷题引擎</h1>
-        <p class="slogan">AI 陪你刷题，让学习更高效</p>
+        <h1 class="title neon-text">CET备考 · 四六级刷题引擎</h1>
+        <p class="slogan">AI 陪你备考四六级，让学习更高效</p>
       </div>
 
       
@@ -58,7 +58,7 @@
           </a-form-item>
           <a-form-item>
             <a-button type="primary" html-type="submit" size="large" block :loading="loading" class="neon-btn">
-              开始刷题
+              开始备考
             </a-button>
           </a-form-item>
           <div class="action-row">
@@ -71,7 +71,7 @@
       
       <template v-else-if="mode === 'register'">
         <div class="form-header">
-          <h2>加入 AI 刷题</h2>
+          <h2>加入 CET备考</h2>
           <a class="link-btn" @click="mode = 'login'">← 返回登录</a>
         </div>
         <a-form layout="vertical" :model="registerForm" @finish="handleRegister">
@@ -102,7 +102,7 @@
           </a-form-item>
           <a-form-item>
             <a-button type="primary" html-type="submit" size="large" block :loading="loading" class="neon-btn">
-              开启 AI 刷题之旅
+              开启四六级备考之旅
             </a-button>
           </a-form-item>
         </a-form>
@@ -272,7 +272,7 @@ const handleForget = async () => {
 <style scoped lang="scss">
 .login-page {
   min-height: 100vh;
-  background: #0b0f1a;
+  background: var(--card-bg);
   position: relative;
   display: flex;
   align-items: center;
@@ -291,7 +291,6 @@ const handleForget = async () => {
     position: absolute;
     border-radius: 50%;
     filter: blur(120px);
-    opacity: 0.3;
   }
 
   .orb-1 {
@@ -299,7 +298,7 @@ const handleForget = async () => {
     height: 520px;
     top: -180px;
     left: 8%;
-    background: radial-gradient(circle, #8b5cf6, transparent 70%);
+    background: radial-gradient(circle, rgba(66, 87, 178, 0.14), transparent 70%);
     animation: float 14s infinite ease-in-out;
   }
 
@@ -308,7 +307,7 @@ const handleForget = async () => {
     height: 460px;
     bottom: -160px;
     right: 6%;
-    background: radial-gradient(circle, #22d3ee, transparent 70%);
+    background: radial-gradient(circle, rgba(66, 87, 178, 0.08), transparent 70%);
     animation: float 18s infinite ease-in-out reverse;
   }
 
@@ -317,17 +316,16 @@ const handleForget = async () => {
     height: 380px;
     top: 30%;
     right: 30%;
-    background: radial-gradient(circle, rgba(34, 211, 238, 0.5), transparent 70%);
+    background: radial-gradient(circle, rgba(66, 87, 178, 0.06), transparent 70%);
     animation: float 22s infinite ease-in-out;
-    opacity: 0.18;
   }
 
   .grid-overlay {
     position: absolute;
     inset: 0;
     background-image:
-      linear-gradient(rgba(139, 92, 246, 0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(139, 92, 246, 0.05) 1px, transparent 1px);
+      linear-gradient(rgba(66, 87, 178, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(66, 87, 178, 0.05) 1px, transparent 1px);
     background-size: 44px 44px;
     mask-image: radial-gradient(circle at 50% 40%, #000 0%, transparent 70%);
   }
@@ -347,14 +345,11 @@ const handleForget = async () => {
   position: relative;
   z-index: 2;
   width: 460px;
-  background: rgba(18, 24, 40, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
+  background: var(--page-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
   padding: 40px 44px;
-  backdrop-filter: blur(24px);
-  box-shadow:
-    0 24px 80px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  box-shadow: var(--shadow-hover);
 }
 
 .brand-area {
@@ -366,39 +361,38 @@ const handleForget = async () => {
     width: 62px;
     height: 62px;
     border-radius: 16px;
-    background: linear-gradient(135deg, #8b5cf6, #22d3ee);
+    background: linear-gradient(135deg, #4257B2, #364899);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 16px;
-    box-shadow: 0 0 32px rgba(139, 92, 246, 0.55);
+    box-shadow: 0 8px 20px rgba(66, 87, 178, 0.28);
 
     .logo-glyph {
       color: #fff;
       font-weight: 800;
-      font-size: 32px;
-      text-shadow: 0 0 14px rgba(255, 255, 255, 0.7);
+      font-size: calc(32px + var(--font-offset, 0px));
     }
 
     .logo-pulse {
       position: absolute;
       inset: -4px;
       border-radius: 18px;
-      border: 1px solid rgba(139, 92, 246, 0.6);
+      border: 1px solid rgba(66, 87, 178, 0.35);
       animation: pulse 2.4s infinite;
     }
   }
 
   .title {
-    font-size: 24px;
+    font-size: calc(24px + var(--font-offset, 0px));
     font-weight: 800;
     letter-spacing: 1px;
   }
 
   .slogan {
     margin-top: 8px;
-    font-size: 14px;
-    color: #9aa4bd;
+    font-size: calc(14px + var(--font-offset, 0px));
+    color: var(--text-muted);
     letter-spacing: 0.5px;
   }
 }
@@ -416,60 +410,59 @@ const handleForget = async () => {
 }
 
 .neon-text {
-  background: linear-gradient(90deg, #a78bfa, #22d3ee);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--primary);
 }
 
 .tab-switch {
   display: flex;
   padding: 4px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
   margin-bottom: 22px;
 
   .tab-item {
     flex: 1;
     text-align: center;
     padding: 9px 0;
-    font-size: 14px;
-    color: #9aa4bd;
+    font-size: calc(14px + var(--font-offset, 0px));
+    color: var(--text-muted);
     border-radius: 9px;
     cursor: pointer;
     transition: all 0.25s;
     user-select: none;
 
     &.active {
-      color: #fff;
-      background: linear-gradient(135deg, rgba(139, 92, 246, 0.35), rgba(34, 211, 238, 0.25));
-      box-shadow: inset 0 0 0 1px rgba(139, 92, 246, 0.4);
+      color: var(--primary);
+      font-weight: 600;
+      background: var(--page-bg);
+      box-shadow: var(--shadow-card);
     }
   }
 }
 
 .glass-input {
-  border-radius: 10px;
+  border-radius: 8px;
 
   :deep(.ant-input) {
     background: transparent;
   }
 
   :deep(.ant-input-prefix .input-icon) {
-    color: #7c86a6;
+    color: var(--text-muted);
   }
 }
 
 :deep(.ant-input-affix-wrapper) {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
+  background: var(--card-bg);
+  border-color: var(--border);
+  border-radius: 8px;
 
   &:hover,
   &:focus-within {
-    border-color: rgba(139, 92, 246, 0.6);
-    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.15);
+    background: var(--page-bg);
+    border-color: rgba(66, 87, 178, 0.5);
+    box-shadow: 0 0 0 2px rgba(66, 87, 178, 0.12);
   }
 }
 
@@ -484,32 +477,32 @@ const handleForget = async () => {
 
 .code-btn {
   height: 40px;
-  border-radius: 10px;
-  background: rgba(139, 92, 246, 0.15);
-  border-color: rgba(139, 92, 246, 0.4);
-  color: #a78bfa;
+  border-radius: 8px;
+  background: var(--primary-light);
+  border-color: rgba(66, 87, 178, 0.35);
+  color: var(--primary);
 
   &:hover {
-    background: rgba(139, 92, 246, 0.25);
-    border-color: rgba(139, 92, 246, 0.6);
-    color: #c4b5fd;
+    background: rgba(66, 87, 178, 0.14);
+    border-color: rgba(66, 87, 178, 0.55);
+    color: var(--primary-hover);
   }
 }
 
 .neon-btn {
   height: 46px;
-  border-radius: 12px;
-  font-size: 16px;
+  border-radius: var(--radius-md);
+  font-size: calc(16px + var(--font-offset, 0px));
   font-weight: 600;
   letter-spacing: 2px;
   border: none;
-  background: linear-gradient(135deg, #8b5cf6, #06b6d4);
-  box-shadow: 0 8px 30px rgba(139, 92, 246, 0.4);
+  background: var(--primary);
+  box-shadow: 0 8px 20px rgba(66, 87, 178, 0.3);
 
   &:hover,
   &:focus {
-    background: linear-gradient(135deg, #a78bfa, #22d3ee) !important;
-    box-shadow: 0 10px 36px rgba(34, 211, 238, 0.4);
+    background: var(--primary-hover) !important;
+    box-shadow: 0 10px 26px rgba(66, 87, 178, 0.4);
   }
 }
 
@@ -520,40 +513,37 @@ const handleForget = async () => {
   margin-bottom: 22px;
 
   h2 {
-    font-size: 20px;
+    font-size: calc(20px + var(--font-offset, 0px));
     font-weight: 700;
-    background: linear-gradient(90deg, #a78bfa, #22d3ee);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--text-title);
   }
 }
 
 .action-row {
   display: flex;
   justify-content: space-between;
-  font-size: 14px;
+  font-size: calc(14px + var(--font-offset, 0px));
 }
 
 .link-btn {
-  color: #9aa4bd;
+  color: var(--text-muted);
   transition: color 0.25s;
 
   &:hover {
-    color: #22d3ee;
+    color: var(--primary);
   }
 }
 
 :deep(.ant-form-item-label > label) {
-  color: #c3cadf !important;
-  font-size: 14px;
+  color: var(--text-body) !important;
+  font-size: calc(14px + var(--font-offset, 0px));
 }
 
 :deep(.ant-input) {
-  color: #e5eaf3;
+  color: var(--text-title);
 }
 
 :deep(.ant-input::placeholder) {
-  color: #6b7693;
+  color: var(--text-muted);
 }
 </style>

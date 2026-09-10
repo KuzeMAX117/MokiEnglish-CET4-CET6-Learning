@@ -104,14 +104,21 @@ public class PaperServiceImpl implements PaperService {
             paperTopicVo.setTopicName(topic.getTopicName());
             paperTopicVo.setOptions(topic.getOptions());
             paperTopicVo.setQuestionType(topic.getQuestionType());
+            paperTopicVo.setArticle(topic.getArticle());
+            paperTopicVo.setCorrectOption(topic.getCorrectOption());
+            paperTopicVo.setAnalysis(topic.getAnalysis());
+            paperTopicVo.setSubSection(paperTopic.getSubSection());
             paperTopicVo.setSection(paperTopic.getSection());
             paperTopicVo.setSorted(index++);
-            sectionMap.computeIfAbsent(paperTopic.getSection(), k -> new ArrayList<>()).add(paperTopicVo);
+            String groupKey = paperTopic.getSection() + "|" + (paperTopic.getSubSection() != null ? paperTopic.getSubSection() : "");
+            sectionMap.computeIfAbsent(groupKey, k -> new ArrayList<>()).add(paperTopicVo);
         }
         List<PaperDetailVo.PaperSectionVo> sections = new ArrayList<>();
         for (Map.Entry<String, List<PaperTopicVo>> entry : sectionMap.entrySet()) {
             PaperDetailVo.PaperSectionVo sectionVo = new PaperDetailVo.PaperSectionVo();
-            sectionVo.setSection(entry.getKey());
+            String[] parts = entry.getKey().split("\\|", -1);
+            sectionVo.setSection(parts[0]);
+            sectionVo.setSubSection(parts.length > 1 ? parts[1] : null);
             sectionVo.setTopics(entry.getValue());
             sections.add(sectionVo);
         }
@@ -167,6 +174,19 @@ public class PaperServiceImpl implements PaperService {
             paperProgressVo.setCorrect(record.getCorrect() != null && record.getCorrect() == 1);
             return paperProgressVo;
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void resetProgress(Long paperId) {
+        if (paperId == null) {
+            throw new TopicException(ResultCodeEnum.FAIL);
+        }
+        Long userId = SecurityUtils.getCurrentId();
+        LambdaQueryWrapper<TopicRecord> recordLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        recordLambdaQueryWrapper.eq(TopicRecord::getUserId, userId);
+        recordLambdaQueryWrapper.eq(TopicRecord::getPaperId, paperId);
+        topicRecordMapper.delete(recordLambdaQueryWrapper);
     }
 
     

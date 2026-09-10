@@ -301,12 +301,11 @@ const handleFeedbackSubmit = async () => {
 
 .topic-card {
   position: relative;
-  background: rgba(18, 24, 40, 0.6);
-  backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
   border-radius: 18px;
   padding: 28px 36px;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--shadow-card);
   min-height: 480px;
   overflow: hidden;
 
@@ -327,7 +326,7 @@ const handleFeedbackSubmit = async () => {
       height: 320px;
       top: -140px;
       right: -60px;
-      background: radial-gradient(circle, #8b5cf6, transparent 70%);
+      background: radial-gradient(circle, var(--primary-light), transparent 70%);
     }
 
     .g2 {
@@ -335,7 +334,7 @@ const handleFeedbackSubmit = async () => {
       height: 280px;
       bottom: -120px;
       left: -60px;
-      background: radial-gradient(circle, #22d3ee, transparent 70%);
+      background: radial-gradient(circle, var(--primary-light), transparent 70%);
     }
   }
 
@@ -357,11 +356,11 @@ const handleFeedbackSubmit = async () => {
           width: 40px;
           height: 40px;
           border-radius: 11px;
-          background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(34, 211, 238, 0.25));
-          border: 1px solid rgba(139, 92, 246, 0.4);
-          color: #22d3ee;
+          background: var(--primary-light);
+          border: 1px solid var(--primary);
+          color: var(--primary);
           font-weight: 800;
-          font-size: 16px;
+          font-size: calc(16px + var(--font-offset, 0px));
           display: flex;
           align-items: center;
           justify-content: center;
@@ -369,8 +368,8 @@ const handleFeedbackSubmit = async () => {
         }
 
         .topic-title {
-          font-size: 22px;
-          color: #e5eaf3;
+          font-size: calc(22px + var(--font-offset, 0px));
+          color: var(--text-title);
           line-height: 1.5;
           font-weight: 700;
         }
@@ -388,13 +387,12 @@ const handleFeedbackSubmit = async () => {
         }
 
         .star-icon {
-          font-size: 24px;
-          color: #7c86a6;
+          font-size: calc(24px + var(--font-offset, 0px));
+          color: var(--text-muted);
           transition: all 0.25s;
 
           &.collected {
-            color: #fbbf24;
-            filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.7));
+            color: var(--warning);
           }
         }
       }
@@ -407,9 +405,9 @@ const handleFeedbackSubmit = async () => {
       gap: 8px;
 
       .tag-item {
-        background: rgba(139, 92, 246, 0.12);
-        border-color: rgba(139, 92, 246, 0.3);
-        color: #a78bfa;
+        background: var(--primary-light);
+        border-color: var(--primary);
+        color: var(--primary);
         border-radius: 8px;
         display: inline-flex;
         align-items: center;
@@ -419,8 +417,7 @@ const handleFeedbackSubmit = async () => {
           width: 6px;
           height: 6px;
           border-radius: 50%;
-          background: #22d3ee;
-          box-shadow: 0 0 6px #22d3ee;
+          background: var(--primary);
         }
       }
     }
@@ -432,14 +429,14 @@ const handleFeedbackSubmit = async () => {
     margin: 20px 0;
 
     :deep(.ant-radio-button-wrapper) {
-      background: rgba(255, 255, 255, 0.04);
-      border-color: rgba(255, 255, 255, 0.1);
-      color: #9aa4bd;
+      background: var(--card-bg);
+      border-color: var(--border);
+      color: var(--text-body);
 
       &.ant-radio-button-wrapper-checked {
-        background: linear-gradient(135deg, rgba(139, 92, 246, 0.35), rgba(34, 211, 238, 0.25));
+        background: var(--primary);
         color: #fff;
-        border-color: rgba(139, 92, 246, 0.5);
+        border-color: var(--primary);
       }
     }
   }
@@ -461,15 +458,14 @@ const handleFeedbackSubmit = async () => {
         text-align: center;
 
         .lock-icon {
-          font-size: 40px;
-          color: #a78bfa;
-          filter: drop-shadow(0 0 16px rgba(139, 92, 246, 0.6));
+          font-size: calc(40px + var(--font-offset, 0px));
+          color: var(--primary);
         }
 
         p {
           margin-top: 12px;
-          color: #7c86a6;
-          font-size: 14px;
+          color: var(--text-muted);
+          font-size: calc(14px + var(--font-offset, 0px));
         }
       }
 
@@ -477,16 +473,16 @@ const handleFeedbackSubmit = async () => {
         height: 46px;
         padding: 0 36px;
         border: none;
-        background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+        background: var(--primary);
         color: #fff;
         font-weight: 600;
         letter-spacing: 2px;
         border-radius: 12px;
-        box-shadow: 0 8px 30px rgba(139, 92, 246, 0.4);
+        box-shadow: var(--shadow-card);
 
         &:hover,
         &:focus {
-          background: linear-gradient(135deg, #a78bfa, #22d3ee) !important;
+          background: var(--primary-hover) !important;
         }
       }
 
@@ -509,7 +505,7 @@ const handleFeedbackSubmit = async () => {
 
     .answer-box {
       line-height: 1.8;
-      color: #e5eaf3;
+      color: var(--text-title);
 
       .answer-head {
         margin-bottom: 14px;
@@ -518,10 +514,10 @@ const handleFeedbackSubmit = async () => {
           display: inline-block;
           padding: 3px 14px;
           border-radius: 8px;
-          font-size: 12px;
-          background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(34, 211, 238, 0.2));
-          border: 1px solid rgba(139, 92, 246, 0.4);
-          color: #22d3ee;
+          font-size: calc(12px + var(--font-offset, 0px));
+          background: var(--primary-light);
+          border: 1px solid var(--primary);
+          color: var(--primary);
           font-weight: 600;
         }
       }
@@ -534,9 +530,8 @@ const handleFeedbackSubmit = async () => {
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(11, 15, 26, 0.85);
-  backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--page-bg);
+  border-top: 1px solid var(--border);
   padding: 12px 24px;
   z-index: 99;
 
@@ -555,7 +550,7 @@ const handleFeedbackSubmit = async () => {
         display: flex;
         align-items: center;
         gap: 10px;
-        color: #22d3ee;
+        color: var(--primary);
         cursor: pointer;
         max-width: 55%;
         overflow: hidden;
@@ -564,24 +559,24 @@ const handleFeedbackSubmit = async () => {
         transition: background 0.25s;
 
         &:hover {
-          background: rgba(139, 92, 246, 0.12);
+          background: var(--primary-light);
         }
 
         .list-icon {
           width: 30px;
           height: 30px;
           border-radius: 8px;
-          background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(34, 211, 238, 0.25));
+          background: var(--primary-light);
           display: flex;
           align-items: center;
           justify-content: center;
-          color: #a78bfa;
+          color: var(--primary);
           flex-shrink: 0;
         }
 
         .topic-name {
-          font-size: 14px;
-          color: #e5eaf3;
+          font-size: calc(14px + var(--font-offset, 0px));
+          color: var(--text-title);
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
@@ -589,7 +584,7 @@ const handleFeedbackSubmit = async () => {
 
         .topic-weight {
           font-weight: 700;
-          color: #7c86a6;
+          color: var(--text-muted);
           flex-shrink: 0;
         }
       }
@@ -597,10 +592,10 @@ const handleFeedbackSubmit = async () => {
       .bar-progress {
         flex: 1;
         :deep(.ant-progress-bg) {
-          background: linear-gradient(90deg, #8b5cf6, #22d3ee);
+          background: var(--primary);
         }
         :deep(.ant-progress-inner) {
-          background: rgba(255, 255, 255, 0.08);
+          background: var(--border);
         }
       }
     }
@@ -614,47 +609,47 @@ const handleFeedbackSubmit = async () => {
         flex: 1;
         height: 42px;
         border-radius: 10px;
-        background: rgba(255, 255, 255, 0.05);
-        border-color: rgba(255, 255, 255, 0.12);
-        color: #e5eaf3;
+        background: var(--card-bg);
+        border-color: var(--border);
+        color: var(--text-title);
 
         &:hover {
-          border-color: rgba(139, 92, 246, 0.5);
-          color: #a78bfa;
+          border-color: var(--primary);
+          color: var(--primary);
         }
 
         &:disabled {
-          color: #4b5678;
-          background: rgba(255, 255, 255, 0.02);
+          color: var(--text-muted);
+          background: var(--card-bg);
         }
       }
 
       .feedback-btn {
-        background: rgba(34, 211, 238, 0.1);
-        border-color: rgba(34, 211, 238, 0.35);
-        color: #22d3ee;
+        background: var(--primary-light);
+        border-color: var(--primary);
+        color: var(--primary);
 
         &:hover {
-          background: rgba(34, 211, 238, 0.2);
-          border-color: rgba(34, 211, 238, 0.5);
-          color: #67e8f9;
+          background: var(--primary);
+          border-color: var(--primary-hover);
+          color: #fff;
         }
       }
 
       .next-btn {
         border: none;
-        background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+        background: var(--primary);
         color: #fff;
         font-weight: 600;
 
         &:hover {
-          background: linear-gradient(135deg, #a78bfa, #22d3ee) !important;
+          background: var(--primary-hover) !important;
           color: #fff;
         }
 
         &:disabled {
-          background: rgba(255, 255, 255, 0.08);
-          color: #4b5678;
+          background: var(--card-bg);
+          color: var(--text-muted);
         }
       }
     }
@@ -674,33 +669,33 @@ const handleFeedbackSubmit = async () => {
     border: 1px solid transparent;
 
     &:hover {
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--primary-light);
     }
 
     &.active {
-      background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(34, 211, 238, 0.15));
-      border-color: rgba(139, 92, 246, 0.4);
+      background: var(--primary-light);
+      border-color: var(--primary);
 
       .title {
-        color: #22d3ee;
+        color: var(--primary);
         font-weight: 600;
       }
 
       .index {
-        color: #a78bfa;
+        color: var(--primary);
       }
     }
 
     .index {
-      font-size: 12px;
-      color: #4b5678;
+      font-size: calc(12px + var(--font-offset, 0px));
+      color: var(--text-muted);
       font-weight: 700;
       flex-shrink: 0;
     }
 
     .title {
-      font-size: 14px;
-      color: #c3cadf;
+      font-size: calc(14px + var(--font-offset, 0px));
+      color: var(--text-body);
       display: block;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -710,6 +705,6 @@ const handleFeedbackSubmit = async () => {
 }
 
 :deep(.ant-empty-description) {
-  color: #7c86a6;
+  color: var(--text-muted);
 }
 </style>

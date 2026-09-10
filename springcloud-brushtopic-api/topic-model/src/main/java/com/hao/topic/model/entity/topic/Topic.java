@@ -20,6 +20,7 @@ public class Topic extends BaseEntity {
     
 
     private String analysis;
+    private String article;
     private Integer sorted;
     private Integer isEveryday;
     private Integer isMember;

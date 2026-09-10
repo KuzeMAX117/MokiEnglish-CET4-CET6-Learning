@@ -123,7 +123,7 @@ const uploadUrl = VITE_SERVE + '/api/system/user/avatar'
 
 const headers = { authorization: userStore.token };
 
-const beforeUpload = (file: UploadProps['fileList'][number]) => {
+const beforeUpload = (file: any) => {
   const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
   if (!isJpgOrPng) {
     message.error('图片格式错误');
@@ -164,7 +164,7 @@ const getUserInfo = async () => {
   apiGetUserInfoDetail(userStore.userInfo.id).then((res) => {
     
     
-    userInfo.value = res
+    userInfo.value = res as any
     formState.nickname = userInfo.value.nickname
   })
 };

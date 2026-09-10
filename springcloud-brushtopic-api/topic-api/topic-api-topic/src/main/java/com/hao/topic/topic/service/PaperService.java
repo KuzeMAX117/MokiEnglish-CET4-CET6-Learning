@@ -25,4 +25,8 @@ public interface PaperService {
     
 
     List<PaperProgressVo> progress(Long paperId);
+
+    
+
+    void resetProgress(Long paperId);
 }

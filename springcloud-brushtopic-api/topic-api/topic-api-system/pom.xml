@@ -34,6 +34,12 @@
             <artifactId>topic-api-utils</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.hao.topic</groupId>
+            <artifactId>topic-client-ai</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
     <build>

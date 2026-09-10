@@ -87,14 +87,13 @@ onMounted(getFavoriteList)
     display: flex;
     align-items: center;
     gap: 12px;
-    font-size: 24px;
+    font-size: calc(24px + var(--font-offset, 0px));
     font-weight: 800;
-    color: #e5eaf3;
+    color: var(--text-title);
 
     .head-icon {
-      font-size: 26px;
-      color: #fbbf24;
-      filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.6));
+      font-size: calc(26px + var(--font-offset, 0px));
+      color: var(--warning);
     }
   }
 
@@ -104,43 +103,37 @@ onMounted(getFavoriteList)
     gap: 8px;
     padding: 8px 16px;
     border-radius: 10px;
-    font-size: 14px;
-    color: #9aa4bd;
+    font-size: calc(14px + var(--font-offset, 0px));
+    color: var(--text-muted);
     cursor: pointer;
     transition: all 0.25s;
 
     &:hover {
-      color: #22d3ee;
-      background: rgba(255, 255, 255, 0.06);
+      color: var(--primary);
+      background: var(--primary-light);
     }
   }
 }
 
 .list-wrapper {
   .list-item {
-    background: rgba(18, 24, 40, 0.6);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--card-bg);
+    border: 1px solid var(--border);
     border-radius: 14px;
     padding: 20px 24px;
     margin-bottom: 12px;
     cursor: pointer;
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
-    border-left: 4px solid;
-    border-image: linear-gradient(180deg, #8b5cf6, #22d3ee) 1;
+    box-shadow: var(--shadow-card);
+    border-left: 4px solid var(--primary);
     transition: all 0.3s;
 
     &:hover {
       transform: translateY(-3px);
-      border-color: rgba(139, 92, 246, 0.6);
-      box-shadow: 0 14px 40px rgba(139, 92, 246, 0.18);
+      border-color: var(--primary-hover);
+      box-shadow: var(--shadow-hover);
 
       .q-mark {
-        color: #22d3ee;
-      }
-
-      .star-icon {
-        filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.6));
+        color: var(--primary);
       }
     }
 
@@ -151,20 +144,20 @@ onMounted(getFavoriteList)
         align-items: center;
 
         .title {
-          font-size: 16px;
+          font-size: calc(16px + var(--font-offset, 0px));
           font-weight: 600;
-          color: #e5eaf3;
+          color: var(--text-title);
 
           .q-mark {
-            color: #8b5cf6;
+            color: var(--primary);
             margin-right: 6px;
             transition: color 0.3s;
           }
         }
 
         .star-icon {
-          color: #fbbf24;
-          font-size: 18px;
+          color: var(--warning);
+          font-size: calc(18px + var(--font-offset, 0px));
           transition: all 0.3s;
         }
       }
@@ -181,9 +174,9 @@ onMounted(getFavoriteList)
           gap: 8px;
 
           .tag-item {
-            background: rgba(139, 92, 246, 0.12);
-            border-color: rgba(139, 92, 246, 0.3);
-            color: #a78bfa;
+            background: var(--primary-light);
+            border-color: var(--primary);
+            color: var(--primary);
             border-radius: 8px;
           }
         }
@@ -194,12 +187,12 @@ onMounted(getFavoriteList)
           gap: 6px;
 
           .clock-icon {
-            color: #4b5678;
+            color: var(--text-muted);
           }
 
           .time {
-            font-size: 12px;
-            color: #7c86a6;
+            font-size: calc(12px + var(--font-offset, 0px));
+            color: var(--text-muted);
           }
         }
       }
@@ -208,6 +201,6 @@ onMounted(getFavoriteList)
 }
 
 :deep(.ant-empty-description) {
-  color: #7c86a6;
+  color: var(--text-muted);
 }
 </style>

@@ -7,15 +7,15 @@
           <span class="greet-text">{{ greeting }}，</span>
           <span class="greet-name">{{ userStore.nickname }}</span>
         </div>
-        <div class="slogan">今日也要保持刷题节奏，每天进步一点点</div>
+        <div class="slogan">今日也要保持备考节奏，每天进步一点点</div>
         <div class="banner-actions">
-          <a-button class="btn-primary" @click="router.push('/database')">
+          <a-button class="btn-primary" @click="router.push('/paper')">
             <ThunderboltFilled class="btn-icon" />
-            开始刷题
+            真题刷题
           </a-button>
-          <a-button class="btn-ghost" @click="router.push('/ai')">
-            <RobotOutlined class="btn-icon" />
-            AI 答疑
+          <a-button class="btn-ghost" @click="router.push('/vocabulary')">
+            <BookOutlined class="btn-icon" />
+            背单词
           </a-button>
         </div>
       </div>
@@ -102,14 +102,6 @@
             </div>
           </div>
           <div class="quick-grid">
-            <div class="quick-item" @click="router.push('/database')">
-              <DatabaseOutlined class="q-icon q1" />
-              <span>去刷题</span>
-            </div>
-            <div class="quick-item" @click="router.push('/ai')">
-              <RobotOutlined class="q-icon q2" />
-              <span>AI 问答</span>
-            </div>
             <div class="quick-item" @click="router.push('/paper?level=4')">
               <FileTextOutlined class="q-icon q1" />
               <span>四级真题</span>
@@ -117,6 +109,26 @@
             <div class="quick-item" @click="router.push('/paper?level=6')">
               <FileTextOutlined class="q-icon q2" />
               <span>六级真题</span>
+            </div>
+            <div class="quick-item" @click="router.push('/vocabulary')">
+              <BookOutlined class="q-icon q3" />
+              <span>背单词</span>
+            </div>
+            <div class="quick-item" @click="router.push('/reading')">
+              <ReadOutlined class="q-icon q4" />
+              <span>文章阅读</span>
+            </div>
+            <div class="quick-item" @click="router.push('/writing')">
+              <EditOutlined class="q-icon q1" />
+              <span>作文批改</span>
+            </div>
+            <div class="quick-item" @click="router.push('/translation')">
+              <SwapOutlined class="q-icon q2" />
+              <span>翻译练习</span>
+            </div>
+            <div class="quick-item" @click="router.push('/ai')">
+              <RobotOutlined class="q-icon q3" />
+              <span>AI 练习</span>
             </div>
             <div class="quick-item" @click="router.push('/ranking')">
               <TrophyOutlined class="q-icon q3" />
@@ -151,6 +163,10 @@ import {
   FileTextOutlined,
   AppstoreOutlined,
   CheckCircleFilled,
+  BookOutlined,
+  ReadOutlined,
+  EditOutlined,
+  SwapOutlined,
 } from '@ant-design/icons-vue'
 import { apiQueryWebHomeCount, apiQueryTopicTodayVo, apiFlushTopic } from '@/api/home'
 import { useUserStore } from '@/stores/user'
@@ -244,23 +260,23 @@ const handleQuestion = async (item: TodayTopicVo) => {
 .welcome-banner {
   position: relative;
   overflow: hidden;
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   padding: 34px 40px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 32px;
-  background: linear-gradient(120deg, rgba(139, 92, 246, 0.26), rgba(34, 211, 238, 0.12) 60%, rgba(11, 15, 26, 0.2));
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+  background: linear-gradient(135deg, rgba(66, 87, 178, 0.06), var(--card-bg) 60%);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-card);
 
   &::before {
     content: '';
     position: absolute;
     inset: 0;
     background-image:
-      linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+      linear-gradient(rgba(66, 87, 178, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(66, 87, 178, 0.05) 1px, transparent 1px);
     background-size: 40px 40px;
     mask-image: radial-gradient(circle at 80% 20%, #000 0%, transparent 70%);
     pointer-events: none;
@@ -276,24 +292,21 @@ const handleQuestion = async (item: TodayTopicVo) => {
       gap: 10px;
 
       .greet-text {
-        font-size: 18px;
-        color: #c3cadf;
+        font-size: calc(18px + var(--font-offset, 0px));
+        color: var(--text-body);
       }
 
       .greet-name {
-        font-size: 30px;
+        font-size: calc(30px + var(--font-offset, 0px));
         font-weight: 800;
-        background: linear-gradient(90deg, #a78bfa, #22d3ee);
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
+        color: var(--text-title);
       }
     }
 
     .slogan {
       margin-top: 10px;
-      font-size: 14px;
-      color: #9aa4bd;
+      font-size: calc(14px + var(--font-offset, 0px));
+      color: var(--text-muted);
       letter-spacing: 0.5px;
     }
 
@@ -306,49 +319,50 @@ const handleQuestion = async (item: TodayTopicVo) => {
         height: 42px;
         padding: 0 22px;
         border: none;
-        border-radius: 12px;
-        background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+        border-radius: var(--radius-md);
+        background: var(--primary);
         color: #fff;
         font-weight: 600;
-        font-size: 14px;
+        font-size: calc(14px + var(--font-offset, 0px));
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4);
+        box-shadow: 0 6px 18px rgba(66, 87, 178, 0.25);
         transition: all 0.3s;
 
         &:hover {
           transform: translateY(-2px);
-          box-shadow: 0 12px 30px rgba(139, 92, 246, 0.55);
+          background: var(--primary-hover);
+          box-shadow: 0 10px 24px rgba(66, 87, 178, 0.35);
           color: #fff;
         }
 
         .btn-icon {
-          font-size: 15px;
+          font-size: calc(15px + var(--font-offset, 0px));
         }
       }
 
       .btn-ghost {
         height: 42px;
         padding: 0 22px;
-        border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.16);
-        background: rgba(255, 255, 255, 0.05);
-        color: #c3cadf;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--text-body);
         font-weight: 500;
-        font-size: 14px;
+        font-size: calc(14px + var(--font-offset, 0px));
         display: inline-flex;
         align-items: center;
         gap: 8px;
         transition: all 0.3s;
 
         &:hover {
-          border-color: rgba(34, 211, 238, 0.5);
-          color: #22d3ee;
+          border-color: rgba(66, 87, 178, 0.4);
+          color: var(--primary);
         }
 
         .btn-icon {
-          font-size: 15px;
+          font-size: calc(15px + var(--font-offset, 0px));
         }
       }
     }
@@ -364,19 +378,16 @@ const handleQuestion = async (item: TodayTopicVo) => {
       align-items: center;
       gap: 16px;
       padding: 14px 24px;
-      border-radius: 16px;
-      background: rgba(11, 15, 26, 0.45);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
+      border-radius: var(--radius-lg);
+      background: var(--page-bg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-card);
 
       .date-day {
-        font-size: 44px;
+        font-size: calc(44px + var(--font-offset, 0px));
         font-weight: 800;
         line-height: 1;
-        background: linear-gradient(180deg, #a78bfa, #22d3ee);
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
+        color: var(--primary);
       }
 
       .date-line {
@@ -385,14 +396,14 @@ const handleQuestion = async (item: TodayTopicVo) => {
         gap: 4px;
 
         .date-month {
-          font-size: 14px;
-          color: #e5eaf3;
+          font-size: calc(14px + var(--font-offset, 0px));
+          color: var(--text-title);
           font-weight: 600;
         }
 
         .date-week {
-          font-size: 12px;
-          color: #8b95b5;
+          font-size: calc(12px + var(--font-offset, 0px));
+          color: var(--text-muted);
         }
       }
     }
@@ -409,15 +420,15 @@ const handleQuestion = async (item: TodayTopicVo) => {
     align-items: center;
     gap: 16px;
     padding: 22px 24px;
-    border-radius: 16px;
-    background: rgba(18, 24, 40, 0.6);
-    backdrop-filter: blur(14px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-lg);
+    background: var(--page-bg);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-card);
     transition: all 0.3s;
 
     &:hover {
       transform: translateY(-3px);
-      box-shadow: 0 12px 34px rgba(0, 0, 0, 0.35);
+      box-shadow: var(--shadow-hover);
     }
 
     .stat-icon {
@@ -427,31 +438,27 @@ const handleQuestion = async (item: TodayTopicVo) => {
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 22px;
+      font-size: calc(22px + var(--font-offset, 0px));
       flex-shrink: 0;
 
       &.purple {
-        background: rgba(139, 92, 246, 0.16);
-        color: #a78bfa;
-        box-shadow: 0 0 18px rgba(139, 92, 246, 0.25);
+        background: var(--tag-2);
+        color: var(--primary);
       }
 
       &.cyan {
-        background: rgba(34, 211, 238, 0.14);
-        color: #22d3ee;
-        box-shadow: 0 0 18px rgba(34, 211, 238, 0.22);
+        background: var(--tag-1);
+        color: var(--primary);
       }
 
       &.green {
-        background: rgba(52, 211, 153, 0.14);
-        color: #34d399;
-        box-shadow: 0 0 18px rgba(52, 211, 153, 0.22);
+        background: var(--tag-4);
+        color: var(--success);
       }
 
       &.gold {
-        background: rgba(251, 191, 36, 0.14);
-        color: #fbbf24;
-        box-shadow: 0 0 18px rgba(251, 191, 36, 0.22);
+        background: var(--tag-3);
+        color: var(--warning);
       }
     }
 
@@ -459,34 +466,31 @@ const handleQuestion = async (item: TodayTopicVo) => {
       min-width: 0;
 
       .stat-value {
-        font-size: 24px;
+        font-size: calc(24px + var(--font-offset, 0px));
         font-weight: 800;
         line-height: 1.15;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
 
-        &.purple {
-          color: #c4b5fd;
-        }
-
+        &.purple,
         &.cyan {
-          color: #67e8f9;
+          color: var(--primary);
         }
 
         &.green {
-          color: #6ee7b7;
+          color: var(--success);
         }
 
         &.gold {
-          color: #fcd34d;
+          color: var(--warning);
         }
       }
 
       .stat-label {
         margin-top: 6px;
-        font-size: 13px;
-        color: #9aa4bd;
+        font-size: calc(13px + var(--font-offset, 0px));
+        color: var(--text-muted);
       }
     }
   }
@@ -500,12 +504,11 @@ const handleQuestion = async (item: TodayTopicVo) => {
 }
 
 .panel {
-  border-radius: 16px;
-  background: rgba(18, 24, 40, 0.6);
-  backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  background: var(--page-bg);
+  border: 1px solid var(--border);
   padding: 22px 24px;
-  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-card);
 
   .panel-head {
     display: flex;
@@ -517,33 +520,30 @@ const handleQuestion = async (item: TodayTopicVo) => {
       display: flex;
       align-items: center;
       gap: 10px;
-      font-size: 17px;
+      font-size: calc(17px + var(--font-offset, 0px));
       font-weight: 700;
-      color: #e5eaf3;
+      color: var(--text-title);
 
       .t-icon {
-        font-size: 18px;
+        font-size: calc(18px + var(--font-offset, 0px));
 
         &.orange {
-          color: #fb923c;
-          filter: drop-shadow(0 0 8px rgba(251, 146, 60, 0.6));
+          color: var(--warning);
         }
 
         &.gold {
-          color: #fbbf24;
-          filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.6));
+          color: var(--warning);
         }
 
         &.purple {
-          color: #a78bfa;
-          filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.6));
+          color: var(--primary);
         }
       }
     }
 
     .panel-meta {
-      font-size: 13px;
-      color: #7c86a6;
+      font-size: calc(13px + var(--font-offset, 0px));
+      color: var(--text-muted);
     }
   }
 }
@@ -553,9 +553,9 @@ const handleQuestion = async (item: TodayTopicVo) => {
   align-items: center;
   gap: 16px;
   padding: 16px 18px;
-  border-radius: 13px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-md);
+  background: transparent;
+  border: 1px solid var(--border);
   margin-bottom: 10px;
   cursor: pointer;
   transition: all 0.28s;
@@ -565,13 +565,13 @@ const handleQuestion = async (item: TodayTopicVo) => {
   }
 
   &:hover {
-    background: rgba(139, 92, 246, 0.08);
-    border-color: rgba(139, 92, 246, 0.4);
+    background: var(--primary-light);
+    border-color: rgba(66, 87, 178, 0.3);
     transform: translateX(4px);
 
     .topic-no {
-      color: #22d3ee;
-      border-color: rgba(34, 211, 238, 0.5);
+      color: var(--primary);
+      border-color: rgba(66, 87, 178, 0.4);
     }
   }
 
@@ -583,17 +583,17 @@ const handleQuestion = async (item: TodayTopicVo) => {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 15px;
+    font-size: calc(15px + var(--font-offset, 0px));
     font-weight: 800;
-    color: #a78bfa;
-    background: rgba(139, 92, 246, 0.12);
-    border: 1px solid rgba(139, 92, 246, 0.3);
+    color: var(--primary);
+    background: var(--primary-light);
+    border: 1px solid rgba(66, 87, 178, 0.2);
     transition: all 0.28s;
 
     &.done {
-      color: #34d399;
-      background: rgba(52, 211, 153, 0.12);
-      border-color: rgba(52, 211, 153, 0.3);
+      color: var(--success);
+      background: var(--success-light);
+      border-color: rgba(40, 167, 69, 0.3);
     }
   }
 
@@ -602,9 +602,9 @@ const handleQuestion = async (item: TodayTopicVo) => {
     min-width: 0;
 
     .topic-title {
-      font-size: 15px;
+      font-size: calc(15px + var(--font-offset, 0px));
       font-weight: 600;
-      color: #e5eaf3;
+      color: var(--text-title);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -617,11 +617,11 @@ const handleQuestion = async (item: TodayTopicVo) => {
       gap: 6px;
 
       .tag-item {
-        background: rgba(139, 92, 246, 0.12);
-        border-color: rgba(139, 92, 246, 0.3);
-        color: #a78bfa;
+        background: var(--primary-light);
+        border-color: rgba(66, 87, 178, 0.2);
+        color: var(--primary);
         border-radius: 8px;
-        font-size: 12px;
+        font-size: calc(12px + var(--font-offset, 0px));
         margin-inline-end: 0;
       }
     }
@@ -633,22 +633,22 @@ const handleQuestion = async (item: TodayTopicVo) => {
     align-items: center;
     gap: 6px;
     padding: 7px 16px;
-    border-radius: 10px;
-    font-size: 13px;
+    border-radius: var(--radius-sm);
+    font-size: calc(13px + var(--font-offset, 0px));
     font-weight: 600;
     color: #fff;
-    background: linear-gradient(135deg, #8b5cf6, #06b6d4);
-    box-shadow: 0 6px 18px rgba(139, 92, 246, 0.3);
+    background: var(--primary);
+    box-shadow: 0 4px 12px rgba(66, 87, 178, 0.25);
     transition: all 0.3s;
 
     .status-icon {
-      font-size: 13px;
+      font-size: calc(13px + var(--font-offset, 0px));
     }
 
     &.done {
-      background: rgba(52, 211, 153, 0.12);
-      color: #34d399;
-      border: 1px solid rgba(52, 211, 153, 0.4);
+      background: var(--success-light);
+      color: var(--success);
+      border: 1px solid rgba(40, 167, 69, 0.3);
       box-shadow: none;
     }
   }
@@ -658,20 +658,16 @@ const handleQuestion = async (item: TodayTopicVo) => {
   text-align: center;
 
   .rank-big {
-    font-size: 48px;
+    font-size: calc(48px + var(--font-offset, 0px));
     font-weight: 800;
     line-height: 1.1;
-    background: linear-gradient(180deg, #fcd34d, #f59e0b);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 30px rgba(251, 191, 36, 0.3);
+    color: var(--warning);
   }
 
   .rank-sub {
     margin-top: 8px;
-    font-size: 13px;
-    color: #8b95b5;
+    font-size: calc(13px + var(--font-offset, 0px));
+    color: var(--text-muted);
   }
 
   .btn-primary.full {
@@ -679,26 +675,27 @@ const handleQuestion = async (item: TodayTopicVo) => {
     width: 100%;
     height: 42px;
     border: none;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+    border-radius: var(--radius-md);
+    background: var(--primary);
     color: #fff;
     font-weight: 600;
-    font-size: 14px;
+    font-size: calc(14px + var(--font-offset, 0px));
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4);
+    box-shadow: 0 6px 18px rgba(66, 87, 178, 0.25);
     transition: all 0.3s;
 
     &:hover {
       transform: translateY(-2px);
-      box-shadow: 0 12px 30px rgba(139, 92, 246, 0.55);
+      background: var(--primary-hover);
+      box-shadow: 0 10px 24px rgba(66, 87, 178, 0.35);
       color: #fff;
     }
 
     .btn-icon {
-      font-size: 14px;
+      font-size: calc(14px + var(--font-offset, 0px));
     }
   }
 }
@@ -717,41 +714,41 @@ const handleQuestion = async (item: TodayTopicVo) => {
       align-items: center;
       gap: 8px;
       padding: 16px 6px;
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: var(--radius-md);
+      background: var(--card-bg);
+      border: 1px solid var(--border);
       cursor: pointer;
       transition: all 0.28s;
 
       &:hover {
         transform: translateY(-3px);
-        background: rgba(255, 255, 255, 0.07);
-        border-color: rgba(139, 92, 246, 0.45);
+        background: var(--primary-light);
+        border-color: rgba(66, 87, 178, 0.3);
       }
 
       .q-icon {
-        font-size: 22px;
+        font-size: calc(22px + var(--font-offset, 0px));
 
         &.q1 {
-          color: #a78bfa;
+          color: var(--primary);
         }
 
         &.q2 {
-          color: #22d3ee;
+          color: var(--primary-hover);
         }
 
         &.q3 {
-          color: #fbbf24;
+          color: var(--warning);
         }
 
         &.q4 {
-          color: #34d399;
+          color: var(--success);
         }
       }
 
       span {
-        font-size: 12px;
-        color: #9aa4bd;
+        font-size: calc(12px + var(--font-offset, 0px));
+        color: var(--text-muted);
       }
     }
   }
@@ -768,6 +765,6 @@ const handleQuestion = async (item: TodayTopicVo) => {
 }
 
 :deep(.ant-empty-description) {
-  color: #7c86a6;
+  color: var(--text-muted);
 }
 </style>

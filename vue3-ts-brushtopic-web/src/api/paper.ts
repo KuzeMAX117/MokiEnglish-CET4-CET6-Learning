@@ -20,3 +20,6 @@ export const apiSubmitPaperAnswer = (data: { paperId: number; topicId: number; s
 
 export const apiQueryPaperProgress = (paperId: number) =>
   request.get<any, ApiResult<PaperProgressItem[]>>(paperPrefix + 'progress/' + paperId)
+
+export const apiResetPaperProgress = (paperId: number) =>
+  request.post<any, ApiResult<boolean>>(paperPrefix + 'reset/' + paperId)

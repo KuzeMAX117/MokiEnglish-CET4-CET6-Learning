@@ -1,0 +1,49 @@
+=== total_len: 23076
+
+=== [Reading Section A full len=1859] ===
+
+Directions：In this section, there is a passage with ten blanks. You are required to select one word for each blank from a list of choices given in a word bank following the passage. Read the passage through carefully before making your choices. Each choice in the bank is identified by a letter. Please mark the corresponding letter for each item on Answer Sheet 2 with a single line through the centre. You may not use any of the words in the bank more than once.
+It's a fantasy that goes back centuries: a message in a bottle, carried ashore from far-off lands. Authors, artists and children ___26___ have dreamed of such a gift from the sea.
+This time, though, it's not a bottle that washes ashore. It's eggs—thousands of little toy eggs.
+That's what happened on the German island of Langegoog this week.
+Lying just off the North Sea coast, it found itself ___27___ by an invasion of colored plastic eggs-much to the ___28___ of local children, because the eggs contained toys.
+Police ___29___ the eggs came from a freighter that lost part of its cargo during an unusually ___30___ storm, the worst to hit Germany's northeastern coast since 2006.
+At any rate, what was lost has now been found by many of the community's littlest residents.
+"The surprise eggs have found their way to freedom," said Mayor Uwe Garrels. However, the joy of the moment ___31___ off soon.
+"At first I thought this was a wonder, because everything was so ___32___, but then we realized that this is a huge ___33___ in the end," said the mayor. He also noted the plastic bags and other materials that have washed ashore on the island can cause serious problems for ___34___.
+Still, all these little eggs contained an extra treat with their toys. They ___35___ notes from afar.
+There was just one problem for the German children who received them: They were written in Russian.
+
+
+
+
+=== [tail 3000] ===
+ofessional certificates for free. The platform currently offers professor-led lectures on a broad range of topics, from data science to fashion design.
+As the world migrant crisis intensifies, employment is becoming a global concern. The new program aims to aid refugees by offering "important skills that will help them in the global economy," Evan Ryan, U.S. assistant secretary of state for educational and cultural affairs, said on a press call last week. "What we don't want to do is not act," added Coursera chief operations officer Lila Ibrahim.
+The idea isn't without problems. For one, starting a new career path isn't as simple as watching a few videos and obtaining an online certificate; even those looking to continue previous careers can't simply rely on an online lecture to get them up-to-date on standards, policies, and practices. For another, most of the classes on Coursera are in English, and though there are plans to add translations, language barriers can be a big obstacle. Then there are the questions over the value of massive open online courses (MOOCs) themselves—both for refugees and for average learners.
+But it's still early days and there are signs of hope. In 2015, a joint study found 72% of people taking the MOOCs saw career benefits afterwards.
+51. Why is the U.S. State Department launching an online learning program for refugees?
+A) To enable them to settle down in host countries.
+B) To allow them to learn as many job skills as possible.
+C) To offer them a platform to pursue advanced degrees.
+D) To help them to meet new employment standards.
+52. What do we know about "Coursera for Refugees"?
+A) It provides refugees with a wide range of courses free of charge.
+B) It offers free online data services for refugees around the world.
+C) It allows refugees to obtain degrees in various academic fields.
+D) It supplies refugees with a great variety of job opportunities.
+53. What does the passage say is a consequence of the global migrant crisis?
+A) Instability increases in host countries.	C) A lot more refugees die during migration.
+B) The global economic crisis intensifies.	D) Refugees find it more difficult to get a job.
+54. What does the author say causes refugees' difficulty in taking online courses?
+A) Cultural environment.	C) Lack of language skills.
+B) Changed academic requirements.	D) Difference in teaching platforms.
+55. What did the joint study find about the MOOCs several years ago?
+A) They helped solve learners' financial problems.
+B) They benefited most of the learners.
+C) They changed some learners' career path.
+D) They provided the most needed vocational skills.
+
+Part IV   Translation                      (30 minutes)
+Directions: For this part, you are allowed 30 minutes to translate a passage from Chinese into English. You should write your answer on Answer Sheet 2. 
+近年来,越来越多的年轻人喜爱各种形式的自助旅游。许多自助旅游者选择徒步或骑自行车出游。他们自己设计路线,自带帐篷、厨具以及其他必备的生活用品。在旅途中,自助旅游者经常能够发现一些新的美丽景点,但有时也会遇见意想不到的困难或突发事件。游客在旅行中拥抱自然、欣赏美景,同时也增强了自己克服困难的勇气和野外生存的能力。

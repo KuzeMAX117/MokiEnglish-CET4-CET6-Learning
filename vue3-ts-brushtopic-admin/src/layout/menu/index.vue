@@ -31,7 +31,7 @@ onMounted(() => {
   userStore.userInfo.menuList.forEach(item => {
     
     
-    const icon = item.icon ? () => h(AntIcons[item.icon]) : null;
+    const icon = item.icon ? () => h((AntIcons as any)[item.icon]) : null;
     let children = null;
     if (!item.children || item.children.length === 0) {
       children = null;
@@ -39,7 +39,7 @@ onMounted(() => {
       children = item.children.map(child => {
         
         
-        const icon = child.icon ? () => h(AntIcons[child.icon]) : null;
+        const icon = child.icon ? () => h((AntIcons as any)[child.icon]) : null;
         return {
           key: child.key,
           label: child.label,

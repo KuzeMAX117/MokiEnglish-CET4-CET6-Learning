@@ -29,6 +29,7 @@ import com.hao.topic.common.exception.TopicException;
 import com.hao.topic.common.security.utils.SecurityUtils;
 import com.hao.topic.model.dto.ai.AiHistoryDto;
 import com.hao.topic.model.dto.ai.ChatDto;
+import com.hao.topic.model.dto.ai.TranslationCorrectDto;
 import com.hao.topic.model.dto.ai.TtsDto;
 import com.hao.topic.model.dto.audit.TopicAudit;
 import com.hao.topic.model.dto.audit.TopicAuditCategory;
@@ -46,6 +47,7 @@ import com.hao.topic.model.entity.topic.TopicSubject;
 import com.hao.topic.model.vo.ai.AiHistoryContent;
 import com.hao.topic.model.vo.ai.AiHistoryListVo;
 import com.hao.topic.model.vo.ai.AiHistoryVo;
+import com.hao.topic.model.vo.ai.TranslationCorrectionVo;
 import com.hao.topic.model.vo.topic.TopicDataVo;
 import com.hao.topic.model.vo.topic.TopicSubjectVo;
 import lombok.extern.slf4j.Slf4j;
@@ -1138,5 +1140,434 @@ public class ModelServiceImpl implements ModelService {
             count = 0L;
         }
         return count;
+    }
+
+    
+
+    @Override
+    public String translateText(String text) {
+        if (text == null || text.isBlank()) {
+            return "";
+        }
+        String prompt = "请将以下英文文本翻译成中文，只返回翻译结果，不要任何解释或额外内容：\n" + text;
+        return this.chatClient.prompt()
+                .user(prompt)
+                .call()
+                .content();
+    }
+
+    
+
+    @Override
+    public TranslationCorrectionVo correctTranslation(TranslationCorrectDto dto) {
+        if (dto == null || CollectionUtils.isEmpty(dto.getItems())) {
+            throw new TopicException("批改内容不能为空");
+        }
+
+        // 人格设定已内置在 System Prompt 中（HaoTeacher 英语语法与翻译批改专家）
+        String systemPrompt = PromptConstant.TRANSLATION_CORRECT_SYSTEM;
+
+        // 逐句内容序列化为 JSON 数组，避免拼接歧义
+        String itemsJson = JSON.toJSONString(dto.getItems());
+        String userPrompt = PromptConstant.TRANSLATION_CORRECT_USER
+                .replace("{direction}", "cn2en".equals(dto.getDirection()) ? "中文翻译成英文" : "英文翻译成中文")
+                .replace("{level}", dto.getLevel() != null && dto.getLevel() == 6 ? "六级" : "四级")
+                .replace("{topic}", dto.getTopic() == null ? "" : dto.getTopic())
+                .replace("{items}", itemsJson);
+
+        log.info("翻译批改请求：direction={}, level={}, 句数={}",
+                dto.getDirection(), dto.getLevel(), dto.getItems().size());
+
+        String content = this.chatClient.prompt()
+                .system(systemPrompt)
+                .user(userPrompt)
+                .call()
+                .content();
+
+        log.debug("翻译批改 AI 原始返回: {}", content);
+
+        TranslationCorrectionVo vo = parseTranslationCorrection(content);
+        normalizeCorrection(vo, dto);
+        return vo;
+    }
+
+    /**
+     * 解析 AI 返回的批改 JSON，容错处理 markdown 代码块包裹等情况。
+     */
+    private TranslationCorrectionVo parseTranslationCorrection(String content) {
+        if (content == null || content.isBlank()) {
+            throw new TopicException("AI 批改服务暂无响应，请稍后重试");
+        }
+        String json = content.trim();
+        // 去除可能的 ```json ... ``` 包裹
+        if (json.startsWith("```")) {
+            int firstBreak = json.indexOf('\n');
+            if (firstBreak > 0) {
+                json = json.substring(firstBreak + 1);
+            }
+            int fenceEnd = json.lastIndexOf("```");
+            if (fenceEnd >= 0) {
+                json = json.substring(0, fenceEnd);
+            }
+            json = json.trim();
+        }
+        // 截取最外层 JSON 对象，防止 AI 携带额外说明文字
+        int start = json.indexOf('{');
+        int end = json.lastIndexOf('}');
+        if (start < 0 || end <= start) {
+            throw new TopicException("AI 批改结果格式异常，请重试");
+        }
+        try {
+            TranslationCorrectionVo vo = JSON.parseObject(json.substring(start, end + 1), TranslationCorrectionVo.class);
+            if (vo == null) {
+                throw new TopicException("AI 批改结果解析失败，请重试");
+            }
+            return vo;
+        } catch (TopicException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("翻译批改结果解析失败: {}", e.getMessage(), e);
+            throw new TopicException("AI 批改结果解析失败，请重试");
+        }
+    }
+
+    /**
+     * 归一化批改结果：
+     * 1. 以后端权威的档次原文映射强制校准 band/bandLabel/bandDescription，保证“档次原文严格原样引用”；
+     * 2. score 钳制到所属档次区间，多维度分钳制 0-5；
+     * 3. 漏译降档上限兜底 + 有效作答下限保护（语义相关的有效作答不得落 0 分档；整篇漏译/语义完全无关按大纲保留 0 分档）；
+     * 4. 以提交内容为准回填原文/译文/参考翻译，补齐缺失字段，防止 AI 幻觉篡改。
+     */
+    private void normalizeCorrection(TranslationCorrectionVo vo, TranslationCorrectDto dto) {
+        // 格式兜底：评分字段全缺失视为解析异常，提示重试，避免静默展示全 0 分
+        if (vo.getBand() == null && vo.getScore() == null && vo.getAccuracy() == null
+                && vo.getFluency() == null && vo.getGrammar() == null) {
+            throw new TopicException("AI 批改结果格式异常，请重试");
+        }
+        vo.setAccuracy(clampScore(vo.getAccuracy(), 5));
+        vo.setFluency(clampScore(vo.getFluency(), 5));
+        vo.setGrammar(clampScore(vo.getGrammar(), 5));
+        double rawScore = vo.getScore() == null ? 0D : Math.max(0, Math.min(vo.getScore(), 15));
+
+        // 档次校准：band 非法时按 score 推断
+        int band = normalizeBand(vo.getBand(), rawScore);
+        // 漏译降档兜底：按有效作答覆盖率强制压低档次上限，防止只译部分句子却拿高分
+        int total = dto.getItems().size();
+        int effective = 0;
+        for (TranslationCorrectDto.Item it : dto.getItems()) {
+            if (isEffectiveAnswer(it.getUserTranslation())) {
+                effective++;
+            }
+        }
+        double coverage = total == 0 ? 0D : (double) effective / total;
+        int coverageMaxBand = maxBandByCoverage(coverage);
+        if (band > coverageMaxBand) {
+            band = coverageMaxBand;
+            vo.setBandReason((vo.getBandReason() == null ? "" : vo.getBandReason())
+                    + String.format(" 【系统校准】有效作答 %d/%d 句（覆盖率 %.0f%%），按漏译降档规则档次上限为 %d 档，已下调。",
+                    effective, total, coverage * 100, coverageMaxBand));
+        }
+        // 下限保护：大纲 0 分档仅限“未作答；仅有孤立单词；译文与原文语义完全无关”；
+        // 部分作答且语义相关时不得被 AI 误判整体清零；coverage>0 时上限必 >=2，故直接提至 2 档
+        if (effective > 0 && band == 0) {
+            // 先用 AI 自己的逐句批改判断有效作答是否真的传达了原文语义：
+            // 若每个有效句都被判 serious 级漏译且核心信息点无 ok，属官方 0 分档“语义完全无关”，保留 0 分档
+            boolean conveysMeaning = false;
+            List<TranslationCorrectionVo.Detail> dlist = vo.getDetails();
+            for (int i = 0; i < dto.getItems().size() && !conveysMeaning; i++) {
+                if (!isEffectiveAnswer(dto.getItems().get(i).getUserTranslation())) {
+                    continue;
+                }
+                TranslationCorrectionVo.Detail d =
+                        (dlist != null && i < dlist.size()) ? dlist.get(i) : null;
+                if (d == null || d.getErrors() == null) {
+                    // 无逐句数据可依时不作无关推定，保留下限保护
+                    conveysMeaning = true;
+                    break;
+                }
+                boolean seriousOmission = false;
+                for (TranslationCorrectionVo.ErrorItem er : d.getErrors()) {
+                    if ("serious".equals(er.getSeverity()) && "omission".equals(er.getType())) {
+                        seriousOmission = true;
+                        break;
+                    }
+                }
+                if (!seriousOmission) {
+                    conveysMeaning = true;
+                }
+            }
+            if (!conveysMeaning && vo.getCoreInfoCheck() != null) {
+                for (TranslationCorrectionVo.CoreInfoItem info : vo.getCoreInfoCheck()) {
+                    if ("ok".equals(info.getStatus())) {
+                        conveysMeaning = true;
+                        break;
+                    }
+                }
+            }
+            if (!conveysMeaning) {
+                vo.setBandReason((vo.getBandReason() == null ? "" : vo.getBandReason())
+                        + String.format(" 【系统校准】有效作答 %d/%d 句经逐句批改均未传达原文核心信息（整篇漏译或语义完全无关），按大纲保留 0 分档。",
+                        effective, total));
+            } else {
+                band = 2;
+                // AI 的 0 分档判定连带其 0 分/0 维度分一并作废：分数与维度改由 AI 自己的逐句错误分级
+                // 聚合已译部分质量重定，避免“译句干净却只拿区间下限 1 分、维度全 1”的误伤
+                int clean = 0;
+                int minorOnly = 0;
+                for (int i = 0; i < dto.getItems().size(); i++) {
+                    if (!isEffectiveAnswer(dto.getItems().get(i).getUserTranslation())) {
+                        continue;
+                    }
+                    TranslationCorrectionVo.Detail d =
+                            (dlist != null && i < dlist.size()) ? dlist.get(i) : null;
+                    if (d == null || d.getErrors() == null) {
+                        continue;
+                    }
+                    int serious = 0;
+                    int minor = 0;
+                    for (TranslationCorrectionVo.ErrorItem er : d.getErrors()) {
+                        if ("serious".equals(er.getSeverity())) {
+                            serious++;
+                        } else {
+                            minor++;
+                        }
+                    }
+                    if (serious == 0 && minor == 0) {
+                        clean++;
+                    } else if (serious == 0) {
+                        minorOnly++;
+                    }
+                }
+                // 2 分档区间 [1,3] 内按已译部分质量取值：全部干净取上沿，仅轻微瑕取中，有严重错误取下沿
+                int qualityScore;
+                int langDim;
+                if (clean == effective) {
+                    qualityScore = 3;
+                    langDim = 4;
+                } else if (clean + minorOnly == effective) {
+                    qualityScore = 2;
+                    langDim = 3;
+                } else {
+                    qualityScore = 1;
+                    langDim = 2;
+                }
+                rawScore = qualityScore;
+                // 准确度按覆盖率折低（至少 1），流畅/语法如实反映已译句语言质量
+                vo.setAccuracy(Math.max(vo.getAccuracy(), Math.max(1D, Math.round(coverage * 5))));
+                vo.setFluency(Math.max(vo.getFluency(), (double) langDim));
+                vo.setGrammar(Math.max(vo.getGrammar(), (double) langDim));
+                vo.setBandReason((vo.getBandReason() == null ? "" : vo.getBandReason())
+                        + String.format(" 【系统校准】有效作答 %d/%d 句且语义相关，不属于未作答或译文完全无关情形，0 分档不适用，已提至 2 档下限；"
+                        + "分数与维度分按已译部分质量（%d 句无错误、%d 句仅轻微瑕）由逐句批改聚合重定。",
+                        effective, total, clean, minorOnly));
+            }
+        }
+        vo.setBand(band);
+        vo.setBandLabel(BAND_LABELS.get(band));
+        vo.setBandDescription(BAND_DESCRIPTIONS.get(band));
+        // score 必须落在该档次区间内，超出则钳制到区间边界
+        double[] range = BAND_RANGES.get(band);
+        vo.setScore(Math.max(range[0], Math.min(rawScore, range[1])));
+        // 维度分一致性兜底：档次非 0 却三维全 0 属自相矛盾（AI 误判 0 分档的连带产物），提至与档次相符的下限
+        if (band > 0 && vo.getAccuracy() == 0D && vo.getFluency() == 0D && vo.getGrammar() == 0D) {
+            vo.setAccuracy(1D);
+            vo.setFluency(1D);
+            vo.setGrammar(1D);
+        }
+
+        if (vo.getBandReason() == null) {
+            vo.setBandReason("");
+        }
+        if (vo.getLevelScene() == null) {
+            vo.setLevelScene("");
+        }
+        if (vo.getOverall() == null) {
+            vo.setOverall("");
+        }
+        if (vo.getCoreInfoCheck() == null) {
+            vo.setCoreInfoCheck(new ArrayList<>());
+        }
+        for (TranslationCorrectionVo.CoreInfoItem info : vo.getCoreInfoCheck()) {
+            if (info.getPoint() == null) {
+                info.setPoint("");
+            }
+            if (info.getNote() == null) {
+                info.setNote("");
+            }
+            String status = info.getStatus();
+            if (!"missing".equals(status) && !"wrong".equals(status)) {
+                info.setStatus("ok");
+            }
+        }
+        if (vo.getSelfCheckList() == null) {
+            vo.setSelfCheckList(new ArrayList<>());
+        }
+
+        List<TranslationCorrectDto.Item> items = dto.getItems();
+        List<TranslationCorrectionVo.Detail> details = vo.getDetails();
+        if (details == null) {
+            details = new ArrayList<>();
+            vo.setDetails(details);
+        }
+        for (int i = 0; i < items.size(); i++) {
+            TranslationCorrectDto.Item item = items.get(i);
+            TranslationCorrectionVo.Detail detail;
+            if (i < details.size() && details.get(i) != null) {
+                detail = details.get(i);
+            } else {
+                detail = new TranslationCorrectionVo.Detail();
+                details.add(detail);
+            }
+            // 原文类字段一律以提交内容为准
+            detail.setSource(item.getSource());
+            detail.setReference(item.getReference());
+            detail.setUserTranslation(item.getUserTranslation() == null || item.getUserTranslation().isBlank()
+                    ? "（未翻译）" : item.getUserTranslation());
+            if (detail.getCompleteness() == null) {
+                detail.setCompleteness("");
+            }
+            if (detail.getPolishedConservative() == null) {
+                detail.setPolishedConservative("");
+            }
+            if (detail.getPolishedAdvanced() == null) {
+                detail.setPolishedAdvanced("");
+            }
+            if (detail.getComment() == null) {
+                detail.setComment("");
+            }
+            if (detail.getErrors() == null) {
+                detail.setErrors(new ArrayList<>());
+            }
+            for (TranslationCorrectionVo.ErrorItem error : detail.getErrors()) {
+                error.setType(normalizeErrType(error.getType()));
+                // 分级：仅 serious/minor，非法值归为 minor
+                boolean serious = "serious".equals(error.getSeverity());
+                error.setSeverity(serious ? "serious" : "minor");
+                if (error.getExplanation() == null) {
+                    error.setExplanation("");
+                }
+                if (error.getSuggestion() == null) {
+                    error.setSuggestion("");
+                }
+                // 影响分析兼底：为空时按分级默认
+                if (error.getImpact() == null || error.getImpact().isBlank()) {
+                    error.setImpact(serious ? "会降档" : "仅小幅扣分，不影响档次");
+                }
+                // 错误片段必须是用户译文的子串，否则清空 errorText，避免前端高亮错位
+                if (error.getErrorText() != null && !error.getErrorText().isEmpty()
+                        && !detail.getUserTranslation().contains(error.getErrorText())) {
+                    error.setErrorText("");
+                }
+            }
+        }
+        // 多余的 details（AI 返回句数超出提交句数）直接丢弃
+        while (details.size() > items.size()) {
+            details.remove(details.size() - 1);
+        }
+    }
+
+    private Double clampScore(Double value, double max) {
+        if (value == null || value < 0) {
+            return 0D;
+        }
+        return Math.min(value, max);
+    }
+
+    /** 官方档次标签（后端权威校准，防止 AI 引用偏差） */
+    private static final Map<Integer, String> BAND_LABELS = Map.of(
+            14, "14分档（13–15分）",
+            11, "11分档（10–12分）",
+            8, "8分档（7–9分）",
+            5, "5分档（4–6分）",
+            2, "2分档（1–3分）",
+            0, "0分档（阅卷执行标准，非大纲正文）"
+    );
+
+    /** 官方档次描述原文（《考试大纲 2016 修订版》翻译评分标准） */
+    private static final Map<Integer, String> BAND_DESCRIPTIONS = Map.of(
+            14, "译文准确表达了原文的意思。译文流畅，结构清晰，用词贴切，基本无语言错误，仅有个别小错。",
+            11, "译文基本表达了原文的意思。结构较清晰，语言通顺，但有少量语言错误。",
+            8, "译文勉强表达了原文的意思。译文勉强连贯，语言错误相当多，其中有一些是严重错误。",
+            5, "译文仅表达了一小部分原文的意思。连贯性差，有相当多的严重语言错误。",
+            2, "译文支离破碎。除个别词语或句子，绝大部分文字没有表达原文意思。",
+            0, "未作答；仅有孤立单词；译文与原文语义完全无关。"
+    );
+
+    /** 各档次分数区间 [min, max]，用于校验 score 与 band 一致 */
+    private static final Map<Integer, double[]> BAND_RANGES = Map.of(
+            14, new double[]{13, 15},
+            11, new double[]{10, 12},
+            8, new double[]{7, 9},
+            5, new double[]{4, 6},
+            2, new double[]{1, 3},
+            0, new double[]{0, 0}
+    );
+
+    private static final Set<String> ERR_TYPES =
+            Set.of("spelling", "grammar", "word_choice", "expression", "omission", "completeness");
+
+    /**
+     * 校准档次：band 合法则用之，否则按总分推断最接近的档次。
+     */
+    private int normalizeBand(Integer band, double score) {
+        if (band != null && BAND_RANGES.containsKey(band)) {
+            return band;
+        }
+        if (score >= 13) {
+            return 14;
+        }
+        if (score >= 10) {
+            return 11;
+        }
+        if (score >= 7) {
+            return 8;
+        }
+        if (score >= 4) {
+            return 5;
+        }
+        if (score >= 1) {
+            return 2;
+        }
+        return 0;
+    }
+
+    private String normalizeErrType(String type) {
+        return type != null && ERR_TYPES.contains(type) ? type : "expression";
+    }
+
+    /**
+     * 判定是否为有效作答：排除空、单个字符、纯数字/符号等无意义输入（视为未作答）。
+     */
+    private boolean isEffectiveAnswer(String text) {
+        if (text == null) {
+            return false;
+        }
+        String t = text.trim();
+        if (t.length() < 2) {
+            return false;
+        }
+        return t.codePoints().anyMatch(Character::isLetter);
+    }
+
+    /**
+     * 按有效作答覆盖率给出档次上限（漏译降档硬规则）。
+     */
+    private int maxBandByCoverage(double coverage) {
+        if (coverage >= 0.99) {
+            return 14;
+        }
+        if (coverage >= 0.8) {
+            return 11;
+        }
+        if (coverage >= 0.6) {
+            return 8;
+        }
+        if (coverage >= 0.4) {
+            return 5;
+        }
+        if (coverage > 0) {
+            return 2;
+        }
+        return 0;
     }
 }

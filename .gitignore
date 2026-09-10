@@ -34,3 +34,7 @@ Thumbs.db
 # Env / secrets
 *.env
 application-local.yaml
+
+# 配置文件（含敏感信息，不上传）
+配置文件/common-config.yaml
+配置文件/common-minio-config.yaml

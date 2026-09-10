@@ -70,7 +70,7 @@
               <div class="msg-body ai-body">
                 <div class="ai-name">
                   <span class="ai-dot"></span>
-                  HaoAi
+                  CET备考 AI
                 </div>
                 <MarkdownView v-if="item.content" :content="item.content" />
                 <div v-else class="typing">
@@ -103,7 +103,7 @@
           </div>
           <a-empty
             v-if="!chatLoading && messageList.length <= 1"
-            description="我是 HaoAi，你的面试题 AI 助手，输入专题开始刷题吧"
+            description="我是 CET备考 AI 助手，可以帮你练习语法、翻译、写作等四六级内容"
             :image="false"
           />
         </a-spin>
@@ -179,16 +179,17 @@ const uuidv4 = () =>
 
 const userStore = useUserStore()
 
-const aiModeValue = ref(localStorage.getItem('aiMode') || 'system')
+const aiModeValue = ref(localStorage.getItem('aiMode') || 'grammar')
 const aiMode = reactive([
-  { label: '系统模式', value: 'system', desc: 'AI 从系统题库中随机提取题目，HaoAi 会校验你的回答' },
-  { label: '模型模式', value: 'model', desc: '完全使用 AI 生成的题目，HaoAi 会校验你的回答' },
-  { label: '混合模式', value: 'mix', desc: 'AI 随机混合系统题库和 AI 生成题目，HaoAi 会校验你的回答' },
+  { label: '语法练习', value: 'grammar', desc: 'AI 生成四六级语法练习题，帮你巩固语法基础' },
+  { label: '翻译练习', value: 'translate', desc: 'AI 生成中英语句翻译练习，提升翻译能力' },
+  { label: '自由问答', value: 'free', desc: '自由提问四六级备考相关问题' },
 ])
 
 const placeholder = computed(() => {
-  if (aiModeValue.value === 'system') return '请输入题目专题，AI 将自动生成题目'
-  return '请输入给 AI 你想刷的题目类型，AI 将自动生成题目'
+  if (aiModeValue.value === 'grammar') return '请输入想练习的语法点，如“虚拟语气”“定语从句”'
+  if (aiModeValue.value === 'translate') return '请输入想翻译的句子或段落'
+  return '请输入四六级备考相关问题'
 })
 
 const chatLoading = ref(false)
@@ -489,12 +490,11 @@ onMounted(() => {
 /* 左侧历史记录 */
 .history-panel {
   width: 260px;
-  background: rgba(18, 24, 40, 0.6);
-  backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
   border-radius: 16px;
   padding: 16px;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
@@ -504,27 +504,27 @@ onMounted(() => {
     justify-content: space-between;
     align-items: center;
     padding-bottom: 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    border-bottom: 1px solid var(--border);
     margin-bottom: 12px;
 
     .history-title {
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 15px;
+      font-size: calc(15px + var(--font-offset, 0px));
       font-weight: 600;
-      color: #e5eaf3;
+      color: var(--text-title);
 
       .title-icon {
-        color: #a78bfa;
+        color: var(--primary);
       }
     }
 
     .icon-btn {
-      color: #7c86a6;
+      color: var(--text-muted);
 
       &:hover {
-        color: #22d3ee;
+        color: var(--primary);
       }
     }
   }
@@ -534,15 +534,15 @@ onMounted(() => {
     overflow-y: auto;
 
     .history-date {
-      font-size: 12px;
-      color: #6b7693;
+      font-size: calc(12px + var(--font-offset, 0px));
+      color: var(--text-muted);
       margin: 12px 0 6px;
       letter-spacing: 0.5px;
     }
 
     .history-item {
-      font-size: 13px;
-      color: #c3cadf;
+      font-size: calc(13px + var(--font-offset, 0px));
+      color: var(--text-body);
       padding: 10px 12px;
       border-radius: 10px;
       margin-bottom: 6px;
@@ -559,24 +559,23 @@ onMounted(() => {
         width: 5px;
         height: 5px;
         border-radius: 50%;
-        background: #4b5678;
+        background: var(--text-muted);
         flex-shrink: 0;
         transition: all 0.2s;
       }
 
       &:hover {
-        background: rgba(255, 255, 255, 0.05);
-        color: #e5eaf3;
+        background: var(--primary-light);
+        color: var(--text-title);
       }
 
       &.active {
-        background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(34, 211, 238, 0.15));
-        color: #22d3ee;
-        border: 1px solid rgba(139, 92, 246, 0.35);
+        background: var(--primary-light);
+        color: var(--primary);
+        border: 1px solid var(--primary);
 
         .item-dot {
-          background: #22d3ee;
-          box-shadow: 0 0 6px #22d3ee;
+          background: var(--primary);
         }
       }
     }
@@ -586,11 +585,10 @@ onMounted(() => {
 /* 右侧对话区 */
 .chat-panel {
   flex: 1;
-  background: rgba(18, 24, 40, 0.6);
-  backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
   border-radius: 16px;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -600,37 +598,37 @@ onMounted(() => {
     justify-content: space-between;
     align-items: center;
     padding: 14px 24px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    border-bottom: 1px solid var(--border);
 
     .chat-title {
       display: flex;
       align-items: center;
       gap: 10px;
-      font-size: 15px;
+      font-size: calc(15px + var(--font-offset, 0px));
       font-weight: 600;
-      color: #e5eaf3;
+      color: var(--text-title);
       max-width: 60%;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
 
       .title-robot {
-        color: #a78bfa;
-        font-size: 18px;
+        color: var(--primary);
+        font-size: calc(18px + var(--font-offset, 0px));
       }
     }
 
     .chat-actions {
       .new-chat-btn {
-        border: 1px solid rgba(139, 92, 246, 0.4);
+        border: 1px solid var(--primary);
         border-radius: 10px;
-        color: #a78bfa;
-        background: rgba(139, 92, 246, 0.12);
+        color: var(--primary);
+        background: var(--primary-light);
 
         &:hover {
           color: #fff;
-          border-color: rgba(139, 92, 246, 0.6);
-          background: rgba(139, 92, 246, 0.25);
+          border-color: var(--primary-hover);
+          background: var(--primary);
         }
       }
     }
@@ -640,7 +638,7 @@ onMounted(() => {
     flex: 1;
     overflow-y: auto;
     padding: 24px;
-    background: rgba(0, 0, 0, 0.15);
+    background: var(--page-bg);
 
     .msg-group {
       margin-bottom: 20px;
@@ -654,9 +652,9 @@ onMounted(() => {
         justify-content: flex-end;
 
         .msg-body {
-          background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(34, 211, 238, 0.2));
-          color: #e5eaf3;
-          border: 1px solid rgba(139, 92, 246, 0.4);
+          background: var(--primary-light);
+          color: var(--text-title);
+          border: 1px solid var(--primary);
         }
       }
 
@@ -664,8 +662,8 @@ onMounted(() => {
         justify-content: flex-start;
 
         .msg-body {
-          background: rgba(255, 255, 255, 0.04);
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          background: var(--card-bg);
+          border: 1px solid var(--border);
         }
       }
 
@@ -674,11 +672,11 @@ onMounted(() => {
         margin: 0 10px;
 
         &.user-avatar {
-          background: linear-gradient(135deg, #8b5cf6, #22d3ee);
+          background: var(--primary);
         }
 
         &.ai-avatar {
-          background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+          background: var(--primary);
           font-weight: 700;
         }
       }
@@ -687,9 +685,9 @@ onMounted(() => {
         max-width: 72%;
         padding: 14px 18px;
         border-radius: 14px;
-        font-size: 14px;
+        font-size: calc(14px + var(--font-offset, 0px));
         line-height: 1.7;
-        color: #e5eaf3;
+        color: var(--text-title);
       }
 
       .ai-body {
@@ -697,8 +695,8 @@ onMounted(() => {
           display: flex;
           align-items: center;
           gap: 8px;
-          font-size: 12px;
-          color: #a78bfa;
+          font-size: calc(12px + var(--font-offset, 0px));
+          color: var(--primary);
           font-weight: 600;
           margin-bottom: 8px;
 
@@ -706,8 +704,7 @@ onMounted(() => {
             width: 6px;
             height: 6px;
             border-radius: 50%;
-            background: #22d3ee;
-            box-shadow: 0 0 6px #22d3ee;
+            background: var(--primary);
           }
         }
 
@@ -715,8 +712,8 @@ onMounted(() => {
           display: flex;
           align-items: center;
           gap: 8px;
-          color: #7c86a6;
-          font-size: 13px;
+          color: var(--text-muted);
+          font-size: calc(13px + var(--font-offset, 0px));
         }
 
         .msg-actions {
@@ -730,21 +727,21 @@ onMounted(() => {
 
   .chat-input {
     padding: 16px 24px;
-    border-top: 1px solid rgba(255, 255, 255, 0.07);
-    background: rgba(11, 15, 26, 0.5);
+    border-top: 1px solid var(--border);
+    background: var(--page-bg);
 
     .mode-buttons {
       margin-bottom: 12px;
 
       :deep(.ant-radio-button-wrapper) {
-        background: rgba(255, 255, 255, 0.04);
-        border-color: rgba(255, 255, 255, 0.1);
-        color: #9aa4bd;
+        background: var(--card-bg);
+        border-color: var(--border);
+        color: var(--text-body);
 
         &.ant-radio-button-wrapper-checked {
-          background: linear-gradient(135deg, rgba(139, 92, 246, 0.35), rgba(34, 211, 238, 0.25));
+          background: var(--primary);
           color: #fff;
-          border-color: rgba(139, 92, 246, 0.5);
+          border-color: var(--primary);
         }
       }
     }
@@ -755,15 +752,15 @@ onMounted(() => {
       align-items: flex-end;
 
       :deep(.ant-input) {
-        background: rgba(255, 255, 255, 0.05);
-        border-color: rgba(255, 255, 255, 0.12);
+        background: var(--card-bg);
+        border-color: var(--border);
         border-radius: 10px;
-        color: #e5eaf3;
+        color: var(--text-title);
 
         &:hover,
         &:focus {
-          border-color: rgba(139, 92, 246, 0.6);
-          box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.15);
+          border-color: var(--primary);
+          box-shadow: 0 0 0 2px var(--primary-light);
         }
       }
 
@@ -772,20 +769,20 @@ onMounted(() => {
         flex-shrink: 0;
         border: none;
         border-radius: 10px;
-        background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+        background: var(--primary);
         font-weight: 600;
 
         &:hover {
-          background: linear-gradient(135deg, #a78bfa, #22d3ee) !important;
+          background: var(--primary-hover) !important;
         }
 
         &:disabled {
-          background: rgba(255, 255, 255, 0.1);
-          color: #4b5678;
+          background: var(--card-bg);
+          color: var(--text-muted);
         }
 
         &.pause-btn {
-          background: rgba(239, 68, 68, 0.8);
+          background: var(--error);
         }
       }
     }
@@ -793,6 +790,6 @@ onMounted(() => {
 }
 
 :deep(.ant-empty-description) {
-  color: #7c86a6;
+  color: var(--text-muted);
 }
 </style>

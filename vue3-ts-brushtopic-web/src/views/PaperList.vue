@@ -127,7 +127,7 @@ onMounted(() => {
 <style scoped lang="scss">
 .paper-page {
   max-width: 960px;
-  margin: 0 auto;
+  margin: 0;
 }
 
 .back-bar {
@@ -135,16 +135,16 @@ onMounted(() => {
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  border-radius: 10px;
-  font-size: 14px;
-  color: #9aa4bd;
+  border-radius: var(--radius-sm);
+  font-size: calc(14px + var(--font-offset, 0px));
+  color: var(--text-muted);
   cursor: pointer;
   transition: all 0.25s;
   margin-bottom: 16px;
 
   &:hover {
-    color: #22d3ee;
-    background: rgba(255, 255, 255, 0.06);
+    color: var(--primary);
+    background: var(--primary-light);
   }
 }
 
@@ -155,25 +155,25 @@ onMounted(() => {
 
   .level-tab {
     padding: 10px 28px;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(18, 24, 40, 0.6);
-    color: #9aa4bd;
-    font-size: 15px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--page-bg);
+    color: var(--text-muted);
+    font-size: calc(15px + var(--font-offset, 0px));
     font-weight: 600;
     cursor: pointer;
     transition: all 0.25s;
 
     &:hover {
-      border-color: rgba(139, 92, 246, 0.5);
-      color: #e5eaf3;
+      border-color: rgba(66, 87, 178, 0.35);
+      color: var(--text-title);
     }
 
     &.active {
-      background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(34, 211, 238, 0.25));
-      border-color: rgba(139, 92, 246, 0.6);
-      color: #fff;
-      box-shadow: 0 0 18px rgba(139, 92, 246, 0.35);
+      background: var(--primary-light);
+      border-color: var(--primary);
+      color: var(--primary);
+      box-shadow: var(--shadow-card);
     }
   }
 }
@@ -191,7 +191,7 @@ onMounted(() => {
       top: 24px;
       bottom: 0;
       width: 2px;
-      background: linear-gradient(180deg, rgba(139, 92, 246, 0.6), rgba(34, 211, 238, 0.15));
+      background: linear-gradient(180deg, var(--primary), rgba(66, 87, 178, 0.1));
       border-radius: 1px;
     }
   }
@@ -208,14 +208,14 @@ onMounted(() => {
       width: 12px;
       height: 12px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #8b5cf6, #22d3ee);
-      box-shadow: 0 0 12px rgba(139, 92, 246, 0.8);
+      background: var(--primary);
+      box-shadow: 0 0 0 4px rgba(66, 87, 178, 0.15);
     }
 
     .node-year {
-      font-size: 20px;
+      font-size: calc(20px + var(--font-offset, 0px));
       font-weight: 700;
-      color: #e5eaf3;
+      color: var(--text-title);
     }
   }
 
@@ -230,24 +230,24 @@ onMounted(() => {
 .paper-card {
   width: 100%;
   max-width: 420px;
-  background: rgba(18, 24, 40, 0.6);
-  backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
+  background: var(--page-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
   padding: 20px 24px;
   cursor: pointer;
   transition: all 0.25s;
+  box-shadow: var(--shadow-card);
 
   &:hover {
-    border-color: rgba(139, 92, 246, 0.5);
-    background: rgba(139, 92, 246, 0.08);
+    border-color: rgba(66, 87, 178, 0.4);
+    background: var(--primary-light);
     transform: translateY(-3px);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+    box-shadow: var(--shadow-hover);
   }
 
   .paper-half {
-    font-size: 12px;
-    color: #a78bfa;
+    font-size: calc(12px + var(--font-offset, 0px));
+    color: var(--primary);
     display: flex;
     align-items: center;
     gap: 6px;
@@ -255,17 +255,17 @@ onMounted(() => {
   }
 
   .paper-title {
-    font-size: 16px;
+    font-size: calc(16px + var(--font-offset, 0px));
     font-weight: 600;
-    color: #e5eaf3;
+    color: var(--text-title);
     margin-bottom: 12px;
   }
 
   .paper-meta {
     display: flex;
     gap: 16px;
-    font-size: 13px;
-    color: #7c86a6;
+    font-size: calc(13px + var(--font-offset, 0px));
+    color: var(--text-muted);
     margin-bottom: 12px;
 
     .meta-item {
@@ -275,7 +275,7 @@ onMounted(() => {
     }
 
     .done {
-      color: #34d399;
+      color: var(--success);
     }
   }
 
@@ -289,36 +289,37 @@ onMounted(() => {
       flex: 1;
       height: 6px;
       border-radius: 3px;
-      background: rgba(255, 255, 255, 0.08);
+      background: var(--card-bg);
       overflow: hidden;
     }
 
     .progress-inner {
       height: 100%;
       border-radius: 3px;
-      background: linear-gradient(90deg, #8b5cf6, #22d3ee);
+      background: var(--primary);
       transition: width 0.4s;
     }
 
     .percent {
-      font-size: 12px;
-      color: #9aa4bd;
+      font-size: calc(12px + var(--font-offset, 0px));
+      color: var(--text-muted);
       width: 36px;
       text-align: right;
     }
   }
 
   .paper-go {
-    font-size: 13px;
-    color: #22d3ee;
+    font-size: calc(13px + var(--font-offset, 0px));
+    color: var(--primary);
     display: flex;
     align-items: center;
     gap: 6px;
+    font-weight: 600;
   }
 }
 
 :deep(.ant-empty-description) {
-  color: #7c86a6;
+  color: var(--text-muted);
   padding: 20px 0;
 }
 </style>

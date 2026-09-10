@@ -166,21 +166,20 @@ onMounted(() => fetchData(1))
     align-items: center;
     justify-content: center;
     gap: 12px;
-    font-size: 28px;
+    font-size: calc(28px + var(--font-offset, 0px));
     font-weight: 800;
-    color: #e5eaf3;
+    color: var(--text-title);
 
     .head-icon {
-      font-size: 30px;
-      color: #fbbf24;
-      filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.6));
+      font-size: calc(30px + var(--font-offset, 0px));
+      color: var(--warning);
     }
   }
 
   .head-sub {
     margin-top: 8px;
-    font-size: 14px;
-    color: #7c86a6;
+    font-size: calc(14px + var(--font-offset, 0px));
+    color: var(--text-muted);
     letter-spacing: 1px;
   }
 }
@@ -192,24 +191,23 @@ onMounted(() => fetchData(1))
 
   .tab-pill {
     display: flex;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--card-bg);
+    border: 1px solid var(--border);
     padding: 4px;
     border-radius: 26px;
 
     .tab-btn {
       padding: 9px 40px;
       border-radius: 22px;
-      font-size: 14px;
-      color: #9aa4bd;
+      font-size: calc(14px + var(--font-offset, 0px));
+      color: var(--text-body);
       cursor: pointer;
       transition: all 0.25s;
 
       &.active {
-        background: linear-gradient(135deg, rgba(139, 92, 246, 0.35), rgba(34, 211, 238, 0.25));
+        background: var(--primary);
         color: #fff;
         font-weight: 600;
-        box-shadow: inset 0 0 0 1px rgba(139, 92, 246, 0.45);
       }
     }
   }
@@ -236,7 +234,7 @@ onMounted(() => fetchData(1))
     position: relative;
 
     .crown {
-      font-size: 30px;
+      font-size: calc(30px + var(--font-offset, 0px));
       margin-bottom: 6px;
       animation: float 3s infinite ease-in-out;
     }
@@ -253,7 +251,7 @@ onMounted(() => fetchData(1))
         height: 30px;
         border-radius: 50%;
         color: #fff;
-        font-size: 15px;
+        font-size: calc(15px + var(--font-offset, 0px));
         font-weight: 800;
         display: flex;
         align-items: center;
@@ -277,14 +275,13 @@ onMounted(() => fetchData(1))
     }
 
     .avatar-fallback {
-      background: linear-gradient(135deg, #8b5cf6, #22d3ee);
-      font-size: 22px;
+      background: var(--primary);
+      font-size: calc(22px + var(--font-offset, 0px));
       font-weight: 700;
-      border: 3px solid rgba(255, 255, 255, 0.15);
-      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+      border: 3px solid var(--border);
 
       &.gold-fb {
-        font-size: 32px;
+        font-size: calc(32px + var(--font-offset, 0px));
         background: linear-gradient(135deg, #fbbf24, #f59e0b);
         color: #7c4b00;
         box-shadow: 0 0 36px rgba(251, 191, 36, 0.55);
@@ -300,8 +297,8 @@ onMounted(() => fetchData(1))
     }
 
     .nickname {
-      font-size: 14px;
-      color: #c3cadf;
+      font-size: calc(14px + var(--font-offset, 0px));
+      color: var(--text-body);
       margin-top: 14px;
       max-width: 160px;
       overflow: hidden;
@@ -309,25 +306,25 @@ onMounted(() => fetchData(1))
       white-space: nowrap;
 
       &.main {
-        font-size: 17px;
+        font-size: calc(17px + var(--font-offset, 0px));
         font-weight: 700;
-        color: #fff;
+        color: var(--text-title);
       }
     }
 
     .score-tag {
       margin-top: 8px;
       padding: 3px 18px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: var(--card-bg);
+      border: 1px solid var(--border);
       border-radius: 14px;
-      font-size: 13px;
-      color: #9aa4bd;
+      font-size: calc(13px + var(--font-offset, 0px));
+      color: var(--text-muted);
 
       &.main {
-        background: linear-gradient(135deg, rgba(251, 191, 36, 0.25), rgba(245, 158, 11, 0.15));
-        border-color: rgba(251, 191, 36, 0.5);
-        color: #fbbf24;
+        background: var(--warning-light);
+        border-color: var(--warning);
+        color: var(--warning);
         font-weight: 600;
       }
     }
@@ -347,19 +344,18 @@ onMounted(() => fetchData(1))
 .rank-list-card {
   max-width: 1000px;
   margin: 0 auto;
-  background: rgba(18, 24, 40, 0.6);
-  backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
   border-radius: 16px;
   padding: 8px 32px;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--shadow-card);
 
   .list-head {
     display: flex;
     padding: 12px 0 8px;
-    font-size: 12px;
-    color: #6b7693;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: calc(12px + var(--font-offset, 0px));
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
     letter-spacing: 1px;
 
     span:nth-child(1) {
@@ -381,7 +377,7 @@ onMounted(() => fetchData(1))
     display: flex;
     align-items: center;
     padding: 15px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--border);
     transition: background 0.25s;
 
     &:last-child {
@@ -389,13 +385,13 @@ onMounted(() => fetchData(1))
     }
 
     &:hover {
-      background: rgba(139, 92, 246, 0.06);
+      background: var(--primary-light);
     }
 
     .rank-index {
       width: 44px;
-      font-size: 18px;
-      color: #7c86a6;
+      font-size: calc(18px + var(--font-offset, 0px));
+      color: var(--text-muted);
       font-style: italic;
       font-weight: 700;
       text-align: center;
@@ -408,13 +404,13 @@ onMounted(() => fetchData(1))
       gap: 12px;
 
       .avatar-fallback {
-        background: linear-gradient(135deg, #8b5cf6, #22d3ee);
+        background: var(--primary);
       }
 
       .u-name {
-        font-size: 14px;
+        font-size: calc(14px + var(--font-offset, 0px));
         font-weight: 500;
-        color: #e5eaf3;
+        color: var(--text-title);
       }
     }
 
@@ -423,12 +419,9 @@ onMounted(() => fetchData(1))
       text-align: right;
 
       .val {
-        font-size: 19px;
+        font-size: calc(19px + var(--font-offset, 0px));
         font-weight: 700;
-        background: linear-gradient(90deg, #a78bfa, #22d3ee);
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
+        color: var(--primary);
       }
     }
   }
@@ -443,39 +436,38 @@ onMounted(() => fetchData(1))
   padding: 8px 0 0;
 
   .my-card {
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(34, 211, 238, 0.8));
+    background: var(--primary);
     border-radius: 16px;
     padding: 16px 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 12px 40px rgba(139, 92, 246, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: var(--shadow-card);
+    border: 1px solid var(--border);
 
     .my-left {
       display: flex;
       align-items: center;
 
       .my-no {
-        font-size: 26px;
+        font-size: calc(26px + var(--font-offset, 0px));
         color: #fff;
         font-weight: 800;
         font-style: italic;
         margin-right: 16px;
-        text-shadow: 0 0 14px rgba(255, 255, 255, 0.5);
       }
 
       .my-info {
         margin-left: 12px;
 
         .my-name {
-          font-size: 15px;
+          font-size: calc(15px + var(--font-offset, 0px));
           color: #fff;
           font-weight: 600;
         }
 
         .my-label {
-          font-size: 12px;
+          font-size: calc(12px + var(--font-offset, 0px));
           color: rgba(255, 255, 255, 0.85);
           margin-top: 2px;
         }
@@ -486,12 +478,12 @@ onMounted(() => fetchData(1))
       color: #fff;
 
       .my-val {
-        font-size: 28px;
+        font-size: calc(28px + var(--font-offset, 0px));
         font-weight: 800;
       }
 
       .my-unit {
-        font-size: 13px;
+        font-size: calc(13px + var(--font-offset, 0px));
         margin-left: 2px;
         opacity: 0.85;
       }
@@ -500,6 +492,6 @@ onMounted(() => fetchData(1))
 }
 
 :deep(.ant-empty-description) {
-  color: #7c86a6;
+  color: var(--text-muted);
 }
 </style>

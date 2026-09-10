@@ -107,6 +107,21 @@ export const constantRoute = [
         meta: {
           title: '专题管理',
         },
+      },
+      {
+        path: '/topic/paper',
+        component: () => import('@/views/topic/paper/index.vue'),
+        meta: {
+          title: '试卷管理',
+        },
+      },
+      {
+        path: '/topic/paper/editor/:id',
+        component: () => import('@/views/topic/paper/editor.vue'),
+        meta: {
+          title: '试卷编辑',
+          hidden: true,
+        },
       }
     ]
   },
