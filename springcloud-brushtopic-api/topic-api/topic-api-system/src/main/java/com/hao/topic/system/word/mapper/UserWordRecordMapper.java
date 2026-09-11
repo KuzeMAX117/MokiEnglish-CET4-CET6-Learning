@@ -52,20 +52,4 @@ public interface UserWordRecordMapper extends BaseMapper<UserWordRecord> {
             "AND last_study_time >= #{startDate} " +
             "GROUP BY DATE(last_study_time)")
     List<Map<String, Object>> selectDailyCounts(@Param("userId") Long userId, @Param("startDate") String startDate);
-
-    @Select("SELECT user_id AS userId, COUNT(*) AS scope " +
-            "FROM user_word_record " +
-            "WHERE is_deleted = 0 AND DATE(last_study_time) = CURDATE() " +
-            "GROUP BY user_id " +
-            "ORDER BY scope DESC " +
-            "LIMIT 100")
-    List<Map<String, Object>> getTodayWordRank();
-
-    @Select("SELECT user_id AS userId, COUNT(*) AS scope " +
-            "FROM user_word_record " +
-            "WHERE is_deleted = 0 AND status != 0 " +
-            "GROUP BY user_id " +
-            "ORDER BY scope DESC " +
-            "LIMIT 100")
-    List<Map<String, Object>> getTotalWordRank();
 }

@@ -1,4 +1,247 @@
-  <script setup lang="ts">
+<template>
+  <div class="exam-page" :style="examPageStyle">
+    <div v-if="loading" class="loading-wrap">
+      <a-spin size="large" />
+    </div>
+    <div v-else-if="paperDetail" class="exam-layout">
+      <!-- 试卷头部 -->
+      <div class="exam-head">
+        <div class="back-bar" @click="router.back()">
+          <LeftOutlined />
+          <span>返回</span>
+        </div>
+        <div class="exam-title">
+          <FileTextOutlined class="title-icon" />
+          {{ paperDetail.title }}
+        </div>
+        <div class="exam-head-actions">
+          <a-popover
+            v-if="revealedAll && scoreList.length"
+            trigger="click"
+            placement="bottomRight"
+            overlay-class-name="score-popover-overlay"
+          >
+            <template #content>
+              <div class="score-panel">
+                <div class="score-header-row">
+                  <span class="score-panel-title">各板块得分</span>
+                  <span class="score-total">{{ totalEarnedScore }} / {{ totalMaxScore }}分</span>
+                </div>
+                <div v-for="s in scoreList" :key="s.name" class="score-row">
+                  <span class="score-name">{{ s.name }}</span>
+                  <span class="score-detail">
+                    <span class="score-correct" :class="{ full: s.correct === s.total && s.total > 0 }">{{ s.correct }}/{{ s.total }}</span>
+                    <span class="score-pts">{{ s.earnedScore }}/{{ s.maxScore }}分</span>
+                  </span>
+                  <div class="score-bar-bg">
+                    <div class="score-bar-fill" :style="{ width: s.maxScore > 0 ? (s.earnedScore / s.maxScore * 100) + '%' : '0%' }" :class="{ full: s.correct === s.total && s.total > 0 }" />
+                  </div>
+                </div>
+              </div>
+            </template>
+            <a-button class="score-btn" size="small">{{ totalEarnedScore }}分</a-button>
+          </a-popover>
+          <a-button type="primary" size="small" :disabled="revealedAll" @click="checkAnswers">
+            <CheckOutlined />
+            {{ checkBtnText }}
+          </a-button>
+          <a-button size="small" :disabled="revealedAll" @click="revealAllAnswers">
+            <ThunderboltOutlined />
+            一键对全部
+          </a-button>
+          <a-button size="small" danger :disabled="resetting" @click="resetAnswers">
+            <ReloadOutlined />
+            重置答案
+          </a-button>
+        </div>
+        <div class="exam-progress">
+          已做 {{ answeredCount }}/{{ flatTopics.length }}
+          <span class="dot">·</span>
+          正确 {{ correctCount }}
+        </div>
+        <a-popover
+          trigger="click"
+          placement="bottomRight"
+          overlay-class-name="settings-popover-overlay"
+          v-model:open="settingsVisible"
+        >
+          <template #content>
+            <div class="settings-panel">
+              <div class="settings-title">显示设置</div>
+              <div class="settings-section">
+                <div class="settings-label">背景色</div>
+                <div class="color-options">
+                  <div
+                    v-for="c in bgOptions"
+                    :key="c.value"
+                    class="color-swatch"
+                    :class="{ active: displaySettings.bgColor === c.value }"
+                    :style="c.value === 'default' ? { background: c.preview, border: '1px dashed var(--border)' } : { background: c.preview }"
+                    :title="c.name"
+                    @click="displaySettings.bgColor = c.value"
+                  />
+                </div>
+              </div>
+              <div class="settings-section">
+                <div class="settings-label">字体大小</div>
+                <div class="font-size-control">
+                  <a-button size="small" @click="changeFontSize(-1)">A-</a-button>
+                  <span class="font-size-value">{{ displaySettings.fontSize }}px</span>
+                  <a-button size="small" @click="changeFontSize(1)">A+</a-button>
+                </div>
+                <div class="font-size-presets">
+                  <span
+                    v-for="p in fontSizePresets"
+                    :key="p"
+                    class="preset-tag"
+                    :class="{ active: displaySettings.fontSize === p }"
+                    @click="displaySettings.fontSize = p"
+                  >{{ p }}px</span>
+                </div>
+              </div>
+              <div class="settings-footer">
+                <a-button size="small" type="link" @click="resetDisplaySettings">重置默认</a-button>
+              </div>
+            </div>
+          </template>
+          <div class="settings-btn" :class="{ active: settingsVisible }">
+            <SettingOutlined />
+          </div>
+        </a-popover>
+      </div>
+
+      <!-- Section 标签导航 -->
+      <div class="section-tabs">
+        <div
+          v-for="(sec, idx) in paperDetail.sections"
+          :key="idx"
+          class="section-tab"
+          :class="{ active: currentSectionIndex === idx }"
+          @click="switchSection(idx)"
+        >
+          <span class="tab-label">{{ sectionDisplayName(sec) }}</span>
+          <span v-if="sectionProgress(sec) > 0" class="tab-badge">
+            {{ sectionProgress(sec) }}/{{ sec.topics.length }}
+          </span>
+        </div>
+      </div>
+
+      <!-- 主内容区域：左右分栏 -->
+      <div v-if="currentSection" class="exam-body">
+        <!-- 左侧：文章/原文（仅在有文章时显示） -->
+        <div v-if="currentArticle" class="article-panel" :class="{ expanded: !showQuestions }">
+          <div class="article-header">
+            <span class="article-badge">{{ sectionDisplayName(currentSection) }}</span>
+            <span v-if="currentArticle" class="article-title">文章原文</span>
+            <span v-else class="article-title">题目内容</span>
+          </div>
+          <div class="article-content">
+            <div class="article-text" v-html="formatArticle(currentArticle)" />
+          </div>
+        </div>
+
+        <!-- 右侧：题目面板（可收起） -->
+        <div class="question-panel" :class="{ collapsed: !showQuestions }">
+          <!-- 收起/展开按钮 -->
+          <div class="panel-toggle" @click="toggleQuestions">
+            <template v-if="showQuestions">
+              <RightOutlined />
+              <span>收起</span>
+            </template>
+            <template v-else>
+              <LeftOutlined />
+              <span>展开题目</span>
+            </template>
+          </div>
+
+          <div v-show="showQuestions" class="question-inner">
+            <div class="question-scroll">
+              <div
+                v-for="(topic, tIdx) in currentSection.topics"
+                :key="topic.topicId"
+                class="question-card"
+                :class="{ active: currentTopicIndex === tIdx }"
+                @click="currentTopicIndex = tIdx"
+              >
+                <div class="question-tag">
+                  <span class="question-no">第 {{ topic.sorted }} 题</span>
+                  <CheckCircleOutlined v-if="answers.has(topic.topicId) && answers.get(topic.topicId)" class="status-icon correct" />
+                  <CloseCircleOutlined v-else-if="answers.has(topic.topicId) && !answers.get(topic.topicId)" class="status-icon wrong" />
+                  <span v-else-if="selections.has(topic.topicId)" class="answered-tag">已作答</span>
+                </div>
+                <div class="question-name">{{ topic.topicName }}</div>
+
+                <!-- 选项列表 -->
+                <div v-if="getOptions(topic).length > 0" class="option-list">
+                  <div
+                    v-for="opt in getOptions(topic)"
+                    :key="opt.label"
+                    class="option-item"
+                    :class="optionClass(topic, opt.label)"
+                    @click.stop="selectOption(topic, opt.label)"
+                  >
+                    <span class="option-label">{{ opt.label }}</span>
+                    <span class="option-content">{{ opt.content }}</span>
+                    <CheckOutlined
+                      v-if="getResultState(topic) === 'correct' && getResult(topic)?.correctOption === opt.label"
+                      class="opt-mark correct"
+                    />
+                    <CloseOutlined
+                      v-if="getResultState(topic) === 'wrong' && getResult(topic)?.selected === opt.label"
+                      class="opt-mark wrong"
+                    />
+                    <CheckOutlined
+                      v-if="revealedIds.has(topic.topicId) && getResultState(topic) === 'none' && topic.correctOption === opt.label"
+                      class="opt-mark reveal-correct"
+                    />
+                  </div>
+                </div>
+
+                <!-- 解析 -->
+                <div v-if="getResultState(topic) !== 'none'" class="analysis-box" :class="getResultState(topic)">
+                  <div class="analysis-title">
+                    <CheckCircleOutlined v-if="getResultState(topic) === 'correct'" />
+                    <CloseCircleOutlined v-else />
+                    {{ getResultState(topic) === 'correct' ? '回答正确' : `回答错误，正确答案是 ${getResult(topic)?.correctOption}` }}
+                  </div>
+                  <div v-if="getResult(topic)?.analysis" class="analysis-content">{{ getResult(topic).analysis }}</div>
+                </div>
+
+                <!-- 对答案模式（未作答的题目） -->
+                <div v-if="revealedIds.has(topic.topicId) && getResultState(topic) === 'none'" class="reveal-box">
+                  <template v-if="topic.correctOption">
+                    <div class="reveal-answer">
+                      <span class="reveal-label">正确答案:</span>
+                      <span class="reveal-value">{{ topic.correctOption }}</span>
+                    </div>
+                    <div v-if="topic.analysis" class="reveal-analysis">{{ topic.analysis }}</div>
+                  </template>
+                  <div v-else class="reveal-empty">暂无参考答案</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 底部导航 -->
+            <div class="section-nav">
+              <a-button :disabled="currentSectionIndex <= 0" @click="prevSection">
+                <LeftOutlined /> 上一部分
+              </a-button>
+              <a-button
+                type="primary"
+                :disabled="currentSectionIndex >= (paperDetail?.sections?.length || 1) - 1"
+                @click="nextSection"
+              >
+                下一部分 <RightOutlined />
+              </a-button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message, Modal } from 'ant-design-vue'
@@ -96,35 +339,6 @@ const sectionDisplayName = (sec: PaperSection) => {
 
 const currentSection = computed(() => paperDetail.value?.sections?.[currentSectionIndex.value])
 
-const CLOZE_BANK_MARKER = '__CLOZE_WORD_BANK__'
-
-const isCloze = computed(() => currentSection.value?.subSection === 'cloze')
-
-/** 选词填空：词库选项 */
-const clozeWordBank = computed(() => {
-  if (!isCloze.value || !currentSection.value) return []
-  const bankTopic = currentSection.value.topics.find((t: PaperTopicItem) => t.topicName === CLOZE_BANK_MARKER)
-  return bankTopic ? getOptions(bankTopic) : []
-})
-
-/** 选词填空：空位题目（排除词库标记） */
-const clozeBlanks = computed(() => {
-  if (!isCloze.value || !currentSection.value) return []
-  return currentSection.value.topics.filter((t: PaperTopicItem) => t.topicName !== CLOZE_BANK_MARKER)
-})
-
-/** 当前板块第一题的全卷题号起点 */
-const startNo = computed(() => {
-  let n = 0
-  for (let i = 0; i < currentSectionIndex.value; i++) {
-    const sec = paperDetail.value?.sections[i]
-    n += sec?.topics.length || 0
-  }
-  // 选词填空减去词库标记的 topic
-  if (isCloze.value) n--
-  return n
-  })
-
 const currentArticle = computed(() => {
   if (!currentSection.value) return ''
   const topics = currentSection.value.topics
@@ -203,13 +417,6 @@ const getOptions = (topic: PaperTopicItem): PaperOption[] => {
     return []
   }
 }
-
-/** 根据标签字母查找词库中的单词 */
-const getWordByLabel = (label: string | undefined): string => {
-  if (!label) return ''
-  const w = clozeWordBank.value.find(w => w.label === label.toUpperCase())
-  return w ? w.content : ''
-  }
 
 // 需要对答案的选择题（写作/翻译等无选项的题目不计入）
 const answerableTopics = computed(() =>
@@ -384,369 +591,6 @@ onMounted(() => {
   loadExam(Number(route.params.id))
 })
 </script>
-
-<template>
-  <div class="exam-page" :style="examPageStyle">
-    <div v-if="loading" class="loading-wrap">
-      <a-spin size="large" />
-    </div>
-    <div v-else-if="paperDetail" class="exam-layout">
-      <!-- 试卷头部 -->
-      <div class="exam-head">
-        <div class="back-bar" @click="router.back()">
-          <LeftOutlined />
-          <span>返回</span>
-        </div>
-        <div class="exam-title">
-          <FileTextOutlined class="title-icon" />
-          {{ paperDetail.title }}
-        </div>
-        <div class="exam-head-actions">
-          <a-popover
-            v-if="revealedAll && scoreList.length"
-            trigger="click"
-            placement="bottomRight"
-            overlay-class-name="score-popover-overlay"
-          >
-            <template #content>
-              <div class="score-panel">
-                <div class="score-header-row">
-                  <span class="score-panel-title">各板块得分</span>
-                  <span class="score-total">{{ totalEarnedScore }} / {{ totalMaxScore }}分</span>
-                </div>
-                <div v-for="s in scoreList" :key="s.name" class="score-row">
-                  <span class="score-name">{{ s.name }}</span>
-                  <span class="score-detail">
-                    <span class="score-correct" :class="{ full: s.correct === s.total && s.total > 0 }">{{ s.correct }}/{{ s.total }}</span>
-                    <span class="score-pts">{{ s.earnedScore }}/{{ s.maxScore }}分</span>
-                  </span>
-                  <div class="score-bar-bg">
-                    <div class="score-bar-fill" :style="{ width: s.maxScore > 0 ? (s.earnedScore / s.maxScore * 100) + '%' : '0%' }" :class="{ full: s.correct === s.total && s.total > 0 }" />
-                  </div>
-                </div>
-              </div>
-            </template>
-            <a-button class="score-btn" size="small">{{ totalEarnedScore }}分</a-button>
-          </a-popover>
-          <a-button type="primary" size="small" :disabled="revealedAll" @click="checkAnswers">
-            <CheckOutlined />
-            {{ checkBtnText }}
-          </a-button>
-          <a-button size="small" :disabled="revealedAll" @click="revealAllAnswers">
-            <ThunderboltOutlined />
-            一键对全部
-          </a-button>
-          <a-button size="small" danger :disabled="resetting" @click="resetAnswers">
-            <ReloadOutlined />
-            重置答案
-          </a-button>
-        </div>
-        <div class="exam-progress">
-          已做 {{ answeredCount }}/{{ flatTopics.length }}
-          <span class="dot">·</span>
-          正确 {{ correctCount }}
-        </div>
-        <a-popover
-          trigger="click"
-          placement="bottomRight"
-          overlay-class-name="settings-popover-overlay"
-          v-model:open="settingsVisible"
-        >
-          <template #content>
-            <div class="settings-panel">
-              <div class="settings-title">显示设置</div>
-              <div class="settings-section">
-                <div class="settings-label">背景色</div>
-                <div class="color-options">
-                  <div
-                    v-for="c in bgOptions"
-                    :key="c.value"
-                    class="color-swatch"
-                    :class="{ active: displaySettings.bgColor === c.value }"
-                    :style="c.value === 'default' ? { background: c.preview, border: '1px dashed var(--border)' } : { background: c.preview }"
-                    :title="c.name"
-                    @click="displaySettings.bgColor = c.value"
-                  />
-                </div>
-              </div>
-              <div class="settings-section">
-                <div class="settings-label">字体大小</div>
-                <div class="font-size-control">
-                  <a-button size="small" @click="changeFontSize(-1)">A-</a-button>
-                  <span class="font-size-value">{{ displaySettings.fontSize }}px</span>
-                  <a-button size="small" @click="changeFontSize(1)">A+</a-button>
-                </div>
-                <div class="font-size-presets">
-                  <span
-                    v-for="p in fontSizePresets"
-                    :key="p"
-                    class="preset-tag"
-                    :class="{ active: displaySettings.fontSize === p }"
-                    @click="displaySettings.fontSize = p"
-                  >{{ p }}px</span>
-                </div>
-              </div>
-              <div class="settings-footer">
-                <a-button size="small" type="link" @click="resetDisplaySettings">重置默认</a-button>
-              </div>
-            </div>
-          </template>
-          <div class="settings-btn" :class="{ active: settingsVisible }">
-            <SettingOutlined />
-          </div>
-        </a-popover>
-      </div>
-
-      <!-- Section 标签导航 -->
-      <div class="section-tabs">
-        <div
-          v-for="(sec, idx) in paperDetail.sections"
-          :key="idx"
-          class="section-tab"
-          :class="{ active: currentSectionIndex === idx }"
-          @click="switchSection(idx)"
-        >
-          <span class="tab-label">{{ sectionDisplayName(sec) }}</span>
-          <span v-if="sectionProgress(sec) > 0" class="tab-badge">
-            {{ sectionProgress(sec) }}/{{ sec.topics.length }}
-          </span>
-        </div>
-      </div>
-
-      <!-- 主内容区域：左右分栏 -->
-      <div v-if="currentSection" class="exam-body">
-        <!-- 左侧：文章/原文（仅在有文章时显示） -->
-        <div v-if="currentArticle" class="article-panel" :class="{ expanded: !showQuestions }">
-          <div class="article-header">
-            <span class="article-badge">{{ sectionDisplayName(currentSection) }}</span>
-            <span v-if="currentArticle" class="article-title">文章原文</span>
-            <span v-else class="article-title">题目内容</span>
-          </div>
-          <div class="article-content">
-            <div class="article-text" v-html="formatArticle(currentArticle)" />
-          </div>
-        </div>
-
-        <!-- 右侧：题目面板（可收起） -->
-        <div class="question-panel" :class="{ collapsed: !showQuestions }">
-          <!-- 收起/展开按钮 -->
-          <div class="panel-toggle" @click="toggleQuestions">
-            <template v-if="showQuestions">
-              <RightOutlined />
-              <span>收起</span>
-            </template>
-            <template v-else>
-              <LeftOutlined />
-              <span>展开题目</span>
-            </template>
-          </div>
-
-          <div v-show="showQuestions" class="question-inner">
-            <div class="question-scroll">
-              <!-- ====== 选词填空专用展示 ====== -->
-              <template v-if="isCloze">
-                <!-- 词库展示 -->
-                <div v-if="clozeWordBank.length > 0" class="cloze-word-bank">
-                  <div class="bank-title">Word Bank</div>
-                  <div class="bank-grid">
-                    <div v-for="w in clozeWordBank" :key="w.label" class="bank-item">
-                      <span class="bank-label">{{ w.label }}</span>
-                      <span class="bank-word">{{ w.content }}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- 空位作答区 -->
-                <div v-if="clozeBlanks.length > 0" class="cloze-blanks-area">
-                  <div v-for="(blank, bi) in clozeBlanks" :key="blank.topicId" class="blank-question">
-                    <div class="blank-header">
-                      <span class="blank-no">第 {{ startNo + bi + 1 }} 题</span>
-                      <CheckCircleOutlined v-if="answers.has(blank.topicId) && answers.get(blank.topicId)" class="status-icon correct" />
-                      <CloseCircleOutlined v-else-if="answers.has(blank.topicId) && !answers.get(blank.topicId)" class="status-icon wrong" />
-                      <span v-else-if="selections.has(blank.topicId)" class="answered-tag">已作答</span>
-                    </div>
-                    <div class="blank-answer-selector">
-                      <a-select
-                        :value="selections.get(blank.topicId)"
-                        :disabled="revealedIds.has(blank.topicId)"
-                        @change="(val: string) => selectOption(blank, val)"
-                        placeholder="选择答案"
-                        style="width: 220px"
-                      >
-                        <a-select-option v-for="w in clozeWordBank" :key="w.label" :value="w.label">
-                          {{ w.label }}. {{ w.content }}
-                        </a-select-option>
-                      </a-select>
-                      <!-- 对答案后显示当前选择 -->
-                      <template v-if="revealedIds.has(blank.topicId) && selections.get(blank.topicId)">
-                        <span class="selected-word">
-                          ( {{ getWordByLabel(selections.get(blank.topicId)) }} )
-                        </span>
-                      </template>
-                    </div>
-                    <!-- 解析 -->
-                    <div v-if="getResultState(blank) !== 'none'" class="analysis-box" :class="getResultState(blank)">
-                      <div class="analysis-title">
-                        <CheckCircleOutlined v-if="getResultState(blank) === 'correct'" />
-                        <CloseCircleOutlined v-else />
-                        {{ getResultState(blank) === 'correct' ? '回答正确' : `回答错误，正确答案是 ${getResult(blank)?.correctOption}` }}
-                      </div>
-                      <div v-if="getResult(blank)?.analysis" class="analysis-content">{{ getResult(blank)?.analysis }}</div>
-                    </div>
-                    <!-- 对答案模式 -->
-                    <div v-if="revealedIds.has(blank.topicId) && getResultState(blank) === 'none'" class="reveal-box">
-                      <template v-if="blank.correctOption">
-                        <div class="reveal-answer">
-                          <span class="reveal-label">正确答案:</span>
-                          <span class="reveal-value">{{ blank.correctOption }}</span>
-                        </div>
-                        <div v-if="blank.analysis" class="reveal-analysis">{{ blank.analysis }}</div>
-                      </template>
-                      <div v-else class="reveal-empty">暂无参考答案</div>
-                    </div>
-                  </div>
-                </div>
-              </template>
-
-              <!-- ====== 长篇匹配专用：下拉框选择段落 ====== -->
-              <template v-if="currentSection.subSection === 'matching'">
-                <div
-                  v-for="(topic, tIdx) in currentSection.topics"
-                  :key="topic.topicId"
-                  class="question-card"
-                  :class="{ active: currentTopicIndex === tIdx }"
-                  @click="currentTopicIndex = tIdx"
-                >
-                  <div class="question-tag">
-                    <span class="question-no">第 {{ topic.sorted }} 题</span>
-                    <CheckCircleOutlined v-if="answers.has(topic.topicId) && answers.get(topic.topicId)" class="status-icon correct" />
-                    <CloseCircleOutlined v-else-if="answers.has(topic.topicId) && !answers.get(topic.topicId)" class="status-icon wrong" />
-                    <span v-else-if="selections.has(topic.topicId)" class="answered-tag">已作答</span>
-                  </div>
-                  <div class="question-name">{{ topic.topicName }}</div>
-
-                  <!-- 下拉框作答区 -->
-                  <div v-if="getOptions(topic).length > 0" class="topic-selector-area">
-                    <a-select
-                      :value="selections.get(topic.topicId)"
-                      :disabled="revealedIds.has(topic.topicId)"
-                      @change="(val: string) => selectOption(topic, val)"
-                      placeholder="选择答案"
-                      style="width: 280px"
-                    >
-                      <a-select-option v-for="opt in getOptions(topic)" :key="opt.label" :value="opt.label">
-                        {{ opt.label }}. {{ opt.content }}
-                      </a-select-option>
-                    </a-select>
-                    <!-- 对答案后显示状态图标 -->
-                    <template v-if="revealedIds.has(topic.topicId)">
-                      <CheckCircleOutlined v-if="getResultState(topic) === 'correct'" class="status-icon correct" />
-                      <CloseCircleOutlined v-else-if="getResultState(topic) === 'wrong'" class="status-icon wrong" />
-                    </template>
-                  </div>
-
-                  <!-- 解析 -->
-                  <div v-if="getResultState(topic) !== 'none'" class="analysis-box" :class="getResultState(topic)">
-                    <div class="analysis-title">
-                      <CheckCircleOutlined v-if="getResultState(topic) === 'correct'" />
-                      <CloseCircleOutlined v-else />
-                      {{ getResultState(topic) === 'correct' ? '回答正确' : `回答错误，正确答案是 ${getResult(topic)?.correctOption}` }}
-                    </div>
-                    <div v-if="getResult(topic)?.analysis" class="analysis-content">{{ getResult(topic)?.analysis }}</div>
-                  </div>
-
-                  <!-- 对答案模式（未作答的题目） -->
-                  <div v-if="revealedIds.has(topic.topicId) && getResultState(topic) === 'none'" class="reveal-box">
-                    <template v-if="topic.correctOption">
-                      <div class="reveal-answer">
-                        <span class="reveal-label">正确答案:</span>
-                        <span class="reveal-value">{{ topic.correctOption }}</span>
-                      </div>
-                      <div v-if="topic.analysis" class="reveal-analysis">{{ topic.analysis }}</div>
-                    </template>
-                    <div v-else class="reveal-empty">暂无参考答案</div>
-                  </div>
-                </div>
-              </template>
-
-              <!-- ====== 仔细阅读等其他题型：展开选项卡片 ====== -->
-              <template v-else>
-                <div
-                  v-for="(topic, tIdx) in currentSection.topics"
-                  :key="topic.topicId"
-                  class="question-card"
-                  :class="{ active: currentTopicIndex === tIdx }"
-                  @click="currentTopicIndex = tIdx"
-                >
-                  <div class="question-tag">
-                    <span class="question-no">第 {{ topic.sorted }} 题</span>
-                    <CheckCircleOutlined v-if="answers.has(topic.topicId) && answers.get(topic.topicId)" class="status-icon correct" />
-                    <CloseCircleOutlined v-else-if="answers.has(topic.topicId) && !answers.get(topic.topicId)" class="status-icon wrong" />
-                    <span v-else-if="selections.has(topic.topicId)" class="answered-tag">已作答</span>
-                  </div>
-                  <div class="question-name">{{ topic.topicName }}</div>
-
-                  <!-- 展开选项卡片 -->
-                  <div v-if="getOptions(topic).length > 0" class="option-list">
-                    <div
-                      v-for="opt in getOptions(topic)"
-                      :key="opt.label"
-                      class="option-item"
-                      :class="optionClass(topic, opt.label)"
-                      @click.stop="selectOption(topic, opt.label)"
-                    >
-                      <span class="option-label">{{ opt.label }}</span>
-                      <span class="option-content">{{ opt.content }}</span>
-                      <CheckOutlined v-if="selections.get(topic.topicId) === opt.label && !revealedIds.has(topic.topicId)" class="opt-mark" />
-                      <CloseOutlined v-if="revealedIds.has(topic.topicId) && selections.get(topic.topicId) === opt.label && getResultState(topic) === 'wrong'" class="opt-mark mark-wrong" />
-                      <CheckOutlined v-if="revealedIds.has(topic.topicId) && topic.correctOption === opt.label" class="opt-mark reveal-correct" />
-                    </div>
-                  </div>
-
-                  <!-- 解析 -->
-                  <div v-if="getResultState(topic) !== 'none'" class="analysis-box" :class="getResultState(topic)">
-                    <div class="analysis-title">
-                      <CheckCircleOutlined v-if="getResultState(topic) === 'correct'" />
-                      <CloseCircleOutlined v-else />
-                      {{ getResultState(topic) === 'correct' ? '回答正确' : `回答错误，正确答案是 ${getResult(topic)?.correctOption}` }}
-                    </div>
-                    <div v-if="getResult(topic)?.analysis" class="analysis-content">{{ getResult(topic)?.analysis }}</div>
-                  </div>
-
-                  <!-- 对答案模式（未作答的题目） -->
-                  <div v-if="revealedIds.has(topic.topicId) && getResultState(topic) === 'none'" class="reveal-box">
-                    <template v-if="topic.correctOption">
-                      <div class="reveal-answer">
-                        <span class="reveal-label">正确答案:</span>
-                        <span class="reveal-value">{{ topic.correctOption }}</span>
-                      </div>
-                      <div v-if="topic.analysis" class="reveal-analysis">{{ topic.analysis }}</div>
-                    </template>
-                    <div v-else class="reveal-empty">暂无参考答案</div>
-                  </div>
-                </div>
-              </template>
-            </div>
-
-            <!-- 底部导航 -->
-            <div class="section-nav">
-              <a-button :disabled="currentSectionIndex <= 0" @click="prevSection">
-                <LeftOutlined /> 上一部分
-              </a-button>
-              <a-button
-                type="primary"
-                :disabled="currentSectionIndex >= (paperDetail?.sections?.length || 1) - 1"
-                @click="nextSection"
-              >
-                下一部分 <RightOutlined />
-              </a-button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  </template>
 
 <style scoped lang="scss">
 .exam-page {
@@ -1113,35 +957,94 @@ onMounted(() => {
     }
   }
 
-  /* ====== 下拉框作答区样式 ====== */
-  .topic-selector-area {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
+  .option-list {
+    .option-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--page-bg);
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
 
-    :deep(.ant-select) {
-      .ant-select-selector {
-        background: var(--card-bg);
-        border-color: var(--border);
-          border-radius: 8px;
+      &:hover {
+        border-color: rgba(66, 87, 178, 0.35);
+        background: rgba(66, 87, 178, 0.04);
       }
-
-      .ant-select-selection-item {
-        font-weight: 600;
-        color: var(--primary);
-      }
-    }
-
-    .status-icon {
-      font-size: calc(16px + var(--font-offset, 0px));
 
       &.correct {
-        color: var(--success);
+        border-color: rgba(40, 167, 69, 0.3);
+        background: rgba(40, 167, 69, 0.06);
       }
 
       &.wrong {
-        color: var(--error);
+        border-color: rgba(220, 53, 69, 0.3);
+        background: rgba(220, 53, 69, 0.06);
+      }
+
+      &.reveal {
+        border-color: rgba(40, 167, 69, 0.3);
+        background: rgba(40, 167, 69, 0.04);
+      }
+
+      &.reveal-answer {
+        border-color: rgba(40, 167, 69, 0.3);
+        background: rgba(40, 167, 69, 0.06);
+
+        .option-label {
+          border-color: var(--success);
+          color: var(--success);
+          background: rgba(40, 167, 69, 0.1);
+        }
+      }
+
+      &.selected {
+        border-color: var(--primary);
+        background: rgba(66, 87, 178, 0.06);
+
+        .option-label {
+          border-color: var(--primary);
+          color: #fff;
+          background: var(--primary);
+        }
+      }
+
+      .option-label {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        border: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: calc(12px + var(--font-offset, 0px));
+        font-weight: 700;
+        color: var(--text-muted);
+        flex-shrink: 0;
+      }
+
+      .option-content {
+        flex: 1;
+        font-size: var(--exam-font-size, 13px);
+        color: var(--text-body);
+        line-height: 1.5;
+      }
+
+      .opt-mark {
+        &.correct {
+          color: var(--success);
+        }
+
+        &.wrong {
+          color: var(--error);
+        }
+
+        &.reveal-correct {
+          color: var(--success);
+        }
       }
     }
   }
@@ -1223,146 +1126,6 @@ onMounted(() => {
       font-size: calc(12px + var(--font-offset, 0px));
       color: var(--text-muted);
       font-style: italic;
-    }
-  }
-
-  /* ====== 选词填空专用样式 ====== */
-  .cloze-word-bank {
-    margin-bottom: 16px;
-    padding: 12px 16px;
-    background: rgba(66, 87, 178, 0.04);
-    border: 1px solid rgba(66, 87, 178, 0.2);
-    border-radius: 12px;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    backdrop-filter: blur(8px);
-
-    .bank-title {
-      font-size: calc(15px + var(--font-offset, 0px));
-      font-weight: 700;
-      color: var(--primary);
-      margin-bottom: 12px;
-    }
-
-    .bank-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 8px;
-
-      .bank-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 12px;
-        background: var(--page-bg);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        transition: all 0.2s;
-
-        &:hover {
-          border-color: rgba(66, 87, 178, 0.35);
-          background: rgba(66, 87, 178, 0.03);
-        }
-
-        .bank-label {
-          font-size: calc(13px + var(--font-offset, 0px));
-          font-weight: 700;
-          color: var(--primary);
-          min-width: 20px;
-          text-align: center;
-          background: rgba(66, 87, 178, 0.1);
-          border-radius: 4px;
-          padding: 2px 6px;
-        }
-
-        .bank-word {
-          font-size: calc(13px + var(--font-offset, 0px));
-          color: var(--text-body);
-          line-height: 1.4;
-        }
-      }
-    }
-  }
-
-  .cloze-blanks-area {
-    padding-top: calc(80px + 16px);
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-
-    .blank-question {
-      padding: 14px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--page-bg);
-      transition: all 0.2s;
-
-      &:hover {
-        border-color: rgba(66, 87, 178, 0.35);
-      }
-
-      .blank-header {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 10px;
-
-        .blank-no {
-          font-size: calc(13px + var(--font-offset, 0px));
-          font-weight: 600;
-          color: var(--text-muted);
-        }
-
-        .status-icon {
-          font-size: calc(14px + var(--font-offset, 0px));
-
-          &.correct {
-            color: var(--success);
-          }
-
-          &.wrong {
-            color: var(--error);
-          }
-        }
-
-        .answered-tag {
-          font-size: calc(11px + var(--font-offset, 0px));
-          color: var(--primary);
-          background: rgba(66, 87, 178, 0.1);
-          padding: 1px 8px;
-          border-radius: 6px;
-        }
-      }
-
-      .blank-answer-selector {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        flex-wrap: wrap;
-
-        :deep(.ant-select) {
-          .ant-select-selector {
-            background: var(--card-bg);
-            border-color: var(--border);
-            border-radius: 8px;
-          }
-
-          .ant-select-selection-item {
-            font-weight: 600;
-            color: var(--primary);
-          }
-        }
-
-        .selected-word {
-          font-size: calc(14px + var(--font-offset, 0px));
-          font-weight: 600;
-          color: var(--success);
-          padding: 4px 12px;
-          background: rgba(40, 167, 69, 0.08);
-          border-radius: 6px;
-        }
-      }
     }
   }
 
@@ -1612,99 +1375,6 @@ onMounted(() => {
     padding-top: 10px;
     border-top: 1px solid var(--card-bg);
     text-align: right;
-  }
-}
-
-// 展开选项卡片（仔细阅读等题型）
-.option-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 10px;
-
-  .option-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 14px;
-    border-radius: 8px;
-    border: 1.5px solid var(--border);
-    background: var(--card-bg);
-    cursor: pointer;
-    transition: all 0.25s;
-    font-size: calc(14px + var(--font-offset, 0px));
-    color: var(--text-body);
-    line-height: 1.5;
-
-    &:hover {
-      border-color: rgba(66, 87, 178, 0.4);
-      background: rgba(66, 87, 178, 0.04);
-    }
-
-    &.selected {
-      border-color: var(--primary);
-      background: rgba(66, 87, 178, 0.08);
-      font-weight: 500;
-    }
-
-    &.correct {
-      border-color: #52c41a;
-      background: rgba(82, 196, 26, 0.08);
-    }
-
-    &.wrong {
-      border-color: #ff4d4f;
-      background: rgba(255, 77, 79, 0.06);
-    }
-
-    .option-label {
-      flex-shrink: 0;
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: calc(13px + var(--font-offset, 0px));
-      color: var(--text-muted);
-      border: 1.5px solid var(--border);
-      background: var(--page-bg);
-      transition: all 0.25s;
-    }
-
-    &.selected .option-label,
-    &.correct .option-label {
-      color: #fff;
-      background: var(--primary);
-      border-color: var(--primary);
-    }
-
-    &.wrong .option-label {
-      color: #fff;
-      background: #ff4d4f;
-      border-color: #ff4d4f;
-    }
-
-    .option-content {
-      flex: 1;
-      word-break: break-word;
-    }
-
-    .opt-mark {
-      margin-left: auto;
-      flex-shrink: 0;
-      font-size: calc(16px + var(--font-offset, 0px));
-      color: var(--primary);
-    }
-
-    .mark-wrong {
-      color: #ff4d4f;
-    }
-
-    .reveal-correct {
-      color: #52c41a;
-    }
   }
 }
 </style>

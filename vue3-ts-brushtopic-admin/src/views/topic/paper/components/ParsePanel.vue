@@ -35,13 +35,13 @@ const SECTION_NAME: Record<string, string> = {
 
 const SUB_SECTION_NAME: Record<string, string> = {
   writing: '写作',
-  news: 'Section A 新闻报道',
-  conversation: 'Section B 长对话',
-  passage: 'Section C 听力篇章',
-  cloze: 'Section A 选词填空',
-  matching: 'Section B 段落匹配',
-  reading_1: 'Section C Passage One',
-  reading_2: 'Section C Passage Two',
+  news: '新闻报道',
+  conversation: '长对话',
+  passage: '听力篇章',
+  cloze: '选词填空',
+  matching: '长篇匹配',
+  reading_1: '仔细阅读 (一)',
+  reading_2: '仔细阅读 (二)',
   translation: '翻译'
 }
 

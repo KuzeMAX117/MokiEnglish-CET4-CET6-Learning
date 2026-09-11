@@ -3,7 +3,7 @@
 -- ============================================
 
 -- 1. 批量插入100个用户（ID从101-200）
-INSERT INTO sys_user (id, username, password, avatar, status, email, create_time, is_deleted, update_time, nickname)
+INSERT INTO sys_user (id, account, password, avatar, status, email, create_time, is_deleted, update_time, nickname)
 VALUES
 (101, 'user_101', '$2a$10$Ni32jdkBfwkc6a.WMgEiaOKVfuduf1ZAfPa6NmqG8JO7hSYnQAtPq', '', 0, 'test101@test.com', NOW(), 0, NOW(), '小明'),
 (102, 'user_102', '$2a$10$Ni32jdkBfwkc6a.WMgEiaOKVfuduf1ZAfPa6NmqG8JO7hSYnQAtPq', '', 0, 'test102@test.com', NOW(), 0, NOW(), '小红'),
@@ -58,7 +58,7 @@ VALUES
 (151, 'user_151', '$2a$10$Ni32jdkBfwkc6a.WMgEiaOKVfuduf1ZAfPa6NmqG8JO7hSYnQAtPq', '', 0, 'test151@test.com', NOW(), 0, NOW(), '小依'),
 (152, 'user_152', '$2a$10$Ni32jdkBfwkc6a.WMgEiaOKVfuduf1ZAfPa6NmqG8JO7hSYnQAtPq', '', 0, 'test152@test.com', NOW(), 0, NOW(), '小骏'),
 (153, 'user_153', '$2a$10$Ni32jdkBfwkc6a.WMgEiaOKVfuduf1ZAfPa6NmqG8JO7hSYnQAtPq', '', 0, 'test153@test.com', NOW(), 0, NOW(), '小湘'),
-(154, 'user_154', '$2a$10$Ni32jdkBfwkc6a.WMgEiaOKVfuduf1ZAfPa6NmqG8JO7hSYnQAtPq', '', 0, 'test154@test.com', NOW(), 0, NOW(), '小睿'),
+(154, 'user_154', '$2a$10$Ni32jdkBfwkc6a.WMgEiaOKVfuduf1ZAfPa6NmqG8JO7hSYnQAtPq', '', 0, 'test154@test.com', NOW(), 0, NOW(), '小雨'),
 (155, 'user_155', '$2a$10$Ni32jdkBfwkc6a.WMgEiaOKVfuduf1ZAfPa6NmqG8JO7hSYnQAtPq', '', 0, 'test155@test.com', NOW(), 0, NOW(), '小霓'),
 (156, 'user_156', '$2a$10$Ni32jdkBfwkc6a.WMgEiaOKVfuduf1ZAfPa6NmqG8JO7hSYnQAtPq', '', 0, 'test156@test.com', NOW(), 0, NOW(), '小霏'),
 (157, 'user_157', '$2a$10$Ni32jdkBfwkc6a.WMgEiaOKVfuduf1ZAfPa6NmqG8JO7hSYnQAtPq', '', 0, 'test157@test.com', NOW(), 0, NOW(), '小霖'),
@@ -66,7 +66,7 @@ VALUES
 (159, 'user_159', '$2a$10$Ni32jdkBfwkc6a.WMgEiaOKVfuduf1ZAfPa6NmqG8JO7hSYnQAtPq', '', 0, 'test159@test.com', NOW(), 0, NOW(), '小靓'),
 (160, 'user_160', '$2a$10$Ni32jdkBfwkc6a.WMgEiaOKVfuduf1ZAfPa6NmqG8JO7hSYnQAtPq', '', 0, 'test160@test.com', NOW(), 0, NOW(), '小颢'),
 (161, 'user_161', '$2a$10$Ni32jdkBfwkc6a.WMgEiaOKVfuduf1ZAfPa6NmqG8JO7hSYnQAtPq', '', 0, 'test161@test.com', NOW(), 0, NOW(), '小颜'),
-(162, 'user_162', '$2a$10$Ni32jdkBfwkc6a.WMgEiaOKVfuduf1ZAfPa6NmqG8JO7hSYnQAtPq', '', 0, 'test162@test.com', NOW(), 0, NOW(), '小颢'),
+(162, 'user_162', '$2a$10$Ni32jdkBfwkc6a.WMgEiaOKVfuduf1ZAfPa6NmqG8JO7hSYnQAtPq', '', 0, 'test162@test.com', NOW(), 0, NOW(), '小晨'),
 (163, 'user_163', '$2a$10$Ni32jdkBfwkc6a.WMgEiaOKVfuduf1ZAfPa6NmqG8JO7hSYnQAtPq', '', 0, 'test163@test.com', NOW(), 0, NOW(), '小铄'),
 (164, 'user_164', '$2a$10$Ni32jdkBfwkc6a.WMgEiaOKVfuduf1ZAfPa6NmqG8JO7hSYnQAtPq', '', 0, 'test164@test.com', NOW(), 0, NOW(), '小曦'),
 (165, 'user_165', '$2a$10$Ni32jdkBfwkc6a.WMgEiaOKVfuduf1ZAfPa6NmqG8JO7hSYnQAtPq', '', 0, 'test165@test.com', NOW(), 0, NOW(), '小 rock'),
@@ -96,7 +96,7 @@ VALUES
 (189, 'user_189', '$2a$10$Ni32jdkBfwkc6a.WMgEiaOKVfuduf1ZAfPa6NmqG8JO7hSYnQAtPq', '', 0, 'test189@test.com', NOW(), 0, NOW(), '小 zhu'),
 (190, 'user_190', '$2a$10$Ni32jdkBfwkc6a.WMgEiaOKVfuduf1ZAfPa6NmqG8JO7hSYnQAtPq', '', 0, 'test190@test.com', NOW(), 0, NOW(), '小 hu'),
 (191, 'user_191', '$2a$10$Ni32jdkBfwkc6a.WMgEiaOKVfuduf1ZAfPa6NmqG8JO7hSYnQAtPq', '', 0, 'test191@test.com', NOW(), 0, NOW(), '小 guo'),
-(192, 'user_192', '$2a$10$Ni32jdkBfwkc6a.WMgEiaOKVfuduf1ZAfPa6NmqG8JO7hSYnQAtPq', '', 0, 'test192@test.com', NOW(), 0, NOW(), '小 lin'),
+(192, 'user_192', '$2a$10$Ni32jdkBfwkc6a.WMgEiaOKVfuduf1ZAfPa6NmqG8JO7hSYnQAtPq', '', 0, 'test192@test.com', NOW(), 0, NOW(), '小磊2'),
 (193, 'user_193', '$2a$10$Ni32jdkBfwkc6a.WMgEiaOKVfuduf1ZAfPa6NmqG8JO7hSYnQAtPq', '', 0, 'test193@test.com', NOW(), 0, NOW(), '小 he'),
 (194, 'user_194', '$2a$10$Ni32jdkBfwkc6a.WMgEiaOKVfuduf1ZAfPa6NmqG8JO7hSYnQAtPq', '', 0, 'test194@test.com', NOW(), 0, NOW(), '小 gao'),
 (195, 'user_195', '$2a$10$Ni32jdkBfwkc6a.WMgEiaOKVfuduf1ZAfPa6NmqG8JO7hSYnQAtPq', '', 0, 'test195@test.com', NOW(), 0, NOW(), '小 luo'),

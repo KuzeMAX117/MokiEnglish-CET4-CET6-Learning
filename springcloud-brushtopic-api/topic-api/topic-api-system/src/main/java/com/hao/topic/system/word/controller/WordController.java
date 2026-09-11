@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/system/word")
@@ -103,21 +102,5 @@ public class WordController {
         Long userId = SecurityUtils.getCurrentId();
         wordService.removeCollection(userId, word);
         return Result.success();
-    }
-
-    @GetMapping("/streakRank")
-    public Result<List<Map<String, Object>>> getStreakRank() {
-        return Result.success(wordService.getStreakRank());
-    }
-
-    @GetMapping("/todayStreakRank")
-    public Result<List<Map<String, Object>>> getTodayStreakRank() {
-        return Result.success(wordService.getTodayStreakRank());
-    }
-
-    @GetMapping("/userStreak")
-    public Result<Map<String, Object>> getUserStreak() {
-        Long userId = SecurityUtils.getCurrentId();
-        return Result.success(wordService.getUserStreak(userId));
     }
 }

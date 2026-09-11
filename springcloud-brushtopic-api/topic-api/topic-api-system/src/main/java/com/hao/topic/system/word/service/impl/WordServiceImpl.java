@@ -1,12 +1,9 @@
 package com.hao.topic.system.word.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.hao.topic.api.utils.constant.RabbitConstant;
-import com.hao.topic.api.utils.mq.RabbitService;
 import com.hao.topic.model.dto.word.SelectBookDto;
 import com.hao.topic.model.dto.word.StudyResultDto;
 import com.hao.topic.model.dto.word.WordCollectionDto;
-import com.hao.topic.model.dto.word.WordStudyMessage;
 import com.hao.topic.model.entity.word.UserWordRecord;
 import com.hao.topic.model.entity.word.UserWordSetting;
 import com.hao.topic.model.entity.word.WordBook;
@@ -20,7 +17,6 @@ import com.hao.topic.model.vo.word.WordItemVo;
 import com.hao.topic.model.vo.word.WordStatsVo;
 import com.hao.topic.model.entity.word.WordDictionary;
 import com.hao.ai.client.ai.AiFeignClient;
-import com.hao.topic.common.security.utils.SecurityUtils;
 import com.hao.topic.system.word.mapper.UserWordRecordMapper;
 import com.hao.topic.system.word.mapper.UserWordSettingMapper;
 import com.hao.topic.system.word.mapper.UserWordCollectionMapper;
@@ -51,7 +47,6 @@ public class WordServiceImpl implements WordService {
     private final UserWordRecordMapper userWordRecordMapper;
     private final UserWordCollectionMapper userWordCollectionMapper;
     private final AiFeignClient aiFeignClient;
-    private final RabbitService rabbitService;
 
     @Override
     public List<WordBookVo> listBooks() {
@@ -202,27 +197,6 @@ public class WordServiceImpl implements WordService {
         long hours = (long) Math.pow(2, record.getProficiency());
         record.setNextReviewTime(LocalDateTime.now().plusHours(hours));
         userWordRecordMapper.updateById(record);
-
-        // 发送打卡消息到 MQ
-        try {
-            Long currentUserId = SecurityUtils.getCurrentId();
-            String nickname = SecurityUtils.getCurrentName();
-            String role = SecurityUtils.getCurrentRole();
-            WordStudyMessage studyMessage = new WordStudyMessage(
-                    currentUserId,
-                    LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-                    nickname,
-                    null,
-                    role
-            );
-            rabbitService.sendMessage(
-                    RabbitConstant.WORD_STUDY_EXCHANGE,
-                    RabbitConstant.WORD_STUDY_ROUTING_KEY_NAME,
-                    studyMessage
-            );
-        } catch (Exception e) {
-            // 打卡消息发送失败不影响主流程
-        }
     }
 
     @Override
@@ -476,85 +450,5 @@ public class WordServiceImpl implements WordService {
         String w = word.toLowerCase().trim();
         if (w.isEmpty()) return;
         userWordCollectionMapper.softDeleteByUserAndWord(userId, w);
-    }
-
-    @Override
-    public List<Map<String, Object>> getStreakRank() {
-        java.util.Set<org.springframework.data.redis.core.ZSetOperations.TypedTuple<String>> tuples =
-                stringRedisTemplate.opsForZSet().reverseRangeWithScores(
-                        RedisConstant.WORD_STREAK_RANK, 0, 49);
-
-        if (tuples == null || tuples.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        List<Map<String, Object>> rankList = new ArrayList<>();
-        int rank = 1;
-        for (org.springframework.data.redis.core.ZSetOperations.TypedTuple<String> tuple : tuples) {
-            String userId = tuple.getValue();
-            Double score = tuple.getScore();
-
-            Map<Object, Object> userInfo = stringRedisTemplate.opsForHash()
-                    .entries(RedisConstant.USER_RANK_PREFIX + userId);
-
-            Map<String, Object> item = new HashMap<>();
-            item.put("rank", rank++);
-            item.put("userId", userId != null ? Long.valueOf(userId) : null);
-            item.put("nickname", userInfo.get("nickname"));
-            item.put("avatar", userInfo.get("avatar"));
-            item.put("role", userInfo.get("role"));
-            item.put("streak", score != null ? score.longValue() : 0L);
-            rankList.add(item);
-        }
-        return rankList;
-    }
-
-    @Override
-    public List<Map<String, Object>> getTodayStreakRank() {
-        String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        String todayKey = RedisConstant.WORD_STREAK_TODAY_RANK + today;
-
-        java.util.Set<org.springframework.data.redis.core.ZSetOperations.TypedTuple<String>> tuples =
-                stringRedisTemplate.opsForZSet().reverseRangeWithScores(todayKey, 0, 49);
-
-        if (tuples == null || tuples.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        List<Map<String, Object>> rankList = new ArrayList<>();
-        int rank = 1;
-        for (org.springframework.data.redis.core.ZSetOperations.TypedTuple<String> tuple : tuples) {
-            String userId = tuple.getValue();
-
-            Map<Object, Object> userInfo = stringRedisTemplate.opsForHash()
-                    .entries(RedisConstant.USER_RANK_PREFIX + userId);
-
-            // 获取用户连续天数
-            String streak = stringRedisTemplate.opsForValue()
-                    .get(RedisConstant.USER_STREAK_KEY_PREFIX + userId);
-
-            Map<String, Object> item = new HashMap<>();
-            item.put("rank", rank++);
-            item.put("userId", userId != null ? Long.valueOf(userId) : null);
-            item.put("nickname", userInfo.get("nickname"));
-            item.put("avatar", userInfo.get("avatar"));
-            item.put("role", userInfo.get("role"));
-            item.put("streak", streak != null ? Long.parseLong(streak) : 0L);
-            rankList.add(item);
-        }
-        return rankList;
-    }
-
-    @Override
-    public Map<String, Object> getUserStreak(Long userId) {
-        String currentStreak = stringRedisTemplate.opsForValue()
-                .get(RedisConstant.USER_STREAK_KEY_PREFIX + userId);
-        Long rank = stringRedisTemplate.opsForZSet()
-                .reverseRank(RedisConstant.WORD_STREAK_RANK, String.valueOf(userId));
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("streak", currentStreak != null ? Long.parseLong(currentStreak) : 0L);
-        result.put("rank", rank != null ? rank + 1 : null);
-        return result;
     }
 }

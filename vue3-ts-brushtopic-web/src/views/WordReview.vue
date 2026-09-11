@@ -184,10 +184,6 @@ const playAudio = (word: string | undefined) => {
     message.warning('当前浏览器不支持发音')
     return
   }
-  
-  // 先取消之前的语音队列，避免排队等待
-  window.speechSynthesis.cancel()
-  
   const utterance = new SpeechSynthesisUtterance(word)
   utterance.lang = 'en-US'
   utterance.rate = 0.9

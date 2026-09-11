@@ -9,10 +9,6 @@
         <p class="page-desc">科学记忆曲线，高效备考四六级词汇</p>
       </div>
       <div class="header-right">
-        <a-button class="neon-btn secondary-btn" @click="refreshFavoriteWords">
-          <StarOutlined /> 收藏单词
-          <ReloadOutlined v-if="favoriteLoading" style="margin-left: 4px; font-size: 12px;" spin />
-        </a-button>
         <a-button type="primary" class="neon-btn" @click="openBookModal">选择词书</a-button>
       </div>
     </div>
@@ -153,42 +149,6 @@
       </div>
     </div>
 
-    <!-- 收藏单词弹窗 -->
-    <a-modal v-model:open="favoriteModalVisible" title="收藏单词" :footer="null" centered width="700px"
-      @open="handleFavoriteModalOpen">
-      <div class="favorite-modal-content">
-        <a-spin :spinning="favoriteLoading">
-          <div v-if="favoriteWords.length === 0 && !favoriteLoading" class="empty-state">
-            <StarOutlined class="empty-icon" />
-            <p>还没有收藏单词</p>
-          </div>
-          <div v-else class="favorite-list">
-            <div class="list-header">
-              <span>共 {{ favoriteWords.length }} 个收藏单词</span>
-              <a-button size="small" type="link" danger @click="clearAllCollection">
-                <UnorderedListOutlined /> 清空
-              </a-button>
-              <a-button size="small" type="primary" class="neon-btn start-recite-btn" @click="startReciteFromFavorite">
-                <ThunderboltFilled /> 开始背诵
-              </a-button>
-            </div>
-            <div class="word-list">
-              <div v-for="(word, index) in favoriteWords" :key="index" class="word-row">
-                <div class="word-main">
-                  <span class="word-text">{{ word.word }}</span>
-                  <span class="word-phonetic" v-if="word.phonetic">{{ word.phonetic }}</span>
-                  <span class="word-meaning">{{ word.meaning || '—' }}</span>
-                </div>
-                <a-button size="small" type="link" danger @click="removeCollection(word.word)">
-                  取消收藏
-                </a-button>
-              </div>
-            </div>
-          </div>
-        </a-spin>
-      </div>
-    </a-modal>
-
     <a-modal v-model:open="bookModalVisible" title="选择词书" :footer="null" centered>
       <div class="book-list">
         <div v-for="book in books" :key="book.id" class="book-card-modal"
@@ -217,10 +177,10 @@ import { message } from 'ant-design-vue'
 import {
   BookOutlined, ThunderboltFilled, RightOutlined,
   CheckCircleOutlined, RobotOutlined, ReloadOutlined, CalendarOutlined, ReadOutlined,
-  LeftOutlined, StarOutlined, UnorderedListOutlined,
+  LeftOutlined,
 } from '@ant-design/icons-vue'
-import { apiGetBooks, apiGetWordSetting, apiSelectBook, apiGetWordStats, apiGetTodayWords, apiGetTodayLearnedWords, apiGetWordCalendar, apiGetCollection, apiAddCollection, apiRemoveCollection } from '@/api/word'
-import type { WordBook, UserWordSetting, WordStats, WordItem, WordCalendarItem, WordCollectionItem } from '@/api/word'
+import { apiGetBooks, apiGetWordSetting, apiSelectBook, apiGetWordStats, apiGetTodayWords, apiGetTodayLearnedWords, apiGetWordCalendar } from '@/api/word'
+import type { WordBook, UserWordSetting, WordStats, WordItem, WordCalendarItem } from '@/api/word'
 import { useArticleStore } from '@/stores/article'
 import MarkdownView from '@/components/MarkdownView.vue'
 
@@ -234,9 +194,6 @@ const bookModalVisible = ref(false)
 const dailyCount = ref(20)
 const todayWords = ref<WordItem[]>([])
 const todayLearnedWords = ref<WordItem[]>([])
-const favoriteWords = ref<WordCollectionItem[]>([])
-const favoriteModalVisible = ref(false)
-const favoriteLoading = ref(false)
 // 短文生成状态全部托管给全局 store，离开页面仍持续生成
 const activeIdx = ref(0)
 const generating = computed(() => articleStore.generating)
@@ -323,7 +280,6 @@ onMounted(() => {
   if (!articleStore.articles.length) articleStore.hydrate()
   loadData()
   loadCalendar()
-  loadFavoriteWords()
 })
 
 // 生成结束（true→false）时统一提示，无论用户当前在哪个页面
@@ -392,87 +348,6 @@ const confirmSelectBook = async () => {
 
 const startStudy = () => router.push('/vocabulary/review')
 
-/** 加载收藏单词 */
-const loadFavoriteWords = async () => {
-  try {
-    const res = await apiGetCollection()
-    favoriteWords.value = res.data || []
-    // 按收藏时间倒序排序
-    favoriteWords.value.sort((a, b) => {
-      if (!a.createTime || !b.createTime) return 0
-      return new Date(b.createTime).getTime() - new Date(a.createTime).getTime()
-    })
-  } catch (e) {
-    console.error('加载收藏单词失败:', e)
-    message.error('加载收藏单词失败')
-  }
-}
-
-/** 刷新收藏单词列表 */
-const refreshFavoriteWords = async () => {
-  favoriteLoading.value = true
-  try {
-    await loadFavoriteWords()
-    favoriteModalVisible.value = true
-    message.success('已刷新')
-  } finally {
-    favoriteLoading.value = false
-  }
-}
-
-/** 处理收藏弹窗打开 */
-const handleFavoriteModalOpen = () => {
-  loadFavoriteWords()
-}
-
-/** 取消收藏 */
-const removeCollection = async (word: string) => {
-  try {
-    await apiRemoveCollection(word)
-    message.success('已取消收藏')
-    // 从列表中移除
-    favoriteWords.value = favoriteWords.value.filter(w => w.word !== word)
-  } catch {
-    message.error('取消收藏失败')
-  }
-}
-
-/** 清空所有收藏 */
-const clearAllCollection = async () => {
-  if (favoriteWords.value.length === 0) return
-  try {
-    for (const w of favoriteWords.value) {
-      await apiRemoveCollection(w.word)
-    }
-    message.success('已清空所有收藏')
-    favoriteWords.value = []
-  } catch {
-    message.error('清空失败')
-  }
-}
-
-/** 从收藏列表开始背诵 */
-const startReciteFromFavorite = () => {
-  if (favoriteWords.value.length === 0) {
-    message.warning('没有收藏单词，无法背诵')
-    return
-  }
-
-  // 将收藏单词转换为背诵格式
-  const words = favoriteWords.value.map((w) => ({
-    word: w.word,
-    meaning: w.meaning || '',
-    phonetic: w.phonetic || '',
-    example: w.example || '',
-    exampleTranslate: w.exampleTranslate || '',
-    proficiency: 0,
-  }))
-
-  // 导航到复习页面并开始背诵
-  router.push('/vocabulary/review')
-  // TODO: 这里可以进一步优化，将收藏单词传递给复习页面
-}
-
 const generateArticle = async () => {
   // 正在生成时，再次点击则停止
   if (articleStore.generating) {
@@ -515,18 +390,6 @@ const generateArticle = async () => {
   height: 42px; border-radius: var(--radius-md); border: none;
   background: var(--primary); font-weight: 600; box-shadow: var(--shadow-card);
   &:hover { background: var(--primary-hover) !important; }
-  
-  &.secondary-btn {
-    background: var(--card-bg);
-    color: var(--text-title);
-    border: 1px solid var(--border);
-    box-shadow: none;
-    &:hover {
-      background: var(--primary-light) !important;
-      color: var(--primary) !important;
-      border-color: var(--primary);
-    }
-  }
 }
 
 .action-grid {
@@ -578,17 +441,7 @@ const generateArticle = async () => {
 .triple-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: stretch; }
 .square-card {
   aspect-ratio: 1 / 1; display: flex; flex-direction: column; overflow: hidden;
-  .card-body { 
-    flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden;
-    display: flex; flex-direction: column;
-    // 隐藏滚动条但保持滚动功能
-    scrollbar-width: none; // Firefox
-    -ms-overflow-style: none; // IE and Edge
-    -webkit-overflow-scrolling: touch; // iOS/移动端惯性滚动
-    &::-webkit-scrollbar { display: none; } // Chrome, Safari, Opera
-    // 启用触摸滑动
-    touch-action: pan-y;
-  }
+  .card-body { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
 }
 
 .heatmap-wrap {
@@ -670,13 +523,6 @@ const generateArticle = async () => {
   color: var(--text-body); font-size: calc(13px + var(--font-offset, 0px)); line-height: 1.7; overflow-y: auto;
   &::-webkit-scrollbar { width: 4px; }
   &::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-  // 隐藏滚动条但保持滚动功能
-  scrollbar-width: none; // Firefox
-  -ms-overflow-style: none; // IE and Edge
-  -webkit-overflow-scrolling: touch; // iOS/移动端惯性滚动
-  &::-webkit-scrollbar { display: none; } // Chrome, Safari, Opera
-  // 启用触摸滑动
-  touch-action: pan-y;
   &.empty { display: flex; align-items: center; justify-content: center; }
   .generating-tip { display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--text-muted); }
   .empty-tip {
@@ -736,100 +582,6 @@ const generateArticle = async () => {
   width: 100%; height: 44px; border-radius: var(--radius-md);
   background: var(--primary); border: none; font-weight: 600;
   &:hover { background: var(--primary-hover) !important; }
-}
-
-// 收藏单词弹窗样式
-.favorite-modal-content {
-  max-height: 500px;
-  overflow-y: auto;
-
-  .empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--text-muted);
-
-    .empty-icon {
-      font-size: calc(48px + var(--font-offset, 0px));
-      color: var(--border);
-      margin-bottom: 16px;
-    }
-
-    p {
-      font-size: calc(14px + var(--font-offset, 0px));
-      margin: 0;
-    }
-  }
-
-  .favorite-list {
-    .list-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 16px;
-      background: var(--card-bg);
-      border-radius: 10px;
-      margin-bottom: 12px;
-      font-size: calc(14px + var(--font-offset, 0px));
-      color: var(--text-title);
-      font-weight: 600;
-
-      .start-recite-btn {
-        height: 32px;
-        font-size: calc(13px + var(--font-offset, 0px));
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-      }
-    }
-
-    .word-list {
-      .word-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 12px 16px;
-        border-bottom: 1px dashed var(--border);
-        transition: all 0.2s;
-
-        &:last-child {
-          border-bottom: none;
-        }
-
-        &:hover {
-          background: rgba(66, 87, 178, 0.04);
-        }
-
-        .word-main {
-          flex: 1;
-          min-width: 0;
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-
-          .word-text {
-            font-size: calc(14px + var(--font-offset, 0px));
-            font-weight: 600;
-            color: var(--text-title);
-          }
-
-          .word-phonetic {
-            font-size: calc(11px + var(--font-offset, 0px));
-            color: var(--text-muted);
-          }
-
-          .word-meaning {
-            font-size: calc(12px + var(--font-offset, 0px));
-            color: var(--text-body);
-          }
-        }
-
-        .word-actions {
-          flex-shrink: 0;
-          margin-left: 16px;
-        }
-      }
-    }
-  }
 }
 
 @media (max-width: 1200px) {

@@ -18,12 +18,10 @@ import {
   SnippetsOutlined,
   FileWordOutlined,
   WarningOutlined,
-  ExclamationCircleOutlined,
-  MinusCircleOutlined
+  ExclamationCircleOutlined
 } from '@ant-design/icons-vue'
 import PaperPreview from './components/PaperPreview.vue'
 import ParsePanel from './components/ParsePanel.vue'
-import ClozeEditor from './components/ClozeEditor.vue'
 import {
   apiGetPaperManageDetail,
   apiSavePaperSection,
@@ -41,61 +39,47 @@ const route = useRoute()
 const router = useRouter()
 const paperId = Number(route.params.id)
 
-/* ============ 板块元数据 — 按照四六级试卷规范 ============ */
+/* ============ 板块元数据 ============ */
 
-/** 大板块列表（答题卡分区 + 达标线）*/
 const SECTION_LIST = [
-  { key: 'writing', name: 'PartⅠ 写作', target: 1, cardSheet: '', hint: '预留模块，请先录入' },
-  { key: 'listening', name: 'PartⅡ 听力理解', target: 9, cardSheet: 'Answer Sheet 1', hint: '答题卡1，材料+问题只读一遍' },
-  { key: 'reading', name: 'PartⅢ 阅读理解', target: 7, cardSheet: 'Answer Sheet 2', hint: '答题卡2' },
-  { key: 'translation', name: 'PartⅣ 翻译', target: 1, cardSheet: 'Answer Sheet 2', hint: '限时30分钟，中文段落英译' }
+  { key: 'writing', name: '写作', target: 1 },
+  { key: 'listening', name: '听力', target: 25 },
+  { key: 'reading', name: '阅读', target: 30 },
+  { key: 'translation', name: '翻译', target: 1 }
 ]
 
-/** 子板块映射 — 四级标准结构 */
-const SUB_SECTION_MAP: Record<string, { key: string; name: string; target: number; hint?: string }[]> = {
-  writing: [
-    { key: 'writing', name: '写作', target: 1 }
-  ],
+const SUB_SECTION_MAP: Record<string, { key: string; name: string }[]> = {
+  writing: [{ key: 'writing', name: '写作' }],
   listening: [
-    { key: 'news',       name: 'Section A 新闻报道',   target: 3, hint: '3篇 × (2~3)题/篇' },
-    { key: 'conversation', name: 'Section B 长对话',     target: 2, hint: '2篇 × 4题/篇' },
-    { key: 'passage',    name: 'Section C 听力篇章',   target: 3, hint: '3篇 × (3~4)题/篇' }
+    { key: 'news', name: '新闻报道' },
+    { key: 'conversation', name: '长对话' },
+    { key: 'passage', name: '听力篇章' }
   ],
   reading: [
-    { key: 'cloze',      name: 'Section A 选词填空',   target: 1, hint: '10空，词库A~N/O' },
-    { key: 'matching',   name: 'Section B 段落匹配',   target: 1, hint: '36~45共10题，段落A~O' },
-    { key: 'reading_1',  name: 'Section C Passage One', target: 1, hint: '1篇文章 × ~4题' },
-    { key: 'reading_2',  name: 'Section C Passage Two', target: 1, hint: '1篇文章 × ~4题' }
+    { key: 'cloze', name: '选词填空' },
+    { key: 'matching', name: '长篇匹配' },
+    { key: 'reading_1', name: '仔细阅读 (一)' },
+    { key: 'reading_2', name: '仔细阅读 (二)' }
   ],
-  translation: [
-    { key: 'translation', name: '翻译', target: 1, hint: '一段中文文本，主观作答' }
-  ]
+  translation: [{ key: 'translation', name: '翻译' }]
 }
 
-/** 子板块名称速查表 */
 const SUB_SECTION_NAME: Record<string, string> = {
   writing: '写作',
   news: '新闻报道',
   conversation: '长对话',
   passage: '听力篇章',
   cloze: '选词填空',
-  matching: '段落匹配',
-  reading_1: 'Passage One',
-  reading_2: 'Passage Two',
+  matching: '长篇匹配',
+  reading_1: '仔细阅读 (一)',
+  reading_2: '仔细阅读 (二)',
   translation: '翻译'
 }
 
-/** 获取子板块元信息 */
-const getSubSectionMeta = (sectionKey: string, subKey: string) => {
-  return SUB_SECTION_MAP[sectionKey]?.find((s) => s.key === subKey)
-}
-
-/* ============ 文章作用域 — 四六级规范 ============ */
-
-/** 组级文章：文章挂在子板块级别，该组所有题目共用同一篇文章 */
+/** 组级文章子板块：文章挂在子板块上，组内共用 */
 const GROUP_ARTICLE_SECTIONS = new Set(['cloze', 'matching', 'reading_1', 'reading_2'])
 
-/** 题级文章：每道题目自带独立的听力材料/原文 */
+/** 题级文章子板块：每题自带听力材料/原文 */
 const TOPIC_ARTICLE_SECTIONS = new Set(['news', 'conversation', 'passage'])
 
 const statusMap: any = {
@@ -230,78 +214,6 @@ const moveTopic = (gi: number, ti: number, delta: number) => {
   markDirty()
 }
 
-/* ============ 选词填空专用 ============ */
-
-const CLOZE_BANK_MARKER = '__CLOZE_WORD_BANK__'
-
-const isClozeBankTopic = (group: PaperSubSectionType, topic: PaperTopicItemType) =>
-  group.subSection === 'cloze' && topic.topicName === CLOZE_BANK_MARKER
-
-const getClozeBank = (group: PaperSubSectionType) => {
-  const t = group.topics.find((t) => t.topicName === CLOZE_BANK_MARKER)
-  return t?.options || []
-}
-
-const getClozeBlanks = (group: PaperSubSectionType) =>
-  group.topics.filter((t) => t.topicName !== CLOZE_BANK_MARKER)
-
-const clozeBlankCount = (group: PaperSubSectionType) => getClozeBlanks(group).length
-
-const addClozeWord = (gi: number) => {
-  const group = currentGroups.value[gi]
-  const bank = getClozeBank(group)
-  if (bank.length >= 15) {
-    message.warning('词库最多 15 个单词')
-    return
-  }
-  const used = new Set(bank.map((w) => (w.label || '').trim().toUpperCase()))
-  let label = ''
-  for (const ch of 'ABCDEFGHIJKLMNO'.split('')) {
-    if (!used.has(ch)) { label = ch; break }
-  }
-  if (!label) return
-  const bankTopic = group.topics.find((t) => t.topicName === CLOZE_BANK_MARKER)
-  if (bankTopic) {
-    bankTopic.options.push({ label, content: '' })
-  } else {
-    group.topics.unshift({
-      topicId: null,
-      topicName: CLOZE_BANK_MARKER,
-      options: [{ label, content: '' }],
-      correctOption: '',
-      answer: '',
-      analysis: '',
-      article: ''
-    })
-  }
-  markDirty()
-}
-
-const removeClozeWord = (gi: number, oi: number) => {
-  const group = currentGroups.value[gi]
-  const bankTopic = group.topics.find((t) => t.topicName === CLOZE_BANK_MARKER)
-  if (bankTopic) {
-    bankTopic.options.splice(oi, 1)
-    markDirty()
-  }
-}
-
-const addClozeBlank = (gi: number) => {
-  const group = currentGroups.value[gi]
-  const blanks = getClozeBlanks(group)
-  const nextNo = blanks.length + 1
-  group.topics.push({
-    topicId: null,
-    topicName: String(nextNo),
-    options: [],
-    correctOption: '',
-    answer: '',
-    analysis: '',
-    article: ''
-  })
-  markDirty()
-}
-
 const nextLabel = (topic: PaperTopicItemType) => {
   const used = new Set((topic.options || []).map((o) => (o.label || '').trim().toUpperCase()))
   for (const ch of ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']) {
@@ -336,45 +248,13 @@ const setCorrect = (topic: PaperTopicItemType, optLabel: string) => {
 }
 
 const sectionCount = (key: string) =>
-  (sectionGroups.value[key] || []).reduce((n, g) => {
-    if (g.subSection === 'cloze') return n + clozeBlankCount(g)
-    return n + g.topics.length
-  }, 0)
+  (sectionGroups.value[key] || []).reduce((n, g) => n + g.topics.length, 0)
 
-/** 根据子板块类型返回不同的题干占位提示 */
 const topicNamePlaceholder = (subSection: string) => {
-  // 写作 —— 粘贴 Directions
-  if (subSection === 'writing')
-    return '写作题目要求（Directions），如：For this part, you are allowed 30 minutes to write an essay...'
-  // 翻译 —— 直接贴中文段落
-  if (subSection === 'translation')
-    return '翻译题目原文（中文段落）'
-  // 阅读 Section A 选词填空 —— 带空编号的题干/选项
-  if (subSection === 'cloze')
-    return '文章正文（包含 26~35 的空，或从 Word Bank 选词填入）'
-  // 阅读 Section B 长篇匹配 —— 陈述句
-  if (subSection === 'matching')
-    return '题干陈述（从段落 A~O 中选择匹配的段落）'
-  // 听力 —— 题干（Question）
-  if (TOPIC_ARTICLE_SECTIONS.has(subSection))
-    return '问题/题干（Questions X and Y are based on the news report/conversation/passage...）'
-  // 阅读 Section C 仔细阅读
-  if (subSection === 'reading_1' || subSection === 'reading_2')
-    return '题干/未完成陈述'
-  // 默认
+  if (subSection === 'writing') return '写作题目要求（Directions），如：For this part, you are allowed 30 minutes to write an essay...'
+  if (subSection === 'translation') return '翻译题目原文（中文段落）'
+  if (TOPIC_ARTICLE_SECTIONS.has(subSection)) return '题干'
   return '题干'
-}
-
-/** 获取子板块显示名称（带 Section A/B/C 前缀）*/
-const getGroupDisplayName = (sectionKey: string, subKey: string) => {
-  const meta = getSubSectionMeta(sectionKey, subKey)
-  return meta ? meta.name : SUB_SECTION_NAME[subKey] || subKey
-}
-
-/** 获取子板块提示信息 */
-const getGroupHint = (sectionKey: string, subKey: string) => {
-  const meta = getSubSectionMeta(sectionKey, subKey)
-  return meta?.hint || ''
 }
 
 /* ============ 板块切换 ============ */
@@ -649,11 +529,7 @@ const previewSections = computed<PaperManageSectionType[]>(() => {
   const result: PaperManageSectionType[] = []
   for (const s of SECTION_LIST) {
     for (const g of sectionGroups.value[s.key] || []) {
-      // 选词填空：过滤掉词库标记 topic，只保留空位
-      const filteredTopics = g.subSection === 'cloze'
-        ? g.topics.filter((t) => t.topicName !== CLOZE_BANK_MARKER)
-        : g.topics
-      const topics = filteredTopics.filter(
+      const topics = g.topics.filter(
         (t) => (t.topicName || '').trim() !== '' || (t.options && t.options.length > 0)
       )
       if (topics.length === 0 && !(g.article || '').trim()) continue
@@ -743,7 +619,7 @@ onMounted(() => {
 
       <!-- 主体：左侧导航 + 编辑区 + 右侧预览 -->
       <div class="editor-main">
-        <!-- 板块导航 — 按 Part I/II/III/IV 四级标准排列 -->
+        <!-- 板块导航 -->
         <div class="section-nav">
           <div v-for="s in SECTION_LIST" :key="s.key" class="nav-item"
             :class="{ active: activeSection === s.key }" @click="switchSection(s.key)">
@@ -755,9 +631,8 @@ onMounted(() => {
               :class="sectionCount(s.key) >= s.target ? 'ok' : (sectionCount(s.key) > 0 ? 'part' : '')">
               {{ sectionCount(s.key) }}/{{ s.target }}
             </div>
-            <div v-if="s.hint" class="nav-hint">{{ s.hint }}</div>
           </div>
-          <div class="nav-tip">各子板块达标线请见卡片提示</div>
+          <div class="nav-tip">达标线：写作1 / 听力25 / 阅读30 / 翻译1</div>
         </div>
 
         <!-- 编辑区 -->
@@ -772,14 +647,9 @@ onMounted(() => {
           </div>
 
           <div v-for="(group, gi) in currentGroups" :key="group.subSection" class="sub-group">
-            <!-- 子板块头部 — 显示 Section A/B/C + 答题卡分区提示 -->
             <div class="group-head">
-              <span class="group-name">{{ getGroupDisplayName(activeSection, group.subSection) }}</span>
-              <span class="group-count">
-                {{ group.subSection === 'cloze' ? clozeBlankCount(group) + ' 空 · ' + getClozeBank(group).length + ' 词' : group.topics.length + ' 题' }}
-              </span>
-              <a-tag v-if="activeSectionMeta.cardSheet" size="small" color="blue">{{ activeSectionMeta.cardSheet }}</a-tag>
-              <span v-if="getGroupHint(activeSection, group.subSection)" class="group-hint">{{ getGroupHint(activeSection, group.subSection) }}</span>
+              <span class="group-name">{{ SUB_SECTION_NAME[group.subSection] || group.subSection }}</span>
+              <span class="group-count">{{ group.topics.length }} 题</span>
             </div>
 
             <!-- 组级文章（阅读类：本子板块共用） -->
@@ -789,83 +659,71 @@ onMounted(() => {
                 placeholder="粘贴文章原文，保存后前台左侧文章面板显示" />
             </div>
 
-            <!-- ====== 选词填空专用编辑器 ====== -->
-            <template v-if="group.subSection === 'cloze'">
-              <ClozeEditor :group="group" @update="markDirty()" />
-              <!-- 选词填空组操作 -->
-              <div class="group-actions">
-                <a-button size="small" :icon="h(FileWordOutlined)" @click="openParse(group.subSection, 'docx')">上传 docx</a-button>
-              </div>
-            </template>
-
-            <!-- ====== 其他题型：原有题目卡片模式 ====== -->
-            <template v-else>
-              <!-- 题目卡片 -->
-              <div v-for="(topic, ti) in group.topics" :key="ti" class="topic-card">
-                <div class="topic-head">
-                  <span class="topic-no">第 {{ topicNo(gi, ti) }} 题</span>
-                  <a-space :size="2">
-                    <a-button size="small" type="text" :icon="h(ArrowUpOutlined)" :disabled="ti === 0"
-                      @click="moveTopic(gi, ti, -1)" />
-                    <a-button size="small" type="text" :icon="h(ArrowDownOutlined)"
-                      :disabled="ti === group.topics.length - 1" @click="moveTopic(gi, ti, 1)" />
-                    <a-button size="small" type="text" danger :icon="h(DeleteOutlined)"
-                      @click="removeTopic(gi, ti)" />
-                  </a-space>
-                </div>
-
-                <a-textarea v-model:value="topic.topicName" :auto-size="{ minRows: 2, maxRows: 6 }" @input="markDirty()"
-                  :placeholder="topicNamePlaceholder(group.subSection)" />
-
-                <!-- 题级文章（听力类：每题自带材料） -->
-                <div v-if="TOPIC_ARTICLE_SECTIONS.has(group.subSection)" class="topic-article">
-                  <div class="field-label">听力材料（本题对应的原文）</div>
-                  <a-textarea v-model:value="topic.article" :auto-size="{ minRows: 2, maxRows: 8 }"
-                    @input="markDirty()" placeholder="该题对应的听力材料原文（对话题/新闻稿/篇章）" />
-                </div>
-
-                <!-- 选项编辑 -->
-                <div class="options-editor">
-                  <div v-for="(opt, oi) in topic.options" :key="oi" class="option-row">
-                    <a-input class="opt-label" v-model:value="opt.label" @input="markDirty()" placeholder="A" />
-                    <a-input class="opt-content" v-model:value="opt.content" @input="markDirty()" placeholder="选项内容" />
-                    <a-button size="small" class="opt-ans"
-                      :type="isCorrectOpt(topic, opt.label) ? 'primary' : 'default'" @click="setCorrect(topic, opt.label)">
-                      <CheckOutlined v-if="isCorrectOpt(topic, opt.label)" />
-                      <span v-else>设答案</span>
-                    </a-button>
-                    <a-button size="small" type="text" danger :icon="h(DeleteOutlined)"
-                      @click="removeOption(topic, oi)" />
-                  </div>
-                  <a-button size="small" type="dashed" :icon="h(PlusOutlined)" @click="addOption(topic)">添加选项</a-button>
-                </div>
-
-                <!-- 答案与解析 -->
-                <div class="answer-row">
-                  <span class="field-label">正确答案</span>
-                  <a-input v-model:value="topic.correctOption" @input="markDirty()"
-                    placeholder="如 A / AB / JGOKB，最多5个字符" style="width: 230px" />
-                </div>
-                <div class="answer-textarea-row">
-                  <div class="field-label">参考答案（可选）</div>
-                  <a-textarea v-model:value="topic.answer" :auto-size="{ minRows: 2, maxRows: 6 }" @input="markDirty()"
-                    placeholder="主观题参考答案，支持多行输入" />
-                </div>
-                <div class="analysis-row">
-                  <div class="field-label">解析（可选）</div>
-                  <a-textarea v-model:value="topic.analysis" :auto-size="{ minRows: 1, maxRows: 4 }" @input="markDirty()"
-                    placeholder="题目解析" />
-                </div>
+            <!-- 题目卡片 -->
+            <div v-for="(topic, ti) in group.topics" :key="ti" class="topic-card">
+              <div class="topic-head">
+                <span class="topic-no">第 {{ topicNo(gi, ti) }} 题</span>
+                <a-space :size="2">
+                  <a-button size="small" type="text" :icon="h(ArrowUpOutlined)" :disabled="ti === 0"
+                    @click="moveTopic(gi, ti, -1)" />
+                  <a-button size="small" type="text" :icon="h(ArrowDownOutlined)"
+                    :disabled="ti === group.topics.length - 1" @click="moveTopic(gi, ti, 1)" />
+                  <a-button size="small" type="text" danger :icon="h(DeleteOutlined)"
+                    @click="removeTopic(gi, ti)" />
+                </a-space>
               </div>
 
-              <!-- 组操作 -->
-              <div class="group-actions">
-                <a-button size="small" :icon="h(PlusOutlined)" @click="addTopic(gi)">加题</a-button>
-                <a-button size="small" :icon="h(SnippetsOutlined)" @click="openParse(group.subSection, 'text')">批量粘贴</a-button>
-                <a-button size="small" :icon="h(FileWordOutlined)" @click="openParse(group.subSection, 'docx')">上传
-                  docx</a-button>
+              <a-textarea v-model:value="topic.topicName" :auto-size="{ minRows: 2, maxRows: 6 }" @input="markDirty()"
+                :placeholder="topicNamePlaceholder(group.subSection)" />
+
+              <!-- 题级文章（听力类：每题自带材料） -->
+              <div v-if="TOPIC_ARTICLE_SECTIONS.has(group.subSection)" class="topic-article">
+                <div class="field-label">听力材料（本题对应的原文）</div>
+                <a-textarea v-model:value="topic.article" :auto-size="{ minRows: 2, maxRows: 8 }"
+                  @input="markDirty()" placeholder="该题对应的听力材料原文（对话题/新闻稿/篇章）" />
               </div>
-            </template>
+
+              <!-- 选项编辑 -->
+              <div class="options-editor">
+                <div v-for="(opt, oi) in topic.options" :key="oi" class="option-row">
+                  <a-input class="opt-label" v-model:value="opt.label" @input="markDirty()" placeholder="A" />
+                  <a-input class="opt-content" v-model:value="opt.content" @input="markDirty()" placeholder="选项内容" />
+                  <a-button size="small" class="opt-ans"
+                    :type="isCorrectOpt(topic, opt.label) ? 'primary' : 'default'" @click="setCorrect(topic, opt.label)">
+                    <CheckOutlined v-if="isCorrectOpt(topic, opt.label)" />
+                    <span v-else>设答案</span>
+                  </a-button>
+                  <a-button size="small" type="text" danger :icon="h(DeleteOutlined)"
+                    @click="removeOption(topic, oi)" />
+                </div>
+                <a-button size="small" type="dashed" :icon="h(PlusOutlined)" @click="addOption(topic)">添加选项</a-button>
+              </div>
+
+              <!-- 答案与解析 -->
+              <div class="answer-row">
+                <span class="field-label">正确答案</span>
+                <a-input v-model:value="topic.correctOption" @input="markDirty()"
+                  placeholder="如 A / AB / JGOKB，最多5个字符" style="width: 230px" />
+              </div>
+              <div class="answer-textarea-row">
+                <div class="field-label">参考答案（可选）</div>
+                <a-textarea v-model:value="topic.answer" :auto-size="{ minRows: 2, maxRows: 6 }" @input="markDirty()"
+                  placeholder="主观题参考答案，支持多行输入" />
+              </div>
+              <div class="analysis-row">
+                <div class="field-label">解析（可选）</div>
+                <a-textarea v-model:value="topic.analysis" :auto-size="{ minRows: 1, maxRows: 4 }" @input="markDirty()"
+                  placeholder="题目解析" />
+              </div>
+            </div>
+
+            <!-- 组操作 -->
+            <div class="group-actions">
+              <a-button size="small" :icon="h(PlusOutlined)" @click="addTopic(gi)">加题</a-button>
+              <a-button size="small" :icon="h(SnippetsOutlined)" @click="openParse(group.subSection, 'text')">批量粘贴</a-button>
+              <a-button size="small" :icon="h(FileWordOutlined)" @click="openParse(group.subSection, 'docx')">上传
+                docx</a-button>
+            </div>
           </div>
         </div>
 
@@ -1013,18 +871,13 @@ onMounted(() => {
         color: #fa8c16;
       }
     }
-    .nav-hint {
-      margin-top: 2px;
-      font-size: 10px;
-      color: #999;
-    }
+  }
 
-    .nav-tip {
-      font-size: 11px;
-      color: #b0b4bb;
-      line-height: 1.6;
-      padding: 0 2px;
-    }
+  .nav-tip {
+    font-size: 11px;
+    color: #b0b4bb;
+    line-height: 1.6;
+    padding: 0 2px;
   }
 }
 
@@ -1075,7 +928,6 @@ onMounted(() => {
       align-items: center;
       gap: 10px;
       margin-bottom: 10px;
-      flex-wrap: wrap;
 
       .group-name {
         font-size: 14px;
@@ -1086,11 +938,6 @@ onMounted(() => {
       .group-count {
         font-size: 12px;
         color: #70757a;
-      }
-
-      .group-hint {
-        font-size: 11px;
-        color: #999;
       }
     }
 
