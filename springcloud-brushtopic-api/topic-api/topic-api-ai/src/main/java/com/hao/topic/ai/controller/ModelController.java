@@ -8,11 +8,13 @@ import com.hao.topic.ai.service.ModelService;
 import com.hao.topic.common.result.Result;
 import com.hao.topic.model.dto.ai.AiHistoryDto;
 import com.hao.topic.model.dto.ai.ChatDto;
+import com.hao.topic.model.dto.ai.EssayCorrectDto;
 import com.hao.topic.model.dto.ai.TranslationCorrectDto;
 import com.hao.topic.model.dto.ai.TtsDto;
 import com.hao.topic.model.entity.system.SysUser;
 import com.hao.topic.model.vo.ai.AiHistoryContent;
 import com.hao.topic.model.vo.ai.AiHistoryListVo;
+import com.hao.topic.model.vo.ai.EssayCorrectionVo;
 import com.hao.topic.model.vo.ai.TranslationCorrectionVo;
 import com.hao.topic.model.vo.topic.TopicDataVo;
 import com.hao.topic.security.utils.DateUtils;
@@ -124,5 +126,10 @@ public class ModelController {
     @PostMapping("/translate/correct")
     public Result<TranslationCorrectionVo> correctTranslation(@RequestBody TranslationCorrectDto dto) {
         return Result.success(modelService.correctTranslation(dto));
+    }
+
+    @PostMapping("/essay/correct")
+    public Result<EssayCorrectionVo> correctEssay(@RequestBody EssayCorrectDto dto) {
+        return Result.success(modelService.correctEssay(dto));
     }
 }

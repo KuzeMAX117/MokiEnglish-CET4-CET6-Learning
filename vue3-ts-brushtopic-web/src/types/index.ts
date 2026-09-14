@@ -212,3 +212,73 @@ export interface TranslationCorrectPayload {
   topic: string
   items: { source: string; reference: string; userTranslation: string }[]
 }
+
+// ======================== 作文批改 ========================
+
+/** 作文批改 —— 语法错误 */
+export interface EssayGrammarError {
+  /** 错误类型 */
+  type: string
+  /** 错误分级 */
+  severity: string
+  /** 原句 */
+  original: string
+  /** 修正后的句子 */
+  correction: string
+  /** 错误解释 */
+  explanation: string
+  /** 错误影响 */
+  impact: string
+}
+
+/** 作文批改 —— 词汇建议 */
+export interface EssayVocabularySuggestion {
+  /** 原始词汇/短语 */
+  original: string
+  /** 建议替换 */
+  suggestion: string
+  /** 建议原因 */
+  reason: string
+}
+
+/** 作文批改 —— AI 评分结果 */
+export interface EssayCorrectionResult {
+  /** 总分 0-15 */
+  score: number
+  /** 档次 */
+  band: number
+  /** 档次标签 */
+  bandLabel: string
+  /** 档次原文 */
+  bandDescription: string
+  /** 定档依据 */
+  bandReason: string
+  /** 评分场景 */
+  levelScene: string
+  /** 总体评语 */
+  overall: string
+  /** 内容 0-5 */
+  content: number
+  /** 语言 0-5 */
+  language: number
+  /** 词汇 0-5 */
+  vocabulary: number
+  /** 结构 0-5 */
+  structure: number
+  /** 语法错误列表 */
+  grammarErrors: EssayGrammarError[]
+  /** 词汇建议列表 */
+  vocabularySuggestions: EssayVocabularySuggestion[]
+  /** 考生自查清单 */
+  selfCheckList: string[]
+}
+
+/** 作文批改 —— 提交参数 */
+export interface EssayCorrectPayload {
+  /** 作文内容 */
+  essay: string
+  /** 作文题目 */
+  topic: string
+  /** 难度等级：4 / 6 */
+  level: number
+}

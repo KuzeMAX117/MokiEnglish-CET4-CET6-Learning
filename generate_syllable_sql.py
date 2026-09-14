@@ -6,11 +6,8 @@ output_path = r'D:\202401\study\Hao-Topic\sql\update_cet4_syllable.sql'
 
 def split_syllable(word):
     """
-    基于规则的英语音节拆分。
-    规则：
-    1. 找出元音位置，按元音分组拆分
-    2. 两个元音之间的辅音通常归后一个音节
-    3. 结尾的 e 不单独成音节
+    基于规则的英语音节拆分�?    规则�?    1. 找出元音位置，按元音分组拆分
+    2. 两个元音之间的辅音通常归后一个音�?    3. 结尾�?e 不单独成音节
     4. 双写辅音拆开
     """
     w = word.lower()
@@ -28,8 +25,7 @@ def split_syllable(word):
     # 处理 silent e：如果最后一个元音是 e，且前面有元音，则忽略尾 e 作为单独音节
     last_is_silent_e = w.endswith('e') and len(vowel_positions) >= 2 and w[vowel_positions[-1]] == 'e'
     if last_is_silent_e:
-        # 检查是否 e 前面是辅音，且整体不是 'le' 等情况
-        if len(w) - vowel_positions[-1] == 1:
+        # 检查是�?e 前面是辅音，且整体不�?'le' 等情�?        if len(w) - vowel_positions[-1] == 1:
             vowel_positions = vowel_positions[:-1]
 
     if len(vowel_positions) == 0:
@@ -42,22 +38,16 @@ def split_syllable(word):
         vp_current = vowel_positions[i]
         vp_next = vowel_positions[i + 1]
 
-        # 两个元音之间的辅音
-        consonants_between = w[vp_current + 1:vp_next]
+        # 两个元音之间的辅�?        consonants_between = w[vp_current + 1:vp_next]
 
-        # 决定切分点
-        # 如果有多个辅音，通常前几个归前音节，后几个归后音节
-        # 简单处理：如果中间有 2 个及以上辅音，前一个元音带走 1 个辅音
-        if len(consonants_between) >= 2:
+        # 决定切分�?        # 如果有多个辅音，通常前几个归前音节，后几个归后音�?        # 简单处理：如果中间�?2 个及以上辅音，前一个元音带�?1 个辅�?        if len(consonants_between) >= 2:
             split_point = vp_current + 1 + 1
         elif len(consonants_between) == 1:
-            # 单个辅音通常归后一个音节
-            split_point = vp_current + 1
+            # 单个辅音通常归后一个音�?            split_point = vp_current + 1
         else:
             split_point = vp_current + 1
 
-        # 确保切分点在合理范围内
-        if split_point <= start:
+        # 确保切分点在合理范围�?        if split_point <= start:
             split_point = vp_current + 1
 
         syllable = w[start:split_point]
@@ -65,13 +55,11 @@ def split_syllable(word):
             syllables.append(syllable)
         start = split_point
 
-    # 添加最后一个音节
-    last_syllable = w[start:]
+    # 添加最后一个音�?    last_syllable = w[start:]
     if last_syllable:
         syllables.append(last_syllable)
 
-    # 清理空音节
-    syllables = [s for s in syllables if s]
+    # 清理空音�?    syllables = [s for s in syllables if s]
 
     if len(syllables) <= 1:
         return w
@@ -106,4 +94,4 @@ with open(output_path, 'w', encoding='utf-8') as f:
     f.write("SET NAMES utf8mb4;\n")
     f.write("\n".join(updates))
 
-print(f'共生成 {len(updates)} 条 UPDATE 语句，SQL 已生成：{output_path}')
+print(f'共生�?{len(updates)} �?UPDATE 语句，SQL 已生成：{output_path}')

@@ -22,7 +22,7 @@ conn = pymysql.connect(
     host='localhost',
     port=3306,
     user='root',
-    password='MIMA132455.',
+    password='your_password',
     database='brushtopic',
     charset='utf8mb4'
 )
@@ -42,6 +42,6 @@ try:
                 )
                 updated += 1
         conn.commit()
-        print(f'共更新 {updated} 个单词的释义')
+        print(f'共更�?{updated} 个单词的释义')
 finally:
     conn.close()

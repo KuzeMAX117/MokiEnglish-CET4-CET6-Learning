@@ -32,43 +32,47 @@ public class ScoreTool implements AgentTool {
         try {
             String levelName = level == 4 ? "四级" : "六级";
             String systemPrompt = String.format("""
-                You are a CET-%s essay grading expert following the official CET scoring rubric.
-                Grade the essay based on: content, language accuracy, vocabulary, and structure.
+                You are a strict CET-%s essay grader. Grade the essay based on error count.
                 
-                CET-%s Essay Scoring Bands (Total 15 points):
-                - Band 5 (14-15): Excellent - well organized, clear arguments, varied vocabulary, minimal errors
-                - Band 4 (11-13): Good - clear structure, good vocabulary, some errors
-                - Band 3 (8-10): Adequate - basic structure, some errors, acceptable vocabulary
-                - Band 2 (5-7): Poor - weak structure, many errors, limited vocabulary
-                - Band 1 (1-4): Very poor - minimal content, severe errors
-                - Band 0 (0): No relevant content or blank
+                First, count all errors in the essay:
+                - Grammar errors (subject-verb agreement, tense, articles, prepositions)
+                - Spelling errors
+                - Incomplete sentences
+                - Logic issues
                 
-                Return a JSON object with the format:
+                Then assign score based on error count:
+                - 0 errors: 14-15 points
+                - 1-2 minor errors: 13 points
+                - 3-4 errors or 1 serious error: 10-12 points
+                - 5-7 errors or 2-3 serious errors: 7-9 points
+                - 8-10 errors or 4+ serious errors: 4-6 points
+                - 11+ errors: 1-3 points
+                - Blank or off-topic: 0 points
+                
+                CET-6 is stricter than CET-4 for same quality.
+                
+                Return JSON:
                 {
-                    "score": 12,
-                    "band": 4,
-                    "bandDescription": "Good",
-                    "overall": "overall evaluation text",
-                    "dimensions": {
-                        "content": 4,
-                        "language": 3,
-                        "vocabulary": 3,
-                        "structure": 3
-                    },
-                    "strengths": ["strength1", "strength2"],
-                    "weaknesses": ["weakness1", "weakness2"]
+                    "score": number,
+                    "band": 14/11/8/5/2/0,
+                    "bandDescription": "description",
+                    "overall": "evaluation",
+                    "dimensions": {"content": 0-5, "language": 0-5, "vocabulary": 0-5, "structure": 0-5},
+                    "strengths": ["strength1"],
+                    "weaknesses": ["weakness1"],
+                    "errorCount": number,
+                    "seriousErrorCount": number
                 }
-                Each dimension is from 1-5. Only return the JSON, no other text.
-                """, levelName, levelName);
+                """, levelName);
 
             String userPrompt = String.format("""
                 Topic: %s
+                Level: CET-%s
                 
                 Essay:
                 %s
                 
-                Please grade this essay according to CET-%s standards and return the result in JSON format.
-                """, topic, essay, levelName);
+                Count errors strictly and grade accordingly.""", topic, level, essay);
 
             String content = chatClient.prompt()
                     .system(systemPrompt)
@@ -78,14 +82,42 @@ public class ScoreTool implements AgentTool {
 
             JSONObject result = parseJson(content);
 
+            // 二次校验：根据错误数量强制限制分数
+            int errorCount = result.getIntValue("errorCount", 0);
+            int seriousErrorCount = result.getIntValue("seriousErrorCount", 0);
+            int score = result.getIntValue("score", 0);
+            int maxScore;
+
+            if (errorCount == 0) {
+                maxScore = 15;
+            } else if (errorCount <= 2 && seriousErrorCount == 0) {
+                maxScore = 13;
+            } else if (errorCount <= 4 || seriousErrorCount <= 1) {
+                maxScore = 12;
+            } else if (errorCount <= 7 || seriousErrorCount <= 3) {
+                maxScore = 9;
+            } else if (errorCount <= 10 || seriousErrorCount <= 5) {
+                maxScore = 6;
+            } else {
+                maxScore = 3;
+            }
+
+            if (score > maxScore) {
+                log.warn("Score {} exceeds max {} based on errors (total:{}, serious:{}), adjusting",
+                        score, maxScore, errorCount, seriousErrorCount);
+                score = maxScore;
+            }
+
             return ToolResult.success(getToolName(), Map.of(
-                    "score", result.getIntValue("score"),
+                    "score", score,
                     "band", result.getIntValue("band"),
                     "bandDescription", result.getString("bandDescription"),
                     "overall", result.getString("overall"),
                     "dimensions", result.getJSONObject("dimensions"),
                     "strengths", result.getJSONArray("strengths"),
-                    "weaknesses", result.getJSONArray("weaknesses")
+                    "weaknesses", result.getJSONArray("weaknesses"),
+                    "errorCount", errorCount,
+                    "seriousErrorCount", seriousErrorCount
             ));
         } catch (Exception e) {
             log.error("评分失败", e);

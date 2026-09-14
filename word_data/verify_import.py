@@ -2,8 +2,8 @@
 import subprocess
 
 bat_content = r"""@echo off
-mysql -uroot -pMIMA132455. --default-character-set=utf8mb4 brushtopic -e "SELECT id, name, type, total_count FROM word_book;"
-mysql -uroot -pMIMA132455. --default-character-set=utf8mb4 brushtopic -e "SELECT book_id, COUNT(*) as cnt FROM word_item GROUP BY book_id;"
+mysql -uroot -pyour_password --default-character-set=utf8mb4 brushtopic -e "SELECT id, name, type, total_count FROM word_book;"
+mysql -uroot -pyour_password --default-character-set=utf8mb4 brushtopic -e "SELECT book_id, COUNT(*) as cnt FROM word_item GROUP BY book_id;"
 """
 
 bat_path = r"D:\202401\study\Hao-Topic\sql\verify_import.bat"

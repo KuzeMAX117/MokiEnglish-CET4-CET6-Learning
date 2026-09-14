@@ -30,7 +30,7 @@ with open(output_path, 'w', encoding='utf-8') as f:
     for w, m, e in words:
         f.write(
             f"INSERT INTO `word_item` (`book_id`, `word`, `phonetic`, `meaning`, `syllable_word`, `example`, `example_translate`) "
-            f"VALUES (1, '{w}', '', '{m}', NULL, '{e}', '我们需要理解本句中 <u>{w}</u> 的含义。');\n"
+            f"VALUES (1, '{w}', '', '{m}', NULL, '{e}', '我们需要理解本句中 <u>{w}</u> 的含义�?);\n"
         )
 
-print(f'共导入 {len(words)} 个单词，SQL 已生成：{output_path}')
+print(f'共导�?{len(words)} 个单词，SQL 已生成：{output_path}')

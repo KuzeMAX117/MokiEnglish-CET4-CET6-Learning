@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""cet_all_import.sql 静态校验脚本"""
+"""cet_all_import.sql 静态校验脚�?""
 import re
 import json
 import sys
@@ -10,7 +10,7 @@ with open(SQL_FILE, "r", encoding="utf-8") as f:
     content = f.read()
 
 lines = content.split("\n")
-print(f"总行数: {len(lines)}")
+print(f"总行�? {len(lines)}")
 
 # 1. 检查非 INSERT/SET 语句（DDL 等）
 bad_stmts = []
@@ -21,7 +21,7 @@ for i, line in enumerate(lines, 1):
     up = s.upper()
     if not (up.startswith("INSERT INTO") or up.startswith("SET NAMES") or up.startswith("SET FOREIGN_KEY_CHECKS")):
         bad_stmts.append((i, s[:120]))
-print(f"\n[1] 非INSERT/SET语句数: {len(bad_stmts)}")
+print(f"\n[1] 非INSERT/SET语句�? {len(bad_stmts)}")
 for i, s in bad_stmts[:20]:
     print(f"  行{i}: {s}")
 
@@ -32,7 +32,7 @@ for m in re.finditer(r"INSERT INTO\s+`?(\w+)`?", content, re.IGNORECASE):
     insert_counts[tbl] = insert_counts.get(tbl, 0) + 1
 print(f"\n[2] INSERT 语句分布: {insert_counts}")
 
-# 3. 试卷元数据（标题、题号）——提取 paper INSERT 的 VALUES
+# 3. 试卷元数据（标题、题号）——提�?paper INSERT �?VALUES
 paper_pat = re.compile(
     r"INSERT INTO `paper` .*?VALUES \((\d+), (\d+), (\d+), '([^']*)', (\d+)\);", re.DOTALL)
 papers = []
@@ -49,13 +49,13 @@ for p in papers:
         print(f"  ⚠️ 重复试卷: 行{p['line']} {p['title']}")
 lv4 = [p for p in papers if p["level"] == 4]
 lv6 = [p for p in papers if p["level"] == 6]
-print(f"  四级 {len(lv4)} 套, 六级 {len(lv6)} 套")
+print(f"  四级 {len(lv4)} �? 六级 {len(lv6)} �?)
 
-# 4. 检查每个 paper INSERT 之后是否有 SET @pid 与 topic/paper_topic 配对
+# 4. 检查每�?paper INSERT 之后是否�?SET @pid �?topic/paper_topic 配对
 sets = list(re.finditer(r"SET @pid = LAST_INSERT_ID\(\);", content))
-print(f"[4] SET @pid 数量: {len(sets)} (应与 paper 数一致)")
+print(f"[4] SET @pid 数量: {len(sets)} (应与 paper 数一�?")
 
-# 5. 提取 topic 插入：将 SQL 按 ';\n' 拆分后逐句解析
+# 5. 提取 topic 插入：将 SQL �?';\n' 拆分后逐句解析
 statements = re.split(r";\s*\n", content)
 topic_stmts = []
 pt_stmts = []
@@ -67,13 +67,12 @@ for st in statements:
         pt_stmts.append(s)
 print(f"[5] topic INSERT: {len(topic_stmts)}, paper_topic INSERT: {len(pt_stmts)}")
 
-# 6. 解析每个 topic 语句的值（用正则手工解析：按列顺序取字符串/数字/NULL）
-# topic 列: topic_name, answer, options, correct_option, question_type, analysis, article, status, create_by
+# 6. 解析每个 topic 语句的值（用正则手工解析：按列顺序取字符串/数字/NULL�?# topic �? topic_name, answer, options, correct_option, question_type, analysis, article, status, create_by
 col_pat = re.compile(r"VALUES \(\s*(.*?)\s*\)\s*$", re.DOTALL)
 
 
 def parse_sql_string(s):
-    """解析SQL字符串字面量（处理 '' 转义），返回 (值, 剩余)"""
+    """解析SQL字符串字面量（处�?'' 转义），返回 (�? 剩余)"""
     if s.startswith("NULL"):
         return None, s[4:]
     if s.startswith("'"):
@@ -88,15 +87,14 @@ def parse_sql_string(s):
                 return "".join(out), s[i + 1:]
             out.append(s[i])
             i += 1
-        return "".join(out), ""  # 未闭合
-    m = re.match(r"-?\d+", s)
+        return "".join(out), ""  # 未闭�?    m = re.match(r"-?\d+", s)
     if m:
         return m.group(0), s[m.end():]
-    raise ValueError(f"无法解析值: {s[:60]}")
+    raise ValueError(f"无法解析�? {s[:60]}")
 
 
 def split_values(vals_str):
-    """按逗号切分（忽略引号内逗号）"""
+    """按逗号切分（忽略引号内逗号�?""
     result = []
     i = 0
     cur = ""
@@ -156,8 +154,7 @@ for idx, st in enumerate(topic_stmts):
     article = unquote(vals[6])
     status = vals[7]
 
-    # 6.1 topic_name 过短（可能是解析失败只剩题号）
-    if topic_name and len(topic_name) <= 3 and not topic_name.startswith("Directions"):
+    # 6.1 topic_name 过短（可能是解析失败只剩题号�?    if topic_name and len(topic_name) <= 3 and not topic_name.startswith("Directions"):
         warnings.append(f"topic[{idx}]: topic_name过短={topic_name!r} answer={answer!r} qtype={qtype}")
 
     # 6.2 options JSON 校验
@@ -173,23 +170,20 @@ for idx, st in enumerate(topic_stmts):
         except json.JSONDecodeError as e:
             errors.append(f"topic[{idx}]: options JSON解析失败 -> {e}")
 
-    # 6.3 correct_option 与 answer 一致性（选择题 answer 应为纯字母；若 answer 为 NULL 且 options 非空 -> 警告）
-    if options and correct:
+    # 6.3 correct_option �?answer 一致性（选择�?answer 应为纯字母；�?answer �?NULL �?options 非空 -> 警告�?    if options and correct:
         if answer is None:
             warnings.append(f"topic[{idx}]: 有options但answer为NULL")
         elif re.fullmatch(r"[A-O]", answer or "") is None:
-            warnings.append(f"topic[{idx}]: answer={answer!r} 与correct_option={correct} 不一致(非纯字母)")
+            warnings.append(f"topic[{idx}]: answer={answer!r} 与correct_option={correct} 不一�?非纯字母)")
 
-    # 6.4 qtype 合法值
-    if qtype not in ("writing", "listening", "reading", "cloze", "translation", "vocabulary", None):
+    # 6.4 qtype 合法�?    if qtype not in ("writing", "listening", "reading", "cloze", "translation", "vocabulary", None):
         errors.append(f"topic[{idx}]: question_type非法={qtype}")
 
     # 6.5 status 应为 0
     if status not in ("0", "NULL"):
-        errors.append(f"topic[{idx}]: status={status} 非0")
+        errors.append(f"topic[{idx}]: status={status} �?")
 
-# 7. paper_topic 检查
-pt_sections = set()
+# 7. paper_topic 检�?pt_sections = set()
 pt_subsections = set()
 pt_sorted_ok = True
 paper_boundary = []  # (paper标题, sorted列表)
@@ -202,7 +196,7 @@ for idx, st in enumerate(pt_stmts):
     body = m.group(1)
     pm = re.match(r"@pid,\s*LAST_INSERT_ID\(\),\s*'([^']*)',\s*(?:'([^']*)'|NULL),\s*(\d+)", body)
     if not pm:
-        # 可能是多行 values (listening, NULL)
+        # 可能是多�?values (listening, NULL)
         pm = re.match(r"@pid,\s*LAST_INSERT_ID\(\),\s*'([^']*)',\s*'([^']*)',\s*(\d+)", body)
     if not pm:
         errors.append(f"pt[{idx}]: 无法解析内容 {body[:100]}")
@@ -213,17 +207,17 @@ for idx, st in enumerate(pt_stmts):
     if sub:
         pt_subsections.add(sub)
 
-print(f"\n[6] topic 检查: 错误={len(errors)}, 警告={len(warnings)}")
+print(f"\n[6] topic 检�? 错误={len(errors)}, 警告={len(warnings)}")
 for e in errors[:30]:
-    print("  ❌", e)
+    print("  �?, e)
 for w in warnings[:30]:
     print("  ⚠️", w)
 if len(errors) > 30:
-    print(f"  ... 其余 {len(errors)-30} 条错误省略")
+    print(f"  ... 其余 {len(errors)-30} 条错误省�?)
 if len(warnings) > 30:
-    print(f"  ... 其余 {len(warnings)-30} 条警告省略")
+    print(f"  ... 其余 {len(warnings)-30} 条警告省�?)
 
-print(f"\n[7] paper_topic 使用的 section: {sorted(pt_sections)}")
-print(f"    paper_topic 使用的 sub_section: {sorted(pt_subsections)}")
+print(f"\n[7] paper_topic 使用�?section: {sorted(pt_sections)}")
+print(f"    paper_topic 使用�?sub_section: {sorted(pt_subsections)}")
 
 print("\n==== 校验结束 ====")

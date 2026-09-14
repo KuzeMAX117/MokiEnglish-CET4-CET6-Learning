@@ -2,26 +2,26 @@
 """Debug cloze answer parsing"""
 import re
 
-# The cloze answers format is: 【36-45】JGOKB
+# The cloze answers format is: �?6-45】JGOKB
 # Let's check if this is being parsed correctly
 
 text = """
-【36-40】JGOKB   【41-45】IFMHA 
+�?6-40】JGOKB   �?1-45】IFMHA 
   
-【46-50】GDAFK   【51-55】HCIBJ
+�?6-50】GDAFK   �?1-55】HCIBJ
 
-【56-60】CADBA   【61-65】ABCDB   
+�?6-60】CADBA   �?1-65】ABCDB   
 """
 
 # Parse range answers
-range_pattern = re.compile(r"[【\[]?\s*(\d+)[-–](\d+)\s*[】\]]?\s*[：:]?\s*([A-D]{1,20})")
+range_pattern = re.compile(r"[【\[]?\s*(\d+)[-–](\d+)\s*[】\]]?\s*[�?]?\s*([A-D]{1,20})")
 matches = list(range_pattern.finditer(text))
 print(f"Range answer matches: {len(matches)}")
 for m in matches:
     print(f"  {m.group()}")
 
 # Parse word answers for cloze
-word_range_pattern = re.compile(r"[【\[]?\s*(\d+)[-–](\d+)\s*[】\]]?\s*[：:]?\s*(.+?)(?=[【\[]?\s*\d+[-–]\d+|$)")
+word_range_pattern = re.compile(r"[【\[]?\s*(\d+)[-–](\d+)\s*[】\]]?\s*[�?]?\s*(.+?)(?=[【\[]?\s*\d+[-–]\d+|$)")
 word_matches = list(word_range_pattern.finditer(text))
 print(f"\nWord range matches: {len(word_matches)}")
 for m in word_matches:

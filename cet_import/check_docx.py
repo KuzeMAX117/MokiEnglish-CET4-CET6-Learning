@@ -35,13 +35,13 @@ full_text = "\n".join(all_text)
 
 # Search for answer patterns
 print("\n--- Searching for answers ---")
-range_matches = list(re.finditer(r"(\d+)[-–](\d+)\s*[：:]\s*([A-D]{1,20})", full_text))
+range_matches = list(re.finditer(r"(\d+)[-–](\d+)\s*[�?]\s*([A-D]{1,20})", full_text))
 print(f"Range answer matches: {len(range_matches)}")
 for m in range_matches:
     print(f"  {m.group()}")
 
 # Check for answer section markers
-for marker in ["参考答案", "答案", "Answer Key", "answer key", "ANSWER"]:
+for marker in ["参考答�?, "答案", "Answer Key", "answer key", "ANSWER"]:
     idx = full_text.rfind(marker)
     if idx >= 0:
         print(f"Found '{marker}' at pos {idx}")

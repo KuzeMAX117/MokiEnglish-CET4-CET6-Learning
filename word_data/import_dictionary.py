@@ -1,5 +1,5 @@
 """
-从 EnWords.sql 提取数据，创建独立的 word_dictionary 词典表并导入
+�?EnWords.sql 提取数据，创建独立的 word_dictionary 词典表并导入
 """
 import subprocess
 import os
@@ -14,7 +14,7 @@ def parse_and_convert():
     
     with open(OUTPUT_SQL, "w", encoding="utf-8") as out:
         out.write("-- 独立词典库（兜底查询用，不参与背诵模块）\n")
-        out.write("-- 数据来源: https://github.com/1eez/103976 (103,976 个英语单词)\n\n")
+        out.write("-- 数据来源: https://github.com/1eez/103976 (103,976 个英语单�?\n\n")
         out.write("SET NAMES utf8mb4;\n\n")
         
         # 创建独立的词典表
@@ -27,7 +27,7 @@ def parse_and_convert():
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_word` (`word`),
   KEY `idx_word` (`word`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='英语词典（兜底查询用）';\n\n""")
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='英语词典（兜底查询用�?;\n\n""")
         
         # 逐行解析原始 SQL 中的 INSERT 数据
         count = 0
@@ -42,12 +42,10 @@ def parse_and_convert():
                 
                 # 解析 ('word', 'translation') 格式
                 # 可能一行有多条: ('w1','t1'),\n('w2','t2'),
-                # 用正则提取每个 (word, translation) 对
-                # 匹配 ('...', '...') 模式
+                # 用正则提取每�?(word, translation) �?                # 匹配 ('...', '...') 模式
                 matches = re.findall(r"\('([^']*)',\s*'([^']*)'\)", line)
                 for word, translation in matches:
-                    # 转义单引号（原始数据中可能有）
-                    w = word.replace("\\", "\\\\").replace("'", "\\'").lower().strip()
+                    # 转义单引号（原始数据中可能有�?                    w = word.replace("\\", "\\\\").replace("'", "\\'").lower().strip()
                     t = translation.replace("\\", "\\\\").replace("'", "\\'").strip()
                     
                     if not w:
@@ -69,15 +67,15 @@ def parse_and_convert():
             out.write(";\n")
     
     print(f"转换完成: {OUTPUT_SQL}")
-    print(f"共 {count} 条词典记录")
+    print(f"�?{count} 条词典记�?)
     return count
 
 def execute_import():
     """执行 SQL 导入"""
     bat_content = f"""@echo off
-mysql -uroot -pMIMA132455. --default-character-set=utf8mb4 brushtopic < "{OUTPUT_SQL}"
+mysql -uroot -pyour_password --default-character-set=utf8mb4 brushtopic < "{OUTPUT_SQL}"
 echo Import exit code: %ERRORLEVEL%
-mysql -uroot -pMIMA132455. --default-character-set=utf8mb4 brushtopic -e "SELECT COUNT(*) as dict_total FROM word_dictionary;"
+mysql -uroot -pyour_password --default-character-set=utf8mb4 brushtopic -e "SELECT COUNT(*) as dict_total FROM word_dictionary;"
 """
     bat_path = r"D:\202401\study\Hao-Topic\sql\tmp_run.bat"
     with open(bat_path, "w", encoding="gbk") as f:

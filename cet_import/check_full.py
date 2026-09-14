@@ -19,7 +19,7 @@ print(f"Total text length: {len(all_text)}")
 
 # Search for answer patterns in the full text
 print("\n--- Searching for answers ---")
-for pattern in [r"\d+[-–]\d+\s*[：:]\s*[A-D]", r"参考答案", r"答案", r"1-5:", r"6-10:"]:
+for pattern in [r"\d+[-–]\d+\s*[�?]\s*[A-D]", r"参考答�?, r"答案", r"1-5:", r"6-10:"]:
     matches = list(re.finditer(pattern, all_text))
     if matches:
         print(f"Pattern '{pattern}': {len(matches)} matches")

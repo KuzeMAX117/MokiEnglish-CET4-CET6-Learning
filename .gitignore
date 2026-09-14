@@ -36,5 +36,15 @@ Thumbs.db
 application-local.yaml
 
 # 配置文件（含敏感信息，不上传）
-配置文件/common-config.yaml
-配置文件/common-minio-config.yaml
+配置文件/
+
+# 本地脚本（含 IP/密码等敏感信息）
+check_nacos.ps1
+fix_vm.sh
+update_meaning.py
+
+# SQL 文件（含敏感数据）
+sql/topic.sql
+
+# bootstrap.properties（含 Nacos 地址等敏感信息）
+**/bootstrap.properties

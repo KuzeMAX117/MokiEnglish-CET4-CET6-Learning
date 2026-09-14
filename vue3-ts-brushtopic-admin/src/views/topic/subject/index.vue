@@ -536,7 +536,7 @@ onMounted(() => {
         </template>
         <template v-if="column.key === 'imageUrl'">
           <a-image :width="48"
-            :src="record.imageUrl != null ? record.imageUrl : 'http://114.116.233.218:9000/topic/H.png'" />
+            :src="record.imageUrl != null ? record.imageUrl : 'http://localhost:9000/topic/H.png'" />
         </template>
         <template v-if="column.key === 'subjectDesc'">
           <a-tooltip>

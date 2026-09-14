@@ -4,7 +4,7 @@ import os
 
 # 1. 执行 ALTER TABLE
 bat_content = r"""@echo off
-mysql -uroot -pMIMA132455. --default-character-set=utf8mb4 brushtopic < D:\202401\study\Hao-Topic\sql\update_word_book_type.sql
+mysql -uroot -pyour_password --default-character-set=utf8mb4 brushtopic < D:\202401\study\Hao-Topic\sql\update_word_book_type.sql
 """
 bat_path = r"D:\202401\study\Hao-Topic\sql\run_alter.bat"
 with open(bat_path, "w", encoding="gbk") as f:

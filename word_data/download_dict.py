@@ -1,4 +1,4 @@
-"""通过 git clone 下载词典库"""
+"""通过 git clone 下载词典�?""
 import subprocess
 import os
 
@@ -16,12 +16,11 @@ else:
     print("STDERR:", result.stderr[:500] if result.stderr else "")
     print("Return code:", result.returncode)
 
-# 检查文件
-sql_path = os.path.join(repo_dir, "EnWords.sql")
+# 检查文�?sql_path = os.path.join(repo_dir, "EnWords.sql")
 csv_path = os.path.join(repo_dir, "EnWords.csv")
 for p in [sql_path, csv_path]:
     if os.path.exists(p):
         size = os.path.getsize(p)
         print(f"存在: {os.path.basename(p)} ({size/1024/1024:.1f} MB)")
     else:
-        print(f"不存在: {os.path.basename(p)}")
+        print(f"不存�? {os.path.basename(p)}")

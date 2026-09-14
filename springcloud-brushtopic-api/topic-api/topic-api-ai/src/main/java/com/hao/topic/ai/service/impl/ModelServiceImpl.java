@@ -13,6 +13,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hao.topic.ai.constant.AiConstant;
 import com.hao.topic.ai.constant.PromptConstant;
 import com.hao.topic.ai.constant.ResultConstant;
+import com.hao.topic.ai.agent.EssayAgent;
+import com.hao.topic.ai.agent.EssayAgentResult;
 import com.hao.topic.ai.enums.AiStatusEnums;
 import com.hao.topic.ai.mapper.AiAuditLogMapper;
 import com.hao.topic.ai.mapper.AiHistoryMapper;
@@ -29,6 +31,7 @@ import com.hao.topic.common.exception.TopicException;
 import com.hao.topic.common.security.utils.SecurityUtils;
 import com.hao.topic.model.dto.ai.AiHistoryDto;
 import com.hao.topic.model.dto.ai.ChatDto;
+import com.hao.topic.model.dto.ai.EssayCorrectDto;
 import com.hao.topic.model.dto.ai.TranslationCorrectDto;
 import com.hao.topic.model.dto.ai.TtsDto;
 import com.hao.topic.model.dto.audit.TopicAudit;
@@ -47,6 +50,7 @@ import com.hao.topic.model.entity.topic.TopicSubject;
 import com.hao.topic.model.vo.ai.AiHistoryContent;
 import com.hao.topic.model.vo.ai.AiHistoryListVo;
 import com.hao.topic.model.vo.ai.AiHistoryVo;
+import com.hao.topic.model.vo.ai.EssayCorrectionVo;
 import com.hao.topic.model.vo.ai.TranslationCorrectionVo;
 import com.hao.topic.model.vo.topic.TopicDataVo;
 import com.hao.topic.model.vo.topic.TopicSubjectVo;
@@ -99,6 +103,9 @@ public class ModelServiceImpl implements ModelService {
 
     @Autowired
     private AiRecordMapper aiRecordMapper;
+
+    @Autowired
+    private EssayAgent essayAgent;
 
     
 
@@ -1569,5 +1576,130 @@ public class ModelServiceImpl implements ModelService {
             return 2;
         }
         return 0;
+    }
+
+    @Override
+    public EssayCorrectionVo correctEssay(EssayCorrectDto dto) {
+        if (dto == null || dto.getEssay() == null || dto.getEssay().isBlank()) {
+            throw new TopicException("作文内容不能为空");
+        }
+
+        String levelName = dto.getLevel() != null && dto.getLevel() == 6 ? "六级" : "四级";
+        log.info("作文批改请求：level=CET-{}, 字数={}", dto.getLevel(), dto.getEssay().split("\\s+").length);
+
+        // 使用 Agent 多Tool协作批改
+        EssayAgentResult agentResult = essayAgent.execute(dto.getEssay(), dto.getTopic(), dto.getLevel());
+
+        // 转换为前端需要的格式
+        EssayCorrectionVo vo = convertToVo(agentResult, dto);
+
+        log.info("作文批改完成：score={}, 语法错误数={}, 词汇建议数={}",
+                vo.getScore(), vo.getGrammarErrors().size(), vo.getVocabularySuggestions().size());
+
+        return vo;
+    }
+
+    /**
+     * 将 Agent 结果转换为前端 VO
+     */
+    private EssayCorrectionVo convertToVo(EssayAgentResult agentResult, EssayCorrectDto dto) {
+        EssayCorrectionVo vo = new EssayCorrectionVo();
+
+        // 基础信息
+        vo.setScore(agentResult.getScore() != null ? (double) agentResult.getScore() : 0.0);
+        vo.setBand(agentResult.getBand());
+        vo.setBandDescription(agentResult.getBandDescription());
+        vo.setOverall(agentResult.getOverall());
+
+        // 四维评分
+        if (agentResult.getDimensions() != null) {
+            vo.setContent(toDouble(agentResult.getDimensions().get("content")));
+            vo.setLanguage(toDouble(agentResult.getDimensions().get("language")));
+            vo.setVocabulary(toDouble(agentResult.getDimensions().get("vocabulary")));
+            vo.setStructure(toDouble(agentResult.getDimensions().get("structure")));
+        }
+
+        // 语法错误
+        if (agentResult.getGrammarErrors() != null) {
+            List<EssayCorrectionVo.GrammarError> errors = agentResult.getGrammarErrors().stream()
+                    .map(m -> {
+                        EssayCorrectionVo.GrammarError e = new EssayCorrectionVo.GrammarError();
+                        e.setType(m.get("type"));
+                        e.setSeverity(m.get("severity"));
+                        e.setOriginal(m.get("original"));
+                        e.setCorrection(m.get("correction"));
+                        e.setExplanation(m.get("explanation"));
+                        return e;
+                    }).toList();
+            vo.setGrammarErrors(errors);
+        } else {
+            vo.setGrammarErrors(new ArrayList<>());
+        }
+
+        // 词汇建议
+        if (agentResult.getVocabularySuggestions() != null) {
+            List<EssayCorrectionVo.VocabularySuggestion> suggestions = agentResult.getVocabularySuggestions().stream()
+                    .map(m -> {
+                        EssayCorrectionVo.VocabularySuggestion s = new EssayCorrectionVo.VocabularySuggestion();
+                        s.setOriginal(m.get("original"));
+                        s.setSuggestion(m.get("suggestion"));
+                        s.setReason(m.get("reason"));
+                        return s;
+                    }).toList();
+            vo.setVocabularySuggestions(suggestions);
+        } else {
+            vo.setVocabularySuggestions(new ArrayList<>());
+        }
+
+        // bandLabel
+        if (vo.getBand() != null) {
+            vo.setBandLabel(getBandLabel(vo.getBand()));
+        }
+
+        // 六级降分
+        if (dto.getLevel() != null && dto.getLevel() == 6 && vo.getScore() != null && vo.getScore() > 1) {
+            vo.setScore(vo.getScore() - 1);
+            vo.setBand(getBandFromScore(vo.getScore().intValue()));
+            vo.setBandLabel(getBandLabel(vo.getBand()));
+        }
+
+        // selfCheckList
+        vo.setSelfCheckList(new ArrayList<>());
+        if (agentResult.getWeaknesses() != null) {
+            vo.setSelfCheckList(agentResult.getWeaknesses());
+        }
+
+        return vo;
+    }
+
+    private Double toDouble(Object obj) {
+        if (obj == null) return 0.0;
+        if (obj instanceof Number) return ((Number) obj).doubleValue();
+        try {
+            return Double.parseDouble(obj.toString());
+        } catch (Exception e) {
+            return 0.0;
+        }
+    }
+
+    private int getBandFromScore(int score) {
+        if (score >= 13) return 14;
+        if (score >= 10) return 11;
+        if (score >= 7) return 8;
+        if (score >= 4) return 5;
+        if (score >= 1) return 2;
+        return 0;
+    }
+
+    private String getBandLabel(int band) {
+        return switch (band) {
+            case 14 -> "14分档（13–15分）";
+            case 11 -> "11分档（10–12分）";
+            case 8 -> "8分档（7–9分）";
+            case 5 -> "5分档（4–6分）";
+            case 2 -> "2分档（1–3分）";
+            case 0 -> "0分档";
+            default -> "";
+        };
     }
 }

@@ -134,4 +134,64 @@ public class PromptConstant {
             "题目主题：{topic}\n" +
             "逐句内容（JSON 数组，每项含 source 原文 / reference 参考翻译 / userTranslation 用户译文）：\n" +
             "{items}";
+
+    // ======================== 作文批改（四六级官方评分标准） ========================
+
+    /**
+     * 作文批改 System Prompt。
+     * <p>
+     * 严格依据《全国大学英语四、六级考试大纲（2016修订版）》作文评分原文标准，
+     * 采用总体印象评分法。AI 内部按阅卷步骤推理，最终只输出结构化 JSON，
+     * 字段与 EssayCorrectionVo 一一对应。
+     * </p>
+     */
+    public static final String ESSAY_CORRECT_SYSTEM =
+            "你是一名严格的英语作文批改老师。请先检查作文错误，再根据错误数量打分。\n\n" +
+            "## 第一步：检查错误\n" +
+            "逐句检查以下错误类型：\n" +
+            "- 拼写错误（spelling）\n" +
+            "- 语法错误（grammar）：主谓不一致、时态错误、冠词错误、介词错误等\n" +
+            "- 句子不完整（incomplete）\n" +
+            "- 逻辑不通（logic）\n" +
+            "严重错误 = 会改变句意或影响理解的错误\n" +
+            "轻微错误 = 不影响理解的小错误（如冠词、单复数）\n\n" +
+            "## 第二步：根据错误数量评分（满分15分）\n" +
+            "根据错误总数和严重程度扣分：\n" +
+            "- 无错误或仅1-2个轻微错误：13-15分\n" +
+            "- 3-5个轻微错误或1-2个严重错误：10-12分\n" +
+            "- 6-10个错误或3-4个严重错误：7-9分\n" +
+            "- 10个以上错误或5个以上严重错误：4-6分\n" +
+            "- 错误满篇、无法理解：1-3分\n" +
+            "- 未作答或文不对题：0分\n\n" +
+            "## 重要：四级/六级区分\n" +
+            "CET-4：基础词汇，允许少量错误\n" +
+            "CET-6：要求高级词汇和复杂句式，评分更严格（同样错误数量，六级分数更低）\n\n" +
+            "## 输出要求\n" +
+            "只返回JSON，格式如下：\n" +
+            "{\n" +
+            "  \"score\": 分数0-15,\n" +
+            "  \"band\": 档次(14/11/8/5/2/0),\n" +
+            "  \"bandLabel\": \"X分档\",\n" +
+            "  \"levelScene\": \"说明四级或六级\",\n" +
+            "  \"overall\": \"总体评语\",\n" +
+            "  \"content\": 0-5,\n" +
+            "  \"language\": 0-5,\n" +
+            "  \"vocabulary\": 0-5,\n" +
+            "  \"structure\": 0-5,\n" +
+            "  \"grammarErrors\": [{\"type\":\"类型\",\"severity\":\"serious或minor\",\"original\":\"原句\",\"correction\":\"修正\",\"explanation\":\"解释\"}],\n" +
+            "  \"vocabularySuggestions\": [{\"original\":\"原词\",\"suggestion\":\"建议\",\"reason\":\"原因\"}],\n" +
+            "  \"selfCheckList\": [\"自查要点\"]\n" +
+            "}\n\n" +
+            "注意：grammarErrors必须列出所有发现的错误，不要遗漏。最多10条，vocabularySuggestions最多5条。";
+
+    /**
+     * 作文批改 User Prompt 模板。
+     * <p>占位符：{topic}、{level}、{essay}</p>
+     */
+    public static final String ESSAY_CORRECT_USER =
+            "请批改以下作文：\n\n" +
+            "题目：{topic}\n" +
+            "级别：{level}\n" +
+            "作文：\n{essay}\n\n" +
+            "请按{level}标准评分，返回JSON。";
 }

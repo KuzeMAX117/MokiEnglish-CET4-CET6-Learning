@@ -1,5 +1,5 @@
 """
-从 GitHub 仓库 KyleBing/english-vocabulary 下载单词 txt 文件并生成导入 SQL
+�?GitHub 仓库 KyleBing/english-vocabulary 下载单词 txt 文件并生成导�?SQL
 """
 import urllib.request
 import os
@@ -10,8 +10,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 
 BASE_URL = "https://raw.githubusercontent.com/KyleBing/english-vocabulary/master/"
 
-# 7 个分类文件
-FILES = {
+# 7 个分类文�?FILES = {
     "1_初中_乱序.txt": "1 初中-乱序.txt",
     "2_高中_乱序.txt": "2 高中-乱序.txt",
     "3_四级_乱序.txt": "3 四级-乱序.txt",
@@ -24,11 +23,11 @@ FILES = {
 DATA_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def download_files():
-    """下载所有 txt 文件"""
+    """下载所�?txt 文件"""
     for local_name, remote_name in FILES.items():
         local_path = os.path.join(DATA_DIR, local_name)
         if os.path.exists(local_path):
-            print(f"[跳过] {local_name} 已存在")
+            print(f"[跳过] {local_name} 已存�?)
             continue
         url = BASE_URL + urllib.parse.quote(remote_name)
         print(f"[下载] {local_name} <- {url}")
@@ -38,7 +37,7 @@ def download_files():
 import urllib.parse
 
 def parse_txt(filepath):
-    """解析 txt 文件，返回 [(word, meaning), ...]"""
+    """解析 txt 文件，返�?[(word, meaning), ...]"""
     words = []
     with open(filepath, "r", encoding="utf-8") as f:
         for line in f:
@@ -54,15 +53,15 @@ def parse_txt(filepath):
     return words
 
 def escape_sql(s):
-    """转义 SQL 字符串中的特殊字符"""
+    """转义 SQL 字符串中的特殊字�?""
     return s.replace("\\", "\\\\").replace("'", "\\'")
 
 def generate_sql():
     """生成导入 SQL 文件"""
     
     # 分类映射：文件名 -> (book_name, type_code)
-    # 原 type: 1-四级 2-六级 3-四级词组 4-六级词组
-    # 新 type: 1-初中 2-高中 3-四级 4-六级 5-考研 6-托福 7-SAT
+    # �?type: 1-四级 2-六级 3-四级词组 4-六级词组
+    # �?type: 1-初中 2-高中 3-四级 4-六级 5-考研 6-托福 7-SAT
     CATEGORY_MAP = {
         "1_初中_乱序.txt": ("初中词汇", 1),
         "2_高中_乱序.txt": ("高中词汇", 2),
@@ -79,15 +78,14 @@ def generate_sql():
     total_words = 0
     
     with open(sql_path, "w", encoding="utf-8") as sql:
-        sql.write("-- 从 GitHub KyleBing/english-vocabulary 导入单词数据\n")
+        sql.write("-- �?GitHub KyleBing/english-vocabulary 导入单词数据\n")
         sql.write("-- 分类：初中、高中、四级、六级、考研、托福、SAT\n\n")
         sql.write("SET NAMES utf8mb4;\n\n")
         
-        # 先插入词书
-        sql.write("-- ==================== 词书数据 ====================\n")
+        # 先插入词�?        sql.write("-- ==================== 词书数据 ====================\n")
         sql.write("-- 先删除旧的词书和单词数据（按 book_id）\n")
         
-        # 收集所有 book_id
+        # 收集所�?book_id
         book_ids = []
         for local_name, (book_name, type_code) in CATEGORY_MAP.items():
             book_id = type_code  # 使用 type_code 作为 book_id
@@ -118,10 +116,9 @@ def generate_sql():
             words = parse_txt(filepath)
             book_id = type_code
             
-            sql.write(f"-- ---------- {book_name} ({len(words)} 词) ----------\n")
+            sql.write(f"-- ---------- {book_name} ({len(words)} �? ----------\n")
             
-            # 批量插入，每 100 条一批
-            batch_size = 100
+            # 批量插入，每 100 条一�?            batch_size = 100
             for i in range(0, len(words), batch_size):
                 batch = words[i:i+batch_size]
                 values = []
@@ -139,15 +136,14 @@ def generate_sql():
             
             sql.write("\n")
     
-    print(f"\n[完成] SQL 文件已生成: {sql_path}")
-    print(f"[统计] 共 {total_words} 个单词")
+    print(f"\n[完成] SQL 文件已生�? {sql_path}")
+    print(f"[统计] �?{total_words} 个单�?)
     
-    # 打印每个分类的统计
-    print("\n各分类单词数量：")
+    # 打印每个分类的统�?    print("\n各分类单词数量：")
     for local_name, (book_name, type_code) in CATEGORY_MAP.items():
         filepath = os.path.join(DATA_DIR, local_name)
         words = parse_txt(filepath)
-        print(f"  {book_name}: {len(words)} 词")
+        print(f"  {book_name}: {len(words)} �?)
 
 if __name__ == "__main__":
     print("=" * 50)

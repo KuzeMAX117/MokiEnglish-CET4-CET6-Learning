@@ -4,9 +4,7 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.hao.topic.api.utils.constant.RabbitConstant;
 import com.hao.topic.api.utils.enums.StatusEnums;
-import com.hao.topic.api.utils.mq.RabbitService;
 import com.hao.topic.common.enums.ResultCodeEnum;
 import com.hao.topic.common.exception.TopicException;
 import com.hao.topic.common.security.utils.SecurityUtils;
@@ -43,7 +41,6 @@ public class TopicSubjectServiceImpl implements TopicSubjectService {
     private final TopicSubjectTopicMapper topicSubjectTopicMapper;
     private final TopicCategorySubjectMapper topicCategorySubjectMapper;
     private final TopicCategoryMapper topicCategoryMapper;
-    private final RabbitService rabbitService;
     private final TopicMapper topicMapper;
 
     
@@ -175,7 +172,6 @@ public class TopicSubjectServiceImpl implements TopicSubjectService {
             String topicAuditSubjectJson = JSON.toJSONString(topicAuditSubject);
             log.info("发送消息{}", topicAuditSubjectJson);
             
-            rabbitService.sendMessage(RabbitConstant.SUBJECT_AUDIT_EXCHANGE, RabbitConstant.SUBJECT_AUDIT_ROUTING_KEY_NAME, topicAuditSubjectJson);
         }
 
         
@@ -230,7 +226,6 @@ public class TopicSubjectServiceImpl implements TopicSubjectService {
                 topicAuditSubject.setSubjectDesc(topicSubjectDto.getSubjectDesc());
                 String topicAuditSubjectJson = JSON.toJSONString(topicAuditSubject);
                 log.info("发送消息{}", topicAuditSubjectJson);
-                rabbitService.sendMessage(RabbitConstant.SUBJECT_AUDIT_EXCHANGE, RabbitConstant.SUBJECT_AUDIT_ROUTING_KEY_NAME, topicAuditSubjectJson);
             }
             topicSubjectDb.setFailMsg("");
         }
@@ -397,7 +392,6 @@ public class TopicSubjectServiceImpl implements TopicSubjectService {
                         topicAuditSubject.setUserId(currentId);
                         String topicAuditSubjectJson = JSON.toJSONString(topicAuditSubject);
                         log.info("发送消息{}", topicAuditSubjectJson);
-                        rabbitService.sendMessage(RabbitConstant.SUBJECT_AUDIT_EXCHANGE, RabbitConstant.SUBJECT_AUDIT_ROUTING_KEY_NAME, topicAuditSubjectJson);
                     }
                     TopicCategory topicCategory = topicCategoryMapper.selectOne(new LambdaQueryWrapper<TopicCategory>()
                             .eq(TopicCategory::getCategoryName, topicSubjectExcel.getCategoryName()));
@@ -432,7 +426,6 @@ public class TopicSubjectServiceImpl implements TopicSubjectService {
                             topicAuditSubject.setSubjectDesc(topicSubjectExcel.getSubjectDesc());
                             String topicAuditSubjectJson = JSON.toJSONString(topicAuditSubject);
                             log.info("发送消息{}", topicAuditSubjectJson);
-                            rabbitService.sendMessage(RabbitConstant.SUBJECT_AUDIT_EXCHANGE, RabbitConstant.SUBJECT_AUDIT_ROUTING_KEY_NAME, topicAuditSubjectJson);
                         }
                         topicSubject.setFailMsg("");
                     }

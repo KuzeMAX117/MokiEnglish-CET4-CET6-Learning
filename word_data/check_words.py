@@ -25,7 +25,7 @@ for target in targets:
                 parts = line.split("\t", 1)
                 word = parts[0].strip().lower()
                 if word == target.lower():
-                    meaning = parts[1] if len(parts) > 1 else "(无释义)"
+                    meaning = parts[1] if len(parts) > 1 else "(无释�?"
                     print(f"  [{fname}] 行{i}: {parts[0].strip()} -> {meaning[:100]}")
                     found = True
     if not found:
@@ -49,7 +49,7 @@ for fname in files:
         pass
 
 # 搜索所有以 "be" 开头的单词
-print("\n\n=== 以 'be' 开头的单词（四级文件） ===")
+print("\n\n=== �?'be' 开头的单词（四级文件） ===")
 fpath = os.path.join(DATA_DIR, "3_四级_乱序.txt")
 with open(fpath, "r", encoding="utf-8") as f:
     for i, line in enumerate(f, 1):

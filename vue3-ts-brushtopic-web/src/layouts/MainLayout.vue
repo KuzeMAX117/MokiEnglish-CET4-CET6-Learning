@@ -69,7 +69,6 @@ import { Modal, message } from 'ant-design-vue'
 import {
   Home,
   Database,
-  Bot,
   Trophy,
   BookOpen,
   FileText,
@@ -80,6 +79,7 @@ import {
   User,
   LogOut,
   ChevronDown,
+  Zap,
 } from 'lucide-vue-next'
 import { useUserStore } from '@/stores/user'
 import { apiLogout } from '@/api/auth'
@@ -99,7 +99,7 @@ const navItems = [
   { key: '/reading', label: '文章阅读', icon: FileText },
   { key: '/writing', label: '作文批改', icon: Pencil },
   { key: '/translation', label: '翻译练习', icon: Languages },
-  { key: '/ai', label: 'AI 练习', icon: Bot },
+  { key: '/pk', label: '词汇量PK', icon: Zap },
   { key: '/ranking', label: '排行榜', icon: Trophy },
 ]
 

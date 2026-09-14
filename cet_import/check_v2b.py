@@ -15,7 +15,7 @@ print(f"Sample answers: {ans_vals[:10]}")
 
 # Show paper question counts
 print("\nPapers:")
-for m in re.finditer(r"-- \[(\d+)\].*?-- 题目数: (\d+)", content):
+for m in re.finditer(r"-- \[(\d+)\].*?-- 题目�? (\d+)", content):
     num = m.group(1)
     count = int(m.group(2))
     status = "good" if count >= 40 else "bad" if count < 5 else "partial"

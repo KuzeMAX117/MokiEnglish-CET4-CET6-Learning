@@ -34,30 +34,43 @@ public class GrammarCheckTool implements AgentTool {
     public ToolResult execute(String essay, String topic, Integer level) {
         try {
             String systemPrompt = """
-                You are an English grammar expert. Check the following English essay for grammar errors.
-                Return a JSON object with the format:
+                You are a strict English grammar checker. Check the essay for ALL errors.
+                
+                Find these errors:
+                1. Spelling errors (misspelled words)
+                2. Grammar errors (subject-verb agreement, tense, articles, prepositions)
+                3. Incomplete sentences (missing parts)
+                4. Punctuation errors
+                
+                For each error, classify severity:
+                - serious: changes meaning or makes sentence incomprehensible
+                - minor: doesn't affect understanding but incorrect
+                
+                Return JSON:
                 {
                     "errors": [
                         {
-                            "original": "the sentence with error",
-                            "correction": "corrected sentence",
-                            "explanation": "grammar rule explanation"
+                            "type": "grammar/spelling/tense/punctuation",
+                            "severity": "serious/minor",
+                            "original": "text with error",
+                            "correction": "corrected text",
+                            "explanation": "what's wrong"
                         }
                     ],
-                    "errorCount": 3
+                    "errorCount": number,
+                    "seriousCount": number
                 }
-                Only return the JSON, no other text.
+                List ALL errors found. Be strict, do not ignore any errors.
                 """;
 
             String userPrompt = String.format("""
-                Level: %s (CET-%s)
+                Level: CET-%s
                 Topic: %s
                 
-                Essay:
+                Check this essay for ALL errors:
                 %s
                 
-                Please check for grammar errors and return the result in JSON format.
-                """, level == 4 ? "四级" : "六级", level, topic, essay);
+                List every error you find.""", level == 4 ? "四级" : "六级", topic, essay);
 
             String content = chatClient.prompt()
                     .system(systemPrompt)
@@ -68,10 +81,21 @@ public class GrammarCheckTool implements AgentTool {
             JSONObject result = parseJson(content);
             JSONArray errors = result.getJSONArray("errors");
             List<Map<String, String>> errorList = new ArrayList<>();
+            int seriousCount = 0;
+            int minorCount = 0;
+
             if (errors != null) {
                 for (int i = 0; i < errors.size(); i++) {
                     JSONObject err = errors.getJSONObject(i);
+                    String severity = err.getString("severity");
+                    if ("serious".equals(severity)) {
+                        seriousCount++;
+                    } else {
+                        minorCount++;
+                    }
                     errorList.add(Map.of(
+                            "type", err.getString("type") != null ? err.getString("type") : "grammar",
+                            "severity", severity != null ? severity : "minor",
                             "original", err.getString("original"),
                             "correction", err.getString("correction"),
                             "explanation", err.getString("explanation")
@@ -81,7 +105,9 @@ public class GrammarCheckTool implements AgentTool {
 
             return ToolResult.success(getToolName(), Map.of(
                     "errors", errorList,
-                    "errorCount", errorList.size()
+                    "errorCount", errorList.size(),
+                    "seriousCount", seriousCount,
+                    "minorCount", minorCount
             ));
         } catch (Exception e) {
             log.error("语法检查失败", e);

@@ -31,6 +31,30 @@
     </div>
 
     
+    
+    <div class="exam-banner" @click="openExamRegistration">
+      <div class="exam-left">
+        <div class="exam-badge">CET</div>
+        <div class="exam-info">
+          <div class="exam-title">四六级考试报名</div>
+          <div class="exam-desc">官方报名入口 · 中国教育考试网</div>
+        </div>
+      </div>
+      <div class="exam-right">
+        <div class="countdown-card">
+          <div class="countdown-num">{{ daysToExam }}</div>
+          <div class="countdown-text">
+            <span>距离考试</span>
+            <span>还有 {{ daysToExam }} 天</span>
+          </div>
+        </div>
+        <div class="exam-link">
+          前往报名
+          <RightOutlined />
+        </div>
+      </div>
+    </div>
+
     <div class="stats-grid">
       <div class="stat-card" v-for="s in statCards" :key="s.key">
         <div class="stat-icon" :class="s.color">
@@ -75,6 +99,41 @@
             </div>
           </a-spin>
         </div>
+
+        <div class="panel article-rec-panel" style="margin-top: 24px;">
+          <div class="panel-head">
+            <div class="panel-title">
+              <ReadOutlined class="t-icon cyan" />
+              文章推荐
+            </div>
+            <a-button type="link" size="small" @click="router.push('/reading')">
+              查看更多
+              <RightOutlined />
+            </a-button>
+          </div>
+          <div class="article-rec-grid">
+            <div
+              v-for="article in recommendArticles"
+              :key="article.id"
+              class="article-rec-card"
+              @click="router.push(`/reading/${article.id}`)"
+            >
+              <div class="article-rec-top">
+                <span class="article-difficulty">
+                  <span v-for="i in article.difficulty" :key="i" class="diff-dot active"></span>
+                  <span v-for="i in (5 - article.difficulty)" :key="'e'+i" class="diff-dot"></span>
+                </span>
+                <span class="article-source">{{ article.source }}</span>
+              </div>
+              <h4 class="article-rec-title">{{ article.title }}</h4>
+              <p class="article-rec-preview">{{ article.preview }}</p>
+              <div class="article-rec-footer">
+                <span class="article-words">{{ article.wordCount }} 词</span>
+                <span class="article-reads">{{ article.readCount }} 次阅读</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       
@@ -110,7 +169,7 @@
               <FileTextOutlined class="q-icon q2" />
               <span>六级真题</span>
             </div>
-            <div class="quick-item" @click="router.push('/vocabulary')">
+            <div class="quick-item" @click="router.push('/vocabulary/review')">
               <BookOutlined class="q-icon q3" />
               <span>背单词</span>
             </div>
@@ -126,9 +185,9 @@
               <SwapOutlined class="q-icon q2" />
               <span>翻译练习</span>
             </div>
-            <div class="quick-item" @click="router.push('/ai')">
-              <RobotOutlined class="q-icon q3" />
-              <span>AI 练习</span>
+            <div class="quick-item" @click="router.push('/pk')">
+              <ThunderboltFilled class="q-icon q1" />
+              <span>词汇量PK</span>
             </div>
             <div class="quick-item" @click="router.push('/ranking')">
               <TrophyOutlined class="q-icon q3" />
@@ -157,7 +216,6 @@ import {
   ClockCircleOutlined,
   RiseOutlined,
   ThunderboltFilled,
-  RobotOutlined,
   DatabaseOutlined,
   UserOutlined,
   FileTextOutlined,
@@ -167,6 +225,7 @@ import {
   ReadOutlined,
   EditOutlined,
   SwapOutlined,
+  CalendarOutlined,
 } from '@ant-design/icons-vue'
 import { apiQueryWebHomeCount, apiQueryTopicTodayVo, apiFlushTopic } from '@/api/home'
 import { useUserStore } from '@/stores/user'
@@ -178,6 +237,55 @@ const userStore = useUserStore()
 const loading = ref(true)
 const webHomeCount = ref<WebHomeCount>({})
 const topicTodayVo = ref<TodayTopicVo[]>([])
+
+const openExamRegistration = () => {
+  window.open('https://cet.neea.edu.cn/', '_blank')
+}
+
+const daysToExam = computed(() => {
+  const now = new Date()
+  const year = now.getFullYear()
+  const examDates = [
+    new Date(year, 5, 13),
+    new Date(year, 11, 12),
+    new Date(year + 1, 5, 12),
+    new Date(year + 1, 11, 11),
+  ]
+  const future = examDates.filter(d => d > now)
+  if (future.length === 0) return 180
+  const diff = future[0].getTime() - now.getTime()
+  return Math.ceil(diff / (1000 * 60 * 60 * 24))
+})
+
+const recommendArticles = ref([
+  {
+    id: 1,
+    title: 'The Rise of Artificial Intelligence in Healthcare',
+    preview: 'Artificial intelligence is transforming the healthcare industry in ways that were unimaginable a decade ago...',
+    source: 'The Guardian',
+    difficulty: 3,
+    wordCount: 520,
+    readCount: 128,
+  },
+  {
+    id: 2,
+    title: 'Climate Change and Its Impact on Global Agriculture',
+    preview: 'As global temperatures continue to rise, farmers around the world are facing unprecedented challenges...',
+    source: 'BBC News',
+    difficulty: 4,
+    wordCount: 680,
+    readCount: 95,
+  },
+  {
+    id: 3,
+    title: 'The Future of Remote Work After the Pandemic',
+    preview: 'The COVID-19 pandemic forced millions of people to work from home, fundamentally changing how we think about the workplace...',
+    source: 'NYT',
+    difficulty: 2,
+    wordCount: 450,
+    readCount: 210,
+  },
+])
 
 const initData = async () => {
   loading.value = true
@@ -762,9 +870,215 @@ const handleQuestion = async (item: TodayTopicVo) => {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .exam-banner {
+    flex-direction: column;
+    gap: 16px;
+
+    .exam-right {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
 }
 
 :deep(.ant-empty-description) {
   color: var(--text-muted);
+}
+
+.exam-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 28px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, rgba(66, 87, 178, 0.08), rgba(66, 87, 178, 0.02));
+  border: 1px solid rgba(66, 87, 178, 0.2);
+  cursor: pointer;
+  transition: all 0.3s;
+
+  &:hover {
+    border-color: var(--primary);
+    box-shadow: 0 6px 20px rgba(66, 87, 178, 0.15);
+    transform: translateY(-2px);
+  }
+
+  .exam-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .exam-badge {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--primary);
+      color: #fff;
+      font-size: calc(16px + var(--font-offset, 0px));
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .exam-info {
+      .exam-title {
+        font-size: calc(16px + var(--font-offset, 0px));
+        font-weight: 700;
+        color: var(--text-title);
+      }
+
+      .exam-desc {
+        font-size: calc(12px + var(--font-offset, 0px));
+        color: var(--text-muted);
+        margin-top: 2px;
+      }
+    }
+  }
+
+  .exam-right {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+
+    .countdown-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .countdown-num {
+        font-size: calc(28px + var(--font-offset, 0px));
+        font-weight: 800;
+        color: var(--primary);
+        line-height: 1;
+      }
+
+      .countdown-text {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+
+        span {
+          font-size: calc(12px + var(--font-offset, 0px));
+          color: var(--text-muted);
+          line-height: 1.3;
+        }
+      }
+    }
+
+    .exam-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      border-radius: var(--radius-md);
+      background: var(--primary);
+      color: #fff;
+      font-size: calc(13px + var(--font-offset, 0px));
+      font-weight: 600;
+      transition: all 0.3s;
+
+      &:hover {
+        background: var(--primary-hover);
+      }
+    }
+  }
+}
+
+.article-rec-panel {
+  .article-rec-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+
+    .article-rec-card {
+      padding: 18px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      cursor: pointer;
+      transition: all 0.28s;
+      display: flex;
+      flex-direction: column;
+
+      &:hover {
+        border-color: var(--primary);
+        background: var(--primary-light);
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-hover);
+      }
+
+      .article-rec-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+
+        .article-difficulty {
+          display: flex;
+          gap: 3px;
+
+          .diff-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--border);
+            transition: background 0.2s;
+
+            &.active {
+              background: var(--primary);
+            }
+          }
+        }
+
+        .article-source {
+          font-size: calc(11px + var(--font-offset, 0px));
+          color: var(--text-muted);
+          padding: 2px 8px;
+          border-radius: 10px;
+          background: var(--primary-light);
+          color: var(--primary);
+        }
+      }
+
+      .article-rec-title {
+        font-size: calc(14px + var(--font-offset, 0px));
+        font-weight: 700;
+        color: var(--text-title);
+        margin: 0 0 8px;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .article-rec-preview {
+        font-size: calc(12px + var(--font-offset, 0px));
+        color: var(--text-muted);
+        line-height: 1.6;
+        margin: 0 0 12px;
+        flex: 1;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .article-rec-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 10px;
+        border-top: 1px solid var(--border);
+
+        span {
+          font-size: calc(11px + var(--font-offset, 0px));
+          color: var(--text-muted);
+        }
+      }
+    }
+  }
 }
 </style>
