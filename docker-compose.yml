@@ -1,0 +1,211 @@
+version: '3.8'
+
+services:
+  # ==================== 中间�?====================
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD:-123456}
+      TZ: Asia/Shanghai
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
+
+  nacos:
+    image: nacos/nacos-server:v2.2.3
+    container_name: nacos
+    restart: always
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+    environment:
+      MODE: standalone
+      SPRING_DATASOURCE_PLATFORM: ""
+      JVM_XMS: 256m
+      JVM_XMX: 256m
+
+  minio:
+    image: minio/minio
+    container_name: minio
+    restart: always
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD:-minioadmin}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+
+  # ==================== Java微服�?====================
+  topic-security:
+    build:
+      context: ./springcloud-brushtopic-api/topic-security
+      dockerfile: Dockerfile
+    container_name: topic-security
+    restart: always
+    ports:
+      - "9999:9999"
+    environment:
+      NACOS_SERVER_ADDR: nacos:8848
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-123456}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
+      JAVA_OPTS: "-Xms256m -Xmx256m"
+    command: sh -c "java $JAVA_OPTS -jar app.jar --spring.cloud.nacos.discovery.server-addr=nacos:8848 --spring.cloud.nacos.config.server-addr=nacos:8848"
+    depends_on:
+      - nacos
+      - mysql
+      - redis
+
+  admin-gateway:
+    build:
+      context: ./springcloud-brushtopic-api/topic-gateway/admin-gateway
+      dockerfile: Dockerfile
+    container_name: admin-gateway
+    restart: always
+    ports:
+      - "9992:9992"
+    environment:
+      NACOS_SERVER_ADDR: nacos:8848
+      JAVA_OPTS: "-Xms256m -Xmx256m"
+    command: sh -c "java $JAVA_OPTS -jar app.jar --spring.cloud.nacos.discovery.server-addr=nacos:8848 --spring.cloud.nacos.config.server-addr=nacos:8848"
+    depends_on:
+      - nacos
+
+  web-gateway:
+    build:
+      context: ./springcloud-brushtopic-api/topic-gateway/web-gateway
+      dockerfile: Dockerfile
+    container_name: web-gateway
+    restart: always
+    ports:
+      - "9993:9993"
+    environment:
+      NACOS_SERVER_ADDR: nacos:8848
+      JAVA_OPTS: "-Xms256m -Xmx256m"
+    command: sh -c "java $JAVA_OPTS -jar app.jar --spring.cloud.nacos.discovery.server-addr=nacos:8848 --spring.cloud.nacos.config.server-addr=nacos:8848"
+    depends_on:
+      - nacos
+
+  service-system:
+    build:
+      context: ./springcloud-brushtopic-api/topic-api/topic-api-system
+      dockerfile: Dockerfile
+    container_name: service-system
+    restart: always
+    ports:
+      - "9996:9996"
+    environment:
+      NACOS_SERVER_ADDR: nacos:8848
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-123456}
+      JAVA_OPTS: "-Xms256m -Xmx256m"
+    command: sh -c "java $JAVA_OPTS -jar app.jar --spring.cloud.nacos.discovery.server-addr=nacos:8848 --spring.cloud.nacos.config.server-addr=nacos:8848"
+    depends_on:
+      - nacos
+      - mysql
+      - redis
+
+  service-topic:
+    build:
+      context: ./springcloud-brushtopic-api/topic-api/topic-api-topic
+      dockerfile: Dockerfile
+    container_name: service-topic
+    restart: always
+    ports:
+      - "9997:9997"
+    environment:
+      NACOS_SERVER_ADDR: nacos:8848
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-123456}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
+      JAVA_OPTS: "-Xms256m -Xmx256m"
+    command: sh -c "java $JAVA_OPTS -jar app.jar --spring.cloud.nacos.discovery.server-addr=nacos:8848 --spring.cloud.nacos.config.server-addr=nacos:8848"
+    depends_on:
+      - nacos
+      - mysql
+      - redis
+      - rabbitmq
+
+  service-ai:
+    build:
+      context: ./springcloud-brushtopic-api/topic-api/topic-api-ai
+      dockerfile: Dockerfile
+    container_name: service-ai
+    restart: always
+    ports:
+      - "9998:9998"
+    environment:
+      NACOS_SERVER_ADDR: nacos:8848
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-123456}
+      aliyun_key: ${ALIYUN_KEY}
+      JAVA_OPTS: "-Xms256m -Xmx256m"
+    command: sh -c "java $JAVA_OPTS -jar app.jar --spring.cloud.nacos.discovery.server-addr=nacos:8848 --spring.cloud.nacos.config.server-addr=nacos:8848"
+    depends_on:
+      - nacos
+      - mysql
+      - redis
+
+  # ==================== 前端 ====================
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./vue3-ts-brushtopic-admin/dist:/usr/share/nginx/html/admin
+      - ./vue3-ts-brushtopic-web/dist:/usr/share/nginx/html/web
+
+volumes:
+  mysql_data:
+  minio_data:

@@ -12,10 +12,19 @@
 
 		<view class="card-area" v-if="currentWord">
 			<view class="word-card" @click="showDetail = true">
-				<view class="word-main">
-					<text class="word-text">{{ currentWord.word }}</text>
+			<view class="word-main">
+				<text class="word-text">{{ currentWord.word }}</text>
+				<view class="phonetic-row">
 					<text class="phonetic">{{ currentWord.phonetic || ' ' }}</text>
+					<view class="play-btn" @click.stop="readAloud(currentWord.word)" v-if="!isSpeaking" v-show="!readAloudLoading">
+						<uv-icon name="volume" size="22" color="#1677ff"></uv-icon>
+					</view>
+					<uv-loading-icon v-if="readAloudLoading" size="22"></uv-loading-icon>
+					<view class="play-btn" @click.stop="cancelReadAloud" v-if="isSpeaking" v-show="!readAloudLoading">
+						<uv-icon name="volume-off" size="22" color="#999"></uv-icon>
+					</view>
 				</view>
+			</view>
 				<text class="tap-tip" v-if="!showDetail">点击卡片显示释义</text>
 			</view>
 
@@ -79,6 +88,83 @@ const loading = ref(true)
 const showSyllable = ref(false)
 const showExample = ref(true)
 const settingPopup = ref(null)
+
+const isSpeaking = ref(false)
+const readAloudLoading = ref(false)
+const loadingTextArr = [
+	"正在朗读中...",
+	"语音合成中，请稍等~",
+	"马上就能听到啦！"
+]
+const loadingText = ref(loadingTextArr[Math.floor(Math.random() * loadingTextArr.length)])
+let currentAudio = null
+
+const token = ref('')
+try {
+	const userInfo = JSON.parse(uni.getStorageSync('h5UserInfo') || '{}')
+	token.value = localStorage.getItem(userInfo.account + 'token') || ''
+} catch (e) {}
+
+const readAloud = (text) => {
+	if (!text) return
+	if (currentAudio) {
+		currentAudio.pause()
+		currentAudio.currentTime = 0
+		currentAudio = null
+	}
+	readAloudLoading.value = true
+	isSpeaking.value = true
+
+	fetch('http://localhost:9993/api/ai/model/tts', {
+		method: 'post',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': token.value
+		},
+		body: JSON.stringify({ text })
+	})
+		.then(res => {
+			if (!res.ok) throw new Error('语音合成请求失败')
+			return res.blob()
+		})
+		.then((blob) => {
+			readAloudLoading.value = false
+			const url = URL.createObjectURL(blob)
+			const audio = new Audio(url)
+			currentAudio = audio
+			audio.play()
+			audio.onended = () => {
+				isSpeaking.value = false
+				currentAudio = null
+				URL.revokeObjectURL(url)
+			}
+		})
+		.catch(() => {
+			readAloudLoading.value = false
+			readAloudWeb(text)
+		})
+}
+
+const readAloudWeb = (text) => {
+	if (!text) return
+	const utterance = new SpeechSynthesisUtterance(text)
+	utterance.lang = 'en-US'
+	utterance.rate = 0.9
+	utterance.pitch = 1
+	window.speechSynthesis.speak(utterance)
+	isSpeaking.value = true
+	utterance.onend = () => { isSpeaking.value = false }
+}
+
+const cancelReadAloud = () => {
+	isSpeaking.value = false
+	window.speechSynthesis.cancel()
+	if (currentAudio) {
+		currentAudio.pause()
+		currentAudio.currentTime = 0
+		currentAudio = null
+	}
+}
 
 const currentWord = computed(() => {
 	if (words.value.length === 0) return null
@@ -228,10 +314,27 @@ const goSelectBook = () => {
 			word-break: break-all;
 		}
 
-		.phonetic {
-			font-size: 32rpx;
-			color: #1677ff;
-			display: block;
+		.phonetic-row {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 16rpx;
+
+			.phonetic {
+				font-size: 32rpx;
+				color: #1677ff;
+				display: block;
+			}
+
+			.play-btn {
+				padding: 8rpx;
+				border-radius: 50%;
+				background: #f0f7ff;
+
+				&:active {
+					opacity: 0.7;
+				}
+			}
 		}
 	}
 

@@ -447,6 +447,9 @@ const handleQuestion = async (item: TodayTopicVo) => {
 
         .btn-icon {
           font-size: calc(15px + var(--font-offset, 0px));
+          line-height: 1;
+          display: flex;
+          align-items: center;
         }
       }
 
@@ -471,6 +474,9 @@ const handleQuestion = async (item: TodayTopicVo) => {
 
         .btn-icon {
           font-size: calc(15px + var(--font-offset, 0px));
+          line-height: 1;
+          display: flex;
+          align-items: center;
         }
       }
     }
@@ -804,6 +810,9 @@ const handleQuestion = async (item: TodayTopicVo) => {
 
     .btn-icon {
       font-size: calc(14px + var(--font-offset, 0px));
+      line-height: 1;
+      display: flex;
+      align-items: center;
     }
   }
 }

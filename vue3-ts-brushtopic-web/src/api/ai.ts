@@ -1,12 +1,7 @@
 import request from '@/utils/request'
-import type { ApiResult, AiHistoryGroup, TranslationCorrectPayload, TranslationCorrectionResult, EssayCorrectPayload, EssayCorrectionResult } from '@/types'
+import type { ApiResult, TranslationCorrectPayload, TranslationCorrectionResult, EssayCorrectPayload, EssayCorrectionResult } from '@/types'
 
 const prefix = '/ai/model/'
-
-export const apiGetManageList = (params: { pageNum: number; pageSize: number; title?: string | null }) =>
-  request.get<any, ApiResult<AiHistoryGroup[]>>(prefix + 'history', { params })
-
-export const apiGetHistoryDetail = (id: number) => request.get<any, ApiResult<any[]>>(prefix + 'history/' + id)
 
 /** AI 翻译多维度智能批改 */
 export const apiCorrectTranslation = (data: TranslationCorrectPayload) =>

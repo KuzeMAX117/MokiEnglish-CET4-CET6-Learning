@@ -42,6 +42,9 @@ application-local.yaml
 check_nacos.ps1
 fix_vm.sh
 update_meaning.py
+run_sql.bat
+sql/run_*.bat
+word_data/*.py
 
 # SQL 文件（含敏感数据）
 sql/topic.sql

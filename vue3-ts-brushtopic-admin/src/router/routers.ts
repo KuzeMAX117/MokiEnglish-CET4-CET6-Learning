@@ -150,30 +150,7 @@ export const constantRoute = [
     ]
   },
   
-  {
-    path: '/ai',
-    component: () => import('../layout/index.vue'),
-    redirect: '/ai/manage',
-    meta: {
-      title: '模型管理',
-    },
-    children: [{
-      path: '/ai/manage',
-      meta: {
-        title: 'AI管理',
-      },
-      component: () => import('@/views/ai/manage/index.vue'),
-    },
-    {
-      path: '/ai/model',
-      meta: {
-        title: 'AI模型',
-      },
-      component: () => import('@/views/ai/model/index.vue'),
-    }
-    ]
-  },
-  
+
   {
     path: '/profile',
     component: () => import('../layout/index.vue'),

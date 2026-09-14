@@ -27,14 +27,7 @@
 				"navigationStyle": "custom"
 			}
 		},
-		{
-			"path": "pages/ai/ai",
-			"style": {
-				"navigationBarTitleText": "ai",
-				"navigationStyle": "custom"
-			}
-		},
-		{
+{
 			"path": "pages/user/user",
 			"style": {
 				"navigationBarTitleText": "我的",
@@ -113,13 +106,7 @@
 				"selectedIconPath": "static/tabbar/topic-active.png",
 				"text": "题库"
 			},
-			{
-				"pagePath": "pages/ai/ai",
-				"iconPath": "static/tabbar/ai.png",
-				"selectedIconPath": "static/tabbar/ai-active.png",
-				"text": "AI"
-			},
-			{
+{
 				"pagePath": "pages/word/study/study",
 				"iconPath": "static/tabbar/topic.png",
 				"selectedIconPath": "static/tabbar/topic-active.png",
