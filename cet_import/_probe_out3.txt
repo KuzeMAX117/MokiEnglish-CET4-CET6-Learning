@@ -1,6 +1,0 @@
-﻿tables: 1
---- table 0: 8 rows x 2 cols
-A) wore | I) intense | B) wildlife | J) human | C) suspect | K) effective | D) struck | L) delight | E) similar | M) colorful | F) quantity | N) bore | G) overthrown | O) alike | H) mess
-
-word-like lines count: 0
-[]

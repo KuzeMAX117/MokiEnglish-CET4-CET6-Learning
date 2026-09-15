@@ -38,3 +38,21 @@ application-local.yaml
 # 配置文件（含敏感信息，不上传）
 配置文件/common-config.yaml
 配置文件/common-minio-config.yaml
+
+# 调试/开发脚本
+cet_import/check_*.py
+cet_import/debug_*.py
+cet_import/extract_*.py
+cet_import/scan_*.py
+cet_import/import_*.py
+cet_import/download_*.py
+cet_import/make_*.py
+generate_*.py
+update_meaning.py
+word_data/*.py
+sql/*.bat
+sql/topic.sql
+run_sql.bat
+
+# 功能清单/分析文档
+项目分析文档.md
