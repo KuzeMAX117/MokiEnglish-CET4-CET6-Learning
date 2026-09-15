@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hao.topic.api.utils.enums.StatusEnums;
-import com.hao.topic.common.constant.RedisConstant;
 import com.hao.topic.common.exception.TopicException;
 import com.hao.topic.common.security.utils.SecurityUtils;
 import com.hao.topic.common.utils.StringUtils;
@@ -27,7 +26,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,19 +41,6 @@ public class PaperManageServiceImpl implements PaperManageService {
     private final PaperTopicMapper paperTopicMapper;
     private final TopicMapper topicMapper;
     private final TopicRecordMapper topicRecordMapper;
-    private final StringRedisTemplate stringRedisTemplate;
-
-    
-    private void evictPaperCache(Long paperId, Integer level) {
-        if (paperId != null) {
-            stringRedisTemplate.delete(RedisConstant.PAPER_DETAIL_PREFIX + paperId);
-        }
-        if (level != null) {
-            stringRedisTemplate.delete(RedisConstant.PAPER_LIST_PREFIX + level);
-        }
-        stringRedisTemplate.delete(RedisConstant.PAPER_LIST_PREFIX + 4);
-        stringRedisTemplate.delete(RedisConstant.PAPER_LIST_PREFIX + 6);
-    }
 
     /**
      * 卷内板块顺序
@@ -215,7 +200,6 @@ public class PaperManageServiceImpl implements PaperManageService {
             paper.setTotalScore(dto.getTotalScore());
         }
         paperMapper.updateById(paper);
-        evictPaperCache(dto.getId(), dto.getLevel());
     }
 
     @Override
@@ -231,7 +215,6 @@ public class PaperManageServiceImpl implements PaperManageService {
             }
             removePaperTopics(id, null);
             paperMapper.deleteById(id);
-            evictPaperCache(id, paper.getLevel());
             log.info("删除试卷：id={}, title={}", id, paper.getTitle());
         }
     }
@@ -348,7 +331,6 @@ public class PaperManageServiceImpl implements PaperManageService {
 
         log.info("试卷分段保存：paperId={}, section={}, saved={}, warnings={}",
                 dto.getPaperId(), dto.getSection(), savedCount, warnings.size());
-        evictPaperCache(dto.getPaperId(), null);
         Map<String, Object> result = new HashMap<>();
         result.put("savedCount", savedCount);
         result.put("warnings", warnings);
@@ -396,7 +378,6 @@ public class PaperManageServiceImpl implements PaperManageService {
 
         paper.setStatus(PAPER_STATUS_NORMAL);
         paperMapper.updateById(paper);
-        evictPaperCache(id, paper.getLevel());
         log.info("发布试卷：id={}, title={}, warnings={}", id, paper.getTitle(), warnings.size());
 
         Map<String, Object> result = new HashMap<>();
@@ -416,7 +397,6 @@ public class PaperManageServiceImpl implements PaperManageService {
         }
         paper.setStatus(PAPER_STATUS_STOP);
         paperMapper.updateById(paper);
-        evictPaperCache(id, paper.getLevel());
         log.info("下架试卷：id={}, title={}", id, paper.getTitle());
     }
 

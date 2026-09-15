@@ -1,5 +1,6 @@
 package com.hao.topic.topic.controller;
 
+import com.hao.topic.api.utils.helper.MinioHelper;
 import com.hao.topic.api.utils.utils.ExcelUtil;
 import com.hao.topic.common.enums.ResultCodeEnum;
 import com.hao.topic.common.exception.TopicException;
@@ -38,6 +39,8 @@ public class TopicSubjectController {
 
     private final TopicSubjectService topicSubjectService;
 
+    private final MinioHelper minioHelper;
+
     
 
     @GetMapping("/list")
@@ -54,6 +57,16 @@ public class TopicSubjectController {
     public Result add(@RequestBody TopicSubjectDto topicCategoryDto) {
         topicSubjectService.add(topicCategoryDto);
         return Result.success();
+    }
+
+    
+
+    @PostMapping("/img")
+    @PreAuthorize("hasAuthority('admin')  || hasAuthority('member')")
+    public Result upload(@RequestParam("avatar") MultipartFile file) {
+        
+        String url = minioHelper.uploadFile(file, "subject");
+        return Result.success(url);
     }
 
     

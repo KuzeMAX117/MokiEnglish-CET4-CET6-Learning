@@ -15,7 +15,7 @@ for fname in sorted(os.listdir(cache_dir))[:8]:
     
     # Find answer patterns - look for the LAST occurrence
     # Pattern 1: 1-5:CBCAA
-    range_matches = list(re.finditer(r"(\d+)[-–](\d+)\s*[�?]\s*([A-D]{1,20})", text))
+    range_matches = list(re.finditer(r"(\d+)[-–](\d+)\s*[：:]\s*([A-D]{1,20})", text))
     if range_matches:
         print(f"  Range answers found: {len(range_matches)}")
         # Show the last group

@@ -14,7 +14,7 @@ for fname in sorted(os.listdir(cache_dir)):
                 content = f.read().decode('utf-8')
             
             # Search for answer patterns
-            range_matches = re.findall(r"(\d+)[-–](\d+)\s*[�?]\s*([A-D]{1,20})", content)
+            range_matches = re.findall(r"(\d+)[-–](\d+)\s*[：:]\s*([A-D]{1,20})", content)
             if range_matches:
                 print(f"FOUND ANSWERS in {fname[:50]}...")
                 print(f"  Matches: {range_matches[:5]}")

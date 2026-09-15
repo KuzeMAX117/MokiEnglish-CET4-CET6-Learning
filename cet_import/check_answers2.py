@@ -15,9 +15,9 @@ for fname in sorted(os.listdir(cache_dir))[:5]:
     
     # Search for answer patterns
     patterns_to_find = [
-        (r"\d+[-–]\d+\s*[�?]\s*[A-D]+", "range answers"),
-        (r"参考答�?, "参考答�?),
-        (r"答案[�?]", "答案�?),
+        (r"\d+[-–]\d+\s*[：:]\s*[A-D]+", "range answers"),
+        (r"参考答案", "参考答案"),
+        (r"答案[：:]", "答案："),
     ]
     
     for pat, desc in patterns_to_find:

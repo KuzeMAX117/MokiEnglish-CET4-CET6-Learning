@@ -20,12 +20,13 @@ all_text = "\n".join([p.text for p in doc.paragraphs])
 print(f"Total text length: {len(all_text)}")
 
 # Search for answer patterns
-range_matches = re.findall(r"(\d+)[-–](\d+)\s*[�?]\s*([A-D]{1,20})", all_text)
+range_matches = re.findall(r"(\d+)[-–](\d+)\s*[：:]\s*([A-D]{1,20})", all_text)
 print(f"Range answers found: {range_matches}")
 
-# Check for 参考答�?idx = all_text.rfind("参考答�?)
+# Check for 参考答案
+idx = all_text.rfind("参考答案")
 if idx >= 0:
-    print(f"\nFound 参考答�?at {idx}")
+    print(f"\nFound 参考答案 at {idx}")
     print(f"Context: ...{all_text[max(0,idx-100):idx+300]}...")
 
 # Show last 500 chars

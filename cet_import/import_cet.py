@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-四六级真题完整导入脚�?v4
-修复答案解析 - 处理【】括号格�?"""
+四六级真题完整导入脚本 v4
+修复答案解析 - 处理【】括号格式
+"""
 import os
 import re
 import json
@@ -51,7 +52,7 @@ def download_docx(file_info, index):
 
 def parse_exam_meta(filepath):
     meta = {"level": 4, "year": 2015, "half": 2, "set_num": 1}
-    ym = re.search(r"(\d{4})�?\d{1,2})�?, filepath)
+    ym = re.search(r"(\d{4})年(\d{1,2})月", filepath)
     if ym:
         meta["year"] = int(ym.group(1))
         meta["half"] = 1 if int(ym.group(2)) <= 6 else 2
@@ -62,14 +63,14 @@ def parse_exam_meta(filepath):
     sm = re.search(r"[卷第]([一二三123])", filepath)
     if sm:
         c = sm.group(1)
-        meta["set_num"] = {"一": 1, "�?: 2, "�?: 3, "1": 1, "2": 2, "3": 3}.get(c, 1)
-    elif "�?�? in filepath or "�?1 �? in filepath:
+        meta["set_num"] = {"一": 1, "二": 2, "三": 3, "1": 1, "2": 2, "3": 3}.get(c, 1)
+    elif "第1套" in filepath or "第 1 套" in filepath:
         meta["set_num"] = 1
-    elif "�?�? in filepath or "�?2 �? in filepath:
+    elif "第2套" in filepath or "第 2 套" in filepath:
         meta["set_num"] = 2
-    elif "�?�? in filepath or "�?3 �? in filepath:
+    elif "第3套" in filepath or "第 3 套" in filepath:
         meta["set_num"] = 3
-    half_text = "上半�? if meta["half"] == 1 else "下半�?
+    half_text = "上半年" if meta["half"] == 1 else "下半年"
     level_text = "四级" if meta["level"] == 4 else "六级"
     meta["title"] = f"{meta['year']}年{half_text}大学英语{level_text}真题（第{meta['set_num']}套）"
     return meta
@@ -81,20 +82,20 @@ def read_docx(docx_path):
 
 
 def parse_answers_v4(text):
-    """Improved answer parser - handles 【�?brackets and word bank letters"""
+    """Improved answer parser - handles 【】 brackets and word bank letters"""
     answers = {}
     
     # Find answer section - look for the actual answer key patterns
     # The answers are typically at the very end of the text
-    # Format: �?-5】CBDAA    �?-10】DBDAC    �?1-15】BACCD    �?6-20】ADCCB
+    # Format: 【1-5】CBDAA    【6-10】DBDAC    【11-15】BACCD    【16-20】ADCCB
     # Or: 1-5:CBDAA    6-10:DBDAC
-    # Cloze answers: �?6-40】JGOKB (word bank letters, not ABCD)
+    # Cloze answers: 【36-40】JGOKB (word bank letters, not ABCD)
     
-    # First, try to find the answer section by looking for patterns like "�?-5�? or "1-5:"
+    # First, try to find the answer section by looking for patterns like "【1-5】" or "1-5:"
     ans_start = None
     
-    # Try to find "参考答�? marker
-    for marker in ["参考答�?, "参考答案：", "参考答案："]:
+    # Try to find "参考答案" marker
+    for marker in ["参考答案", "参考答案：", "参考答案："]:
         idx = text.rfind(marker)
         if idx >= len(text) * 0.5:  # Must be in the second half
             ans_start = idx
@@ -102,8 +103,8 @@ def parse_answers_v4(text):
     
     # If no marker found, look for the first answer pattern
     if ans_start is None:
-        # Look for patterns like "�?-5�? or "1-5�? at the start of a line
-        for m in re.finditer(r"(?:^|\n)\s*[【\[]?\s*(\d+)[-–](\d+)\s*[】\]]?\s*[�?]?\s*[A-D]", text):
+        # Look for patterns like "【1-5】" or "1-5：" at the start of a line
+        for m in re.finditer(r"(?:^|\n)\s*[【\[]?\s*(\d+)[-–](\d+)\s*[】\]]?\s*[：:]?\s*[A-D]", text):
             if m.start() > len(text) * 0.5:  # Must be in the second half
                 ans_start = m.start()
                 break
@@ -114,18 +115,18 @@ def parse_answers_v4(text):
         # Use the entire text as a fallback
         answer_section = text
     
-    # Parse range answers: �?-5】CBDAA or 1-5:CBDAA
-    # Handle 【�? [], and colons
-    # Also handle word bank letters like �?6-40】JGOKB
-    range_pattern = re.compile(r"[【\[]?\s*(\d+)[-–](\d+)\s*[】\]]?\s*[�?]?\s*([A-Za-z]{1,20})")
+    # Parse range answers: 【1-5】CBDAA or 1-5:CBDAA
+    # Handle 【】, [], and colons
+    # Also handle word bank letters like 【36-40】JGOKB
+    range_pattern = re.compile(r"[【\[]?\s*(\d+)[-–](\d+)\s*[】\]]?\s*[：:]?\s*([A-Za-z]{1,20})")
     for rm in range_pattern.finditer(answer_section):
         start, end, ans_str = int(rm.group(1)), int(rm.group(2)), rm.group(3).upper()
         if end - start + 1 == len(ans_str):
             for i, ch in enumerate(ans_str):
                 answers[start + i] = ch
     
-    # Parse word answers for cloze: �?6-30】word1  word2  word3  word4  word5
-    word_range_pattern = re.compile(r"[【\[]?\s*(\d+)[-–](\d+)\s*[】\]]?\s*[�?]?\s*(.+?)(?=[【\[]?\s*\d+[-–]\d+|$)")
+    # Parse word answers for cloze: 【26-30】word1  word2  word3  word4  word5
+    word_range_pattern = re.compile(r"[【\[]?\s*(\d+)[-–](\d+)\s*[】\]]?\s*[：:]?\s*(.+?)(?=[【\[]?\s*\d+[-–]\d+|$)")
     for wm in word_range_pattern.finditer(answer_section):
         start, end = int(wm.group(1)), int(wm.group(2))
         words_text = wm.group(3).strip()
@@ -177,7 +178,7 @@ def parse_listening_questions_v2(text, level, year):
                 current_q = q_num
                 current_text = qm.group(2)
         elif current_q is not None:
-            if re.match(r"^\s*[A-D]\s*[.)\]）�?：]", stripped):
+            if re.match(r"^\s*[A-D]\s*[.)\]）】:：]", stripped):
                 current_text += " " + stripped
             elif re.match(r"Questions?\s+\d+|Section\s+[ABC]|Part\s+[III]+|Passage\s+[OneTwo]|Directions", stripped, re.IGNORECASE):
                 q_texts[current_q] = current_text.strip()
@@ -192,13 +193,13 @@ def parse_listening_questions_v2(text, level, year):
     for q_num in sorted(q_texts.keys()):
         q_text = q_texts[q_num]
         options = []
-        option_matches = re.findall(r"([A-D])\s*[.)\]）�?：]\s*(.*?)(?=\s*[A-D]\s*[.)\]）�?：]|$)", q_text, re.DOTALL)
+        option_matches = re.findall(r"([A-D])\s*[.)\]）】:：]\s*(.*?)(?=\s*[A-D]\s*[.)\]）】:：]|$)", q_text, re.DOTALL)
         for label, content in option_matches:
             content = re.sub(r"\s+", " ", content).strip()
             if content:
                 options.append({"label": label, "content": content})
         
-        clean = re.sub(r"[A-D]\s*[.)\]）�?：]\s*.*", "", q_text).strip()
+        clean = re.sub(r"[A-D]\s*[.)\]）】:：]\s*.*", "", q_text).strip()
         clean = re.sub(r"^\d+\s*[.)\]）】]\s*", "", clean).strip()
         
         questions.append({
@@ -292,7 +293,7 @@ def parse_reading_questions_v2(text, level, year):
                 current_q = q_num
                 current_text = qm.group(2)
         elif current_q is not None:
-            if re.match(r"^\s*[A-D]\s*[.)\]）�?：]", stripped):
+            if re.match(r"^\s*[A-D]\s*[.)\]）】:：]", stripped):
                 current_text += " " + stripped
             elif re.match(r"Questions?\s+\d+|Passage\s+[OneTwo]|Part\s+IV|翻译|Translation", stripped, re.IGNORECASE):
                 q_texts[current_q] = current_text.strip()
@@ -307,13 +308,13 @@ def parse_reading_questions_v2(text, level, year):
     for q_num in sorted(q_texts.keys()):
         q_text = q_texts[q_num]
         options = []
-        option_matches = re.findall(r"([A-D])\s*[.)\]）�?：]\s*(.*?)(?=\s*[A-D]\s*[.)\]）�?：]|$)", q_text, re.DOTALL)
+        option_matches = re.findall(r"([A-D])\s*[.)\]）】:：]\s*(.*?)(?=\s*[A-D]\s*[.)\]）】:：]|$)", q_text, re.DOTALL)
         for label, content in option_matches:
             content = re.sub(r"\s+", " ", content).strip()
             if content:
                 options.append({"label": label, "content": content})
         
-        clean = re.sub(r"[A-D]\s*[.)\]）�?：]\s*.*", "", q_text).strip()
+        clean = re.sub(r"[A-D]\s*[.)\]）】:：]\s*.*", "", q_text).strip()
         clean = re.sub(r"^\d+\s*[.)\]）】]\s*", "", clean).strip()
         
         questions.append({
@@ -563,7 +564,7 @@ def main():
         f.write("-- =====================================================\n")
         f.write("-- 四六级历年真题完整导入SQL\n")
         f.write(f"-- 生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-        f.write(f"-- �?{len(files)} 套试卷\n")
+        f.write(f"-- 共 {len(files)} 套试卷\n")
         f.write("-- =====================================================\n\n")
         f.write("SET NAMES utf8mb4;\n")
         f.write("SET FOREIGN_KEY_CHECKS=0;\n\n")
@@ -579,14 +580,14 @@ def main():
                 sql, q_count, meta = process_one_file(finfo, i)
                 f.write(f"-- {'='*60}\n")
                 f.write(f"-- [{i+1}] {meta['title']}\n")
-                f.write(f"-- 题目�? {q_count}\n")
-                f.write(f"-- 源文�? {finfo['path']}\n")
+                f.write(f"-- 题目数: {q_count}\n")
+                f.write(f"-- 源文件: {finfo['path']}\n")
                 f.write(f"-- {'='*60}\n\n")
                 f.write(sql)
                 f.write("\n\n")
                 success += 1
                 total_q += q_count
-                print(f"  -> {meta['title']} ({q_count}�?")
+                print(f"  -> {meta['title']} ({q_count}题)")
             except Exception as e:
                 fail += 1
                 print(f"  -> 失败: {e}")
@@ -597,8 +598,8 @@ def main():
     
     print("\n" + "=" * 70)
     print(f"  完成!")
-    print(f"  成功: {success} �?)
-    print(f"  失败: {fail} �?)
+    print(f"  成功: {success} 套")
+    print(f"  失败: {fail} 套")
     print(f"  总题目数: {total_q}")
     print(f"  SQL文件: {SQL_OUTPUT}")
     print("=" * 70)

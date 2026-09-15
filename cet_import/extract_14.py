@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
-"""从修复版 SQL 中按卷号提取 14 套优质卷，生成部分导�?SQL"""
+"""从修复版 SQL 中按卷号提取 14 套优质卷，生成部分导入 SQL"""
 import re
 
 SQL_FILE = r"D:\202401\study\Hao-Topic\cet_import\cet_all_import_fixed.sql"
 OUT_FILE = r"D:\202401\study\Hao-Topic\cet_import\cet_import_14papers.sql"
 
-# 目标卷号（按 SQL �?paper 出现顺序 1..32�?TARGETS = [1, 3, 6, 9, 11, 13, 15, 17, 18, 20, 21, 23, 24, 26]
+# 目标卷号（按 SQL 中 paper 出现顺序 1..32）
+TARGETS = [1, 3, 6, 9, 11, 13, 15, 17, 18, 20, 21, 23, 24, 26]
 
 with open(SQL_FILE, encoding="utf-8") as f:
     lines = f.readlines()
 
-# 定位每个卷块起点（INSERT INTO `paper`�?starts = []
+# 定位每个卷块起点（INSERT INTO `paper`）
+starts = []
 for i, line in enumerate(lines):
     if line.strip().startswith("INSERT INTO `paper`"):
         starts.append(i)
@@ -30,7 +32,8 @@ for idx, s in enumerate(starts):
     titles[idx + 1] = m if m else "(no header)"
     print("vol %2d: L%-6d %s" % (idx + 1, s + 1, titles[idx + 1][:100]))
 
-# 提取目标�?header_end = 0
+# 提取目标块
+header_end = 0
 for i, line in enumerate(lines[: starts[0]]):
     if line.strip().startswith("SET FOREIGN_KEY_CHECKS=0"):
         header_end = i + 1
@@ -48,7 +51,7 @@ for vol in TARGETS:
     n_pt = sum(1 for l in block if l.strip().startswith("INSERT INTO `paper_topic`"))
     assert n_topic == n_pt, "vol %d topic/pt mismatch %d/%d" % (vol, n_topic, n_pt)
     total_topic += n_topic
-    # 卷注释头（含标题）一并带上：回找 -- [N] 及上方注释行�?-- ==== 边界
+    # 卷注释头（含标题）一并带上：回找 -- [N] 及上方注释行到 -- ==== 边界
     hdr = []
     for j in range(s - 1, max(0, s - 12), -1):
         t = lines[j].strip()

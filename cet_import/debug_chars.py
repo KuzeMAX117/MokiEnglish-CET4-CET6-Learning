@@ -26,6 +26,6 @@ if idx >= 0:
 else:
     print("'1-5' not found")
     # Search for patterns
-    for pattern in [r"1[-–]5", r"1-5", r"1�?", r"1:5"]:
+    for pattern in [r"1[-–]5", r"1-5", r"1：5", r"1:5"]:
         matches = list(re.finditer(pattern, all_text))
         print(f"Pattern '{pattern}': {len(matches)} matches")

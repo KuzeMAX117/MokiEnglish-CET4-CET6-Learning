@@ -4,7 +4,9 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.hao.topic.api.utils.constant.RabbitConstant;
 import com.hao.topic.api.utils.enums.StatusEnums;
+import com.hao.topic.api.utils.mq.RabbitService;
 import com.hao.topic.common.constant.RedisConstant;
 import com.hao.topic.common.enums.ResultCodeEnum;
 import com.hao.topic.common.exception.TopicException;
@@ -52,6 +54,7 @@ public class TopicServiceImpl implements TopicService {
     private final TopicSubjectMapper topicSubjectMapper;
     private final TopicLabelMapper topicLabelMapper;
     private final TopicLabelTopicMapper topicLabelTopicMapper;
+    private final RabbitService rabbitService;
     private final StringRedisTemplate stringRedisTemplate;
     private final TopicCollectionMapper topicCollectionMapper;
     private final TopicRecordMapper topicRecordMapper;
@@ -230,6 +233,7 @@ public class TopicServiceImpl implements TopicService {
             topicAudit.setTopicLabelName(labelNames.toString());
             String topicAuditJson = JSON.toJSONString(topicAudit);
             log.info("发送消息{}", topicAuditJson);
+            rabbitService.sendMessage(RabbitConstant.TOPIC_AUDIT_EXCHANGE, RabbitConstant.TOPIC_AUDIT_ROUTING_KEY_NAME, topicAuditJson);
         }
 
         
@@ -316,6 +320,7 @@ public class TopicServiceImpl implements TopicService {
             topicAudit.setTopicLabelName(labelNames.toString());
             String topicAuditJson = JSON.toJSONString(topicAudit);
             log.info("发送消息{}", topicAuditJson);
+            rabbitService.sendMessage(RabbitConstant.TOPIC_AUDIT_EXCHANGE, RabbitConstant.TOPIC_AUDIT_ROUTING_KEY_NAME, topicAuditJson);
         }
         topic.setFailMsg("");
         
@@ -614,6 +619,7 @@ public class TopicServiceImpl implements TopicService {
                         topicAudit.setId(topicDb.getId());
                         
                         String topicAuditJson = JSON.toJSONString(topicAudit);
+                        rabbitService.sendMessage(RabbitConstant.TOPIC_AUDIT_EXCHANGE, RabbitConstant.TOPIC_AUDIT_ROUTING_KEY_NAME, topicAuditJson);
                     }
                     successNum++;
                     successMsg.append("<br/>").append(successNum).append("-题目：").append(topicDb.getTopicName()).append("-导入成功");
@@ -722,6 +728,7 @@ public class TopicServiceImpl implements TopicService {
                         topicAudit.setId(topic.getId());
                         
                         String topicAuditJson = JSON.toJSONString(topicAudit);
+                        rabbitService.sendMessage(RabbitConstant.TOPIC_AUDIT_EXCHANGE, RabbitConstant.TOPIC_AUDIT_ROUTING_KEY_NAME, topicAuditJson);
                     }
                     topic.setFailMsg("");
                     
@@ -863,6 +870,7 @@ public class TopicServiceImpl implements TopicService {
                         topicAudit.setId(topicDb.getId());
                         
                         String topicAuditJson = JSON.toJSONString(topicAudit);
+                        rabbitService.sendMessage(RabbitConstant.TOPIC_AUDIT_EXCHANGE, RabbitConstant.TOPIC_AUDIT_ROUTING_KEY_NAME, topicAuditJson);
                     }
                     successNum++;
                     successMsg.append("<br/>").append(successNum).append("-题目：").append(topicDb.getTopicName()).append("-导入成功");
@@ -972,6 +980,7 @@ public class TopicServiceImpl implements TopicService {
                         topicAudit.setId(topic.getId());
                         
                         String topicAuditJson = JSON.toJSONString(topicAudit);
+                        rabbitService.sendMessage(RabbitConstant.TOPIC_AUDIT_EXCHANGE, RabbitConstant.TOPIC_AUDIT_ROUTING_KEY_NAME, topicAuditJson);
                     }
                     topic.setFailMsg("");
                     
@@ -1043,7 +1052,7 @@ public class TopicServiceImpl implements TopicService {
         topicAudit.setId(topicDb.getId());
         topicAudit.setUserId(SecurityUtils.getCurrentId());
         topicAudit.setAccount(SecurityUtils.getCurrentName());
-
+        rabbitService.sendMessage(RabbitConstant.AI_ANSWER_EXCHANGE, RabbitConstant.AI_ANSWER_ROUTING_KEY_NAME, JSON.toJSONString(topicAudit));
     }
 
     

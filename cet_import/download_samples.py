@@ -17,7 +17,7 @@ print(f"Found {len(docx_files)} docx files")
 # Download a few samples for analysis
 samples_to_download = [
     # 2015 CET6
-    docx_files[0],  # 2015 12�?六级卷一
+    docx_files[0],  # 2015 12月 六级卷一
     # 2016 CET4
     [f for f in docx_files if '2016' in f['path'] and '四级' in f['path']][0],
     # 2017 CET4  

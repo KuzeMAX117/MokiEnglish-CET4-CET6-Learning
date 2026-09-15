@@ -4,7 +4,9 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.hao.topic.api.utils.constant.RabbitConstant;
 import com.hao.topic.api.utils.enums.StatusEnums;
+import com.hao.topic.api.utils.mq.RabbitService;
 import com.hao.topic.common.enums.ResultCodeEnum;
 import com.hao.topic.common.exception.TopicException;
 import com.hao.topic.common.security.utils.SecurityUtils;
@@ -40,6 +42,7 @@ import java.util.stream.Collectors;
 public class TopicCategoryServiceImpl implements TopicCategoryService {
     private final TopicCategoryMapper topicCategoryMapper;
     private final TopicCategorySubjectMapper topicCategorySubjectMapper;
+    private final RabbitService rabbitService;
 
     
 
@@ -127,6 +130,7 @@ public class TopicCategoryServiceImpl implements TopicCategoryService {
             String jsonString = JSON.toJSONString(topicAuditCategory);
             log.info("发送的消息：{}", jsonString);
             
+            rabbitService.sendMessage(RabbitConstant.CATEGORY_AUDIT_EXCHANGE, RabbitConstant.CATEGORY_AUDIT_ROUTING_KEY_NAME, jsonString);
         }
     }
 
@@ -164,6 +168,7 @@ public class TopicCategoryServiceImpl implements TopicCategoryService {
                 String jsonString = JSON.toJSONString(topicAuditCategory);
                 log.info("发送的消息：{}", jsonString);
                 
+                rabbitService.sendMessage(RabbitConstant.CATEGORY_AUDIT_EXCHANGE, RabbitConstant.CATEGORY_AUDIT_ROUTING_KEY_NAME, jsonString);
             }
             topicCategory.setFailMsg("");
         }
@@ -287,6 +292,7 @@ public class TopicCategoryServiceImpl implements TopicCategoryService {
                         String jsonString = JSON.toJSONString(topicAuditCategory);
                         log.info("发送消息{}", jsonString);
                         
+                        rabbitService.sendMessage(RabbitConstant.CATEGORY_AUDIT_EXCHANGE, RabbitConstant.CATEGORY_AUDIT_ROUTING_KEY_NAME, jsonString);
                     }
                     successNum++;
                     successMsg.append("<br/>").append(successNum).append("-题目分类：").append(topicCategoryDb.getCategoryName()).append("-导入成功");
@@ -315,6 +321,7 @@ public class TopicCategoryServiceImpl implements TopicCategoryService {
                             String jsonString = JSON.toJSONString(topicAuditCategory);
                             log.info("发送消息{}", jsonString);
                             
+                            rabbitService.sendMessage(RabbitConstant.CATEGORY_AUDIT_EXCHANGE, RabbitConstant.CATEGORY_AUDIT_ROUTING_KEY_NAME, jsonString);
                         }
                         topicCategory.setFailMsg("");
                     }

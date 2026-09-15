@@ -1,7 +1,6 @@
 package com.hao.topic.topic.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.hao.topic.common.constant.RedisConstant;
 import com.hao.topic.common.enums.ResultCodeEnum;
 import com.hao.topic.common.exception.TopicException;
 import com.hao.topic.common.security.utils.SecurityUtils;
@@ -23,14 +22,12 @@ import com.hao.topic.topic.service.PaperService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,24 +39,9 @@ public class PaperServiceImpl implements PaperService {
     private final PaperTopicMapper paperTopicMapper;
     private final TopicMapper topicMapper;
     private final TopicRecordMapper topicRecordMapper;
-    private final StringRedisTemplate stringRedisTemplate;
 
     @Override
     public List<PaperVo> paperList(Integer level) {
-        String cacheKey = RedisConstant.PAPER_LIST_PREFIX + level;
-        String cached = stringRedisTemplate.opsForValue().get(cacheKey);
-        if (cached != null) {
-            if (RedisConstant.PAPER_NULL_MARKER.equals(cached)) {
-                return Collections.emptyList();
-            }
-            try {
-                return com.alibaba.fastjson2.JSON.parseArray(cached, PaperVo.class);
-            } catch (Exception e) {
-                log.warn("解析真题列表缓存失败，回源查询: {}", e.getMessage());
-                stringRedisTemplate.delete(cacheKey);
-            }
-        }
-
         LambdaQueryWrapper<Paper> paperLambdaQueryWrapper = new LambdaQueryWrapper<>();
         paperLambdaQueryWrapper.eq(Paper::getLevel, level);
         paperLambdaQueryWrapper.eq(Paper::getStatus, 0);
@@ -68,8 +50,6 @@ public class PaperServiceImpl implements PaperService {
         paperLambdaQueryWrapper.orderByDesc(Paper::getCreateTime);
         List<Paper> papers = paperMapper.selectList(paperLambdaQueryWrapper);
         if (CollectionUtils.isEmpty(papers)) {
-            stringRedisTemplate.opsForValue().set(cacheKey, RedisConstant.PAPER_NULL_MARKER,
-                    RedisConstant.PAPER_NULL_TTL, TimeUnit.SECONDS);
             return Collections.emptyList();
         }
         
@@ -91,33 +71,13 @@ public class PaperServiceImpl implements PaperService {
             paperVo.setDoneCount(countDone(paper.getId(), currentId));
             paperVos.add(paperVo);
         }
-
-        stringRedisTemplate.opsForValue().set(cacheKey,
-                com.alibaba.fastjson2.JSON.toJSONString(paperVos),
-                RedisConstant.PAPER_CACHE_TTL, TimeUnit.SECONDS);
         return paperVos;
     }
 
     @Override
     public PaperDetailVo paperDetail(Long id) {
-        String cacheKey = RedisConstant.PAPER_DETAIL_PREFIX + id;
-        String cached = stringRedisTemplate.opsForValue().get(cacheKey);
-        if (cached != null) {
-            if (RedisConstant.PAPER_NULL_MARKER.equals(cached)) {
-                throw new TopicException(ResultCodeEnum.FAIL);
-            }
-            try {
-                return com.alibaba.fastjson2.JSON.parseObject(cached, PaperDetailVo.class);
-            } catch (Exception e) {
-                log.warn("解析真题详情缓存失败，回源查询: {}", e.getMessage());
-                stringRedisTemplate.delete(cacheKey);
-            }
-        }
-
         Paper paper = paperMapper.selectById(id);
         if (paper == null || paper.getStatus() != 0) {
-            stringRedisTemplate.opsForValue().set(cacheKey, RedisConstant.PAPER_NULL_MARKER,
-                    RedisConstant.PAPER_NULL_TTL, TimeUnit.SECONDS);
             throw new TopicException(ResultCodeEnum.FAIL);
         }
         PaperDetailVo paperDetailVo = new PaperDetailVo();
@@ -163,10 +123,6 @@ public class PaperServiceImpl implements PaperService {
             sections.add(sectionVo);
         }
         paperDetailVo.setSections(sections);
-
-        stringRedisTemplate.opsForValue().set(cacheKey,
-                com.alibaba.fastjson2.JSON.toJSONString(paperDetailVo),
-                RedisConstant.PAPER_CACHE_TTL, TimeUnit.SECONDS);
         return paperDetailVo;
     }
 

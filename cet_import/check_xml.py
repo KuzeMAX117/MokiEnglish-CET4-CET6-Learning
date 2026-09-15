@@ -26,12 +26,13 @@ with zipfile.ZipFile(fpath, 'r') as z:
     
     # Search for answer patterns in XML
     print("\n--- Searching XML for answers ---")
-    range_matches = re.findall(r"(\d+)[-–](\d+)\s*[�?]\s*([A-D]{1,20})", content)
+    range_matches = re.findall(r"(\d+)[-–](\d+)\s*[：:]\s*([A-D]{1,20})", content)
     print(f"Range answer matches: {range_matches}")
     
-    # Search for 参考答�?    idx = content.rfind("参考答�?)
+    # Search for 参考答案
+    idx = content.rfind("参考答案")
     if idx >= 0:
-        print(f"\nFound 参考答�?in XML")
+        print(f"\nFound 参考答案 in XML")
         print(f"  Context: {content[idx:idx+300]}")
     
     # Check for answer section

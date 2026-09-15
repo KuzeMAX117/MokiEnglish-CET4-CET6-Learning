@@ -2,6 +2,7 @@ package com.hao.topic.system.controller;
 
 import com.alibaba.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.hao.topic.api.utils.helper.MinioHelper;
 import com.hao.topic.api.utils.utils.ExcelUtil;
 import com.hao.topic.client.security.SecurityFeignClient;
 import com.hao.topic.common.enums.ResultCodeEnum;
@@ -40,6 +41,9 @@ public class SysUserController {
     @Autowired
     private SysRoleMapper sysRoleMapper;
 
+    @Autowired
+    private MinioHelper minioHelper;
+
     
 
     @GetMapping("/list")
@@ -62,6 +66,15 @@ public class SysUserController {
             return sysRoleVo;
         }).toList();
         return Result.success(list);
+    }
+
+    
+
+    @PostMapping("/avatar")
+    public Result upload(@RequestParam("avatar") MultipartFile file) {
+        
+        String url = minioHelper.uploadFile(file, "avatar");
+        return Result.success(url);
     }
 
     

@@ -6,7 +6,6 @@
         <span>返回题目列表</span>
       </div>
       <div class="topic-title-bar">
-        <span class="topic-level-tag" :class="'level-' + topic.level">CET-{{ topic.level }}</span>
         {{ topic.title }}
       </div>
       <div class="word-counter">
@@ -27,21 +26,19 @@
           <div class="desc-text">{{ topic.description }}</div>
         </div>
         <textarea
-          id="essay-input"
+          v-model="essayContent"
           class="write-textarea"
-          placeholder="请在此输入你的作文..."
+          placeholder="Start writing your essay here..."
           spellcheck="false"
-          rows="10"
-          @input="handleInput"
-        ></textarea>
+        />
         <div class="write-actions">
-          <a-button @click="clearContent">
+          <a-button @click="essayContent = ''">
             <ClearOutlined /> 清空
           </a-button>
           <a-button
             type="primary"
             :loading="submitting"
-            :disabled="wordCount < 20 || submitting"
+            :disabled="wordCount < 20"
             class="submit-btn"
             @click="submitEssay"
           >
@@ -94,12 +91,8 @@
             </div>
 
             <div v-if="result.grammarErrors.length" class="grammar-section">
-              <div class="section-title">语法错误 ({{ result.grammarErrors.length }}处)</div>
+              <div class="section-title">语法错误</div>
               <div v-for="(err, idx) in result.grammarErrors" :key="idx" class="error-card">
-                <div class="error-header">
-                  <span class="error-type-tag" :class="err.severity">{{ err.severity === 'serious' ? '严重' : '轻微' }}</span>
-                  <span class="error-type">{{ err.type }}</span>
-                </div>
                 <div class="error-original">
                   <CloseCircleOutlined class="err-icon wrong" />
                   {{ err.original }}
@@ -115,12 +108,9 @@
             <div v-if="result.suggestions.length" class="suggestion-section">
               <div class="section-title">词汇建议</div>
               <div v-for="(s, idx) in result.suggestions" :key="idx" class="sug-card">
-                <div class="sug-main">
-                  <span class="sug-word">{{ s.original }}</span>
-                  <span class="sug-arrow">→</span>
-                  <span class="sug-better">{{ s.suggestion }}</span>
-                </div>
-                <div v-if="s.reason" class="sug-reason">{{ s.reason }}</div>
+                <span class="sug-word">{{ s.original }}</span>
+                <span class="sug-arrow">→</span>
+                <span class="sug-better">{{ s.suggestion }}</span>
               </div>
             </div>
           </template>
@@ -131,7 +121,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, reactive, onMounted } from 'vue'
+import { computed, ref, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import {
@@ -143,154 +133,65 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
 } from '@ant-design/icons-vue'
-import { apiCorrectEssay } from '@/api/ai'
 
 const route = useRoute()
 const router = useRouter()
 
 const topic = ref({
   id: Number(route.params.id),
-  title: '',
-  description: '',
+  title: 'The Importance of Reading in the Digital Age',
+  description: 'Write an essay on the importance of reading, discussing why reading remains essential despite the prevalence of digital media. You should write at least 150 words but no more than 200 words.',
   wordLimit: 200,
-  level: 4,
-})
-
-const topicDatabase: Record<number, { title: string; description: string; wordLimit: number; level: number }> = {
-  1: {
-    title: 'The Importance of Reading in the Digital Age',
-    description: 'Write an essay on the importance of reading, discussing why reading remains essential despite the prevalence of digital media.',
-    wordLimit: 200,
-    level: 4,
-  },
-  2: {
-    title: 'A Letter of Application',
-    description: 'Write a letter applying for a volunteer position at an international conference. Include your qualifications and motivation.',
-    wordLimit: 150,
-    level: 4,
-  },
-  3: {
-    title: 'Should Universities Charge Tuition Fees?',
-    description: 'Some people believe university education should be free. Discuss both views and give your opinion.',
-    wordLimit: 250,
-    level: 6,
-  },
-  4: {
-    title: 'The Impact of Social Media on Young People',
-    description: 'Write an essay discussing how social media affects the mental health and social skills of young people.',
-    wordLimit: 250,
-    level: 6,
-  },
-}
-
-onMounted(() => {
-  const id = Number(route.params.id)
-  const topicData = topicDatabase[id]
-  if (topicData) {
-    topic.value = { id, ...topicData }
-  }
 })
 
 const essayContent = ref('')
-const wordCount = ref(0)
 const submitted = ref(false)
 const submitting = ref(false)
 
-const handleInput = () => {
-  const textarea = document.getElementById('essay-input') as HTMLTextAreaElement
-  if (textarea) {
-    essayContent.value = textarea.value
-    const text = textarea.value.trim()
-    wordCount.value = text ? text.split(/\s+/).filter((w: string) => w.length > 0).length : 0
-    // 自动保存草稿
-    saveDraft(topic.value.id, essayContent.value)
-  }
-}
+const wordCount = computed(() => {
+  const text = essayContent.value.trim()
+  if (!text) return 0
+  return text.split(/\s+/).length
+})
 
 const result = reactive({
   score: null as number | null,
   overall: '',
-  grammarErrors: [] as { type: string; severity: string; original: string; correction: string; explanation: string }[],
-  suggestions: [] as { original: string; suggestion: string; reason: string }[],
+  grammarErrors: [] as { original: string; correction: string; explanation: string }[],
+  suggestions: [] as { original: string; suggestion: string }[],
 })
-
-// === 草稿保存功能 ===
-const getStorageKey = (id: number) => `essay_draft_${id}`
-
-const saveDraft = (id: number, content: string) => {
-  try {
-    if (content && content.trim()) {
-      localStorage.setItem(getStorageKey(id), content)
-    }
-  } catch { /* 忽略 */ }
-}
-
-const loadDraft = (id: number): string => {
-  try {
-    return localStorage.getItem(getStorageKey(id)) || ''
-  } catch { return '' }
-}
-
-const deleteDraft = (id: number) => {
-  try {
-    localStorage.removeItem(getStorageKey(id))
-  } catch { /* 忽略 */ }
-}
-
-// 页面加载时恢复草稿
-onMounted(() => {
-  const id = Number(route.params.id)
-  const saved = loadDraft(id)
-  if (saved) {
-    essayContent.value = saved
-    wordCount.value = saved.trim().split(/\s+/).filter((w: string) => w.length > 0).length
-    // 同步到 textarea DOM
-    setTimeout(() => {
-      const textarea = document.getElementById('essay-input') as HTMLTextAreaElement
-      if (textarea) textarea.value = saved
-    }, 0)
-  }
-})
-
-const clearContent = () => {
-  essayContent.value = ''
-  wordCount.value = 0
-  const textarea = document.getElementById('essay-input') as HTMLTextAreaElement
-  if (textarea) textarea.value = ''
-  deleteDraft(topic.value.id)
-}
 
 const submitEssay = async () => {
   if (wordCount.value < 20) {
     message.warning('作文至少需要 20 个词')
     return
   }
-  
   submitting.value = true
   submitted.value = true
 
-  try {
-    const res = await apiCorrectEssay({
-      essay: essayContent.value,
-      topic: topic.value.title,
-      level: topic.value.level,
-    })
-    
-    if (res.data) {
-      result.score = res.data.score
-      result.overall = res.data.overall || ''
-      result.grammarErrors = res.data.grammarErrors || []
-      result.suggestions = res.data.vocabularySuggestions || []
-      message.success('批改完成！')
-      // 批改成功后删除草稿
-      deleteDraft(topic.value.id)
-    }
-  } catch (error) {
-    message.error('批改失败，请稍后重试')
-    submitted.value = false
-  } finally {
+  setTimeout(() => {
+    result.score = 11.5
+    result.overall = 'Your essay demonstrates a good understanding of the topic with clear arguments. The structure is logical, moving from introduction to body paragraphs and conclusion. However, there are some grammatical errors and areas where vocabulary could be more varied.'
+    result.grammarErrors = [
+      {
+        original: 'Reading is very importance in our life.',
+        correction: 'Reading is very important in our lives.',
+        explanation: '"importance" is a noun; use the adjective "important" after "is". Also, "life" should be plural "lives" when referring to people in general.',
+      },
+      {
+        original: 'Digital media have change the way we get information.',
+        correction: 'Digital media has changed the way we obtain information.',
+        explanation: 'Use present perfect "has changed" for actions that started in the past and continue. "Obtain" is more formal than "get".',
+      },
+    ]
+    result.suggestions = [
+      { original: 'very important', suggestion: 'crucial / essential / vital' },
+      { original: 'get information', suggestion: 'obtain / acquire information' },
+      { original: 'a lot of', suggestion: 'numerous / a multitude of' },
+    ]
     submitting.value = false
-  }
+    message.success('批改完成！')
+  }, 2000)
 }
 </script>
 
@@ -333,29 +234,6 @@ const submitEssay = async () => {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    .topic-level-tag {
-      font-size: calc(12px + var(--font-offset, 0px));
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-weight: 600;
-      flex-shrink: 0;
-
-      &.level-4 {
-        background: #e6f7ff;
-        color: #1890ff;
-        border: 1px solid #91d5ff;
-      }
-
-      &.level-6 {
-        background: #f6ffed;
-        color: #52c41a;
-        border: 1px solid #b7eb8f;
-      }
-    }
   }
 
   .word-counter {
@@ -442,9 +320,8 @@ const submitEssay = async () => {
 .write-textarea {
   flex: 1;
   width: 100%;
-  min-height: 300px;
   padding: 20px;
-  background: var(--card-bg);
+  background: transparent;
   border: none;
   outline: none;
   color: var(--text-title);
@@ -452,12 +329,6 @@ const submitEssay = async () => {
   line-height: 1.9;
   resize: none;
   font-family: inherit;
-  box-sizing: border-box;
-
-  &:focus {
-    outline: 2px solid var(--primary);
-    outline-offset: -2px;
-  }
 
   &::placeholder {
     color: var(--text-muted);
@@ -599,37 +470,6 @@ const submitEssay = async () => {
       padding: 14px 16px;
       margin-bottom: 10px;
 
-      .error-header {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 10px;
-
-        .error-type-tag {
-          font-size: calc(12px + var(--font-offset, 0px));
-          padding: 2px 8px;
-          border-radius: 4px;
-          font-weight: 500;
-
-          &.serious {
-            background: #fff2f0;
-            color: #ff4d4f;
-            border: 1px solid #ffccc7;
-          }
-
-          &.minor {
-            background: #f6ffed;
-            color: #52c41a;
-            border: 1px solid #b7eb8f;
-          }
-        }
-
-        .error-type {
-          font-size: calc(12px + var(--font-offset, 0px));
-          color: var(--text-muted);
-        }
-      }
-
       .error-original,
       .error-fix {
         display: flex;
@@ -669,40 +509,30 @@ const submitEssay = async () => {
 
   .suggestion-section {
     .sug-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       padding: 10px 14px;
       background: var(--page-bg);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       margin-bottom: 8px;
 
-      .sug-main {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-
-        .sug-word {
-          font-size: calc(14px + var(--font-offset, 0px));
-          color: var(--error);
-          text-decoration: line-through;
-          opacity: 0.7;
-        }
-
-        .sug-arrow {
-          color: var(--text-muted);
-        }
-
-        .sug-better {
-          font-size: calc(14px + var(--font-offset, 0px));
-          color: var(--success);
-          font-weight: 600;
-        }
+      .sug-word {
+        font-size: calc(14px + var(--font-offset, 0px));
+        color: var(--error);
+        text-decoration: line-through;
+        opacity: 0.7;
       }
 
-      .sug-reason {
-        margin-top: 6px;
-        font-size: calc(12px + var(--font-offset, 0px));
+      .sug-arrow {
         color: var(--text-muted);
-        line-height: 1.5;
+      }
+
+      .sug-better {
+        font-size: calc(14px + var(--font-offset, 0px));
+        color: var(--success);
+        font-weight: 600;
       }
     }
   }

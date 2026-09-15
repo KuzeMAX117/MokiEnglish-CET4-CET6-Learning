@@ -94,6 +94,12 @@ const router = createRouter({
           meta: { title: '翻译练习' },
         },
         {
+          path: 'ai',
+          name: 'AiChat',
+          component: () => import('@/views/AiChat.vue'),
+          meta: { title: 'AI 练习' },
+        },
+        {
           path: 'user',
           name: 'UserCenter',
           component: () => import('@/views/UserCenter.vue'),
@@ -110,24 +116,6 @@ const router = createRouter({
           name: 'Feedback',
           component: () => import('@/views/Feedback.vue'),
           meta: { title: '我的反馈' },
-        },
-        {
-          path: 'pk',
-          name: 'PkMatch',
-          component: () => import('@/views/PkMatch.vue'),
-          meta: { title: '词汇量PK' },
-        },
-        {
-          path: 'pk/battle',
-          name: 'PkBattle',
-          component: () => import('@/views/PkBattle.vue'),
-          meta: { title: 'PK对战' },
-        },
-        {
-          path: 'pk/rank',
-          name: 'PkRank',
-          component: () => import('@/views/PkRank.vue'),
-          meta: { title: 'PK排行榜' },
         },
       ],
     },

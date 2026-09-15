@@ -30,7 +30,7 @@ if ans_vals:
 
 # Paper question counts
 print("\nPapers with question counts:")
-for m in re.finditer(r"-- \[(\d+)\].*?-- 题目�? (\d+)", content):
+for m in re.finditer(r"-- \[(\d+)\].*?-- 题目数: (\d+)", content):
     num = m.group(1)
     count = int(m.group(2))
     status = "good" if count >= 40 else "bad" if count < 10 else "partial"

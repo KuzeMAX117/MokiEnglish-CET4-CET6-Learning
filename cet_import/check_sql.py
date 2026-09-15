@@ -19,6 +19,6 @@ print(f"Topics with answers: {ans_not_null}")
 print(f"Topics without answers: {ans_null}")
 
 # Papers with > 40 questions
-for m in re.finditer(r"-- \[(\d+)\].*?-- 题目�? (\d+)", content):
+for m in re.finditer(r"-- \[(\d+)\].*?-- 题目数: (\d+)", content):
     if int(m.group(2)) >= 40:
         print(f"  Good paper [{m.group(1)}]: {m.group(2)} questions")

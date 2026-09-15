@@ -20,12 +20,13 @@ with zipfile.ZipFile(fpath, 'r') as z:
     print("\n--- Searching for answers in XML ---")
     
     # Pattern 1: 1-5:CBCAA
-    matches = re.findall(r"(\d+)[-–](\d+)\s*[�?]\s*([A-D]{1,20})", content)
+    matches = re.findall(r"(\d+)[-–](\d+)\s*[：:]\s*([A-D]{1,20})", content)
     print(f"Range answers (1-5:CBCAA): {matches}")
     
-    # Pattern 2: look for 参考答�?    idx = content.find("参考答�?)
+    # Pattern 2: look for 参考答案
+    idx = content.find("参考答案")
     if idx >= 0:
-        print(f"\nFound 参考答�?at {idx}")
+        print(f"\nFound 参考答案 at {idx}")
         # Extract surrounding text
         start = max(0, idx - 100)
         print(f"Context: {content[start:idx+500]}")

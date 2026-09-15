@@ -4,7 +4,9 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.hao.topic.api.utils.constant.RabbitConstant;
 import com.hao.topic.api.utils.enums.StatusEnums;
+import com.hao.topic.api.utils.mq.RabbitService;
 import com.hao.topic.common.enums.ResultCodeEnum;
 import com.hao.topic.common.exception.TopicException;
 import com.hao.topic.common.security.utils.SecurityUtils;
@@ -41,6 +43,7 @@ public class TopicLabelServiceImpl implements TopicLabelService {
 
     private final TopicLabelMapper topicLabelMapper;
     private final TopicLabelTopicMapper topicLabelTopicMapper;
+    private final RabbitService rabbitService;
 
     
 
@@ -117,6 +120,7 @@ public class TopicLabelServiceImpl implements TopicLabelService {
             topicAuditLabel.setId(topicLabel.getId());
             String topicAuditLabelJson = JSON.toJSONString(topicAuditLabel);
             log.info("发送消息{}", topicAuditLabelJson);
+            rabbitService.sendMessage(RabbitConstant.LABEL_AUDIT_EXCHANGE, RabbitConstant.LABEL_AUDIT_ROUTING_KEY_NAME, topicAuditLabelJson);
         }
     }
 
@@ -149,6 +153,7 @@ public class TopicLabelServiceImpl implements TopicLabelService {
                 topicAuditLabel.setId(topicLabelDto.getId());
                 String topicAuditLabelJson = JSON.toJSONString(topicAuditLabel);
                 log.info("发送消息{}", topicAuditLabelJson);
+                rabbitService.sendMessage(RabbitConstant.LABEL_AUDIT_EXCHANGE, RabbitConstant.LABEL_AUDIT_ROUTING_KEY_NAME, topicAuditLabelJson);
             }
             topicLabel.setFailMsg("");
         }
@@ -268,6 +273,7 @@ public class TopicLabelServiceImpl implements TopicLabelService {
                         String jsonString = JSON.toJSONString(topicAuditLabel);
                         log.info("发送消息{}", jsonString);
                         
+                        rabbitService.sendMessage(RabbitConstant.LABEL_AUDIT_EXCHANGE, RabbitConstant.LABEL_AUDIT_ROUTING_KEY_NAME, jsonString);
                     }
                     successNum++;
                     successMsg.append("<br/>").append(successNum).append("-题目标签：").append(topicLabelDb.getLabelName()).append("-导入成功");
@@ -289,6 +295,7 @@ public class TopicLabelServiceImpl implements TopicLabelService {
                             topicAuditLabel.setId(topicLabel.getId());
                             String jsonString = JSON.toJSONString(topicAuditLabel);
                             log.info("发送消息{}", jsonString);
+                            rabbitService.sendMessage(RabbitConstant.LABEL_AUDIT_EXCHANGE, RabbitConstant.LABEL_AUDIT_ROUTING_KEY_NAME, jsonString);
                         }
                         topicLabel.setFailMsg("");
                     }

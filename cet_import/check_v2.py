@@ -15,8 +15,8 @@ print(f"Topics with non-NULL answer: {total_topics - ans_not_null}")
 
 # Papers with question counts
 print("\nPapers with question counts:")
-for m in re.finditer(r"-- \[(\d+)\].*?-- 题目�? (\d+)", content):
+for m in re.finditer(r"-- \[(\d+)\].*?-- 题目数: (\d+)", content):
     num = m.group(1)
     count = int(m.group(2))
-    status = "�? if count >= 40 else "�? if count < 5 else "~"
+    status = "✓" if count >= 40 else "✗" if count < 5 else "~"
     print(f"  [{num:>2}] {count:>3} questions {status}")

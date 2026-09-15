@@ -3,11 +3,11 @@
 import re
 
 text = """
-�?6-40】JGOKB   �?1-45】IFMHA 
+【36-40】JGOKB   【41-45】IFMHA 
   
-�?6-50】GDAFK   �?1-55】HCIBJ
+【46-50】GDAFK   【51-55】HCIBJ
 
-�?6-60】CADBA   �?1-65】ABCDB   
+【56-60】CADBA   【61-65】ABCDB   
 """
 
 # Check the actual format
@@ -17,7 +17,7 @@ if idx >= 0:
     print(repr(text[max(0,idx-20):idx+20]))
 
 # Check the pattern
-pattern = re.compile(r"[【\[]?\s*(\d+)[-–](\d+)\s*[】\]]?\s*[�?]?\s*([A-D]{1,20})")
+pattern = re.compile(r"[【\[]?\s*(\d+)[-–](\d+)\s*[】\]]?\s*[：:]?\s*([A-D]{1,20})")
 matches = list(pattern.finditer(text))
 print(f"\nPattern matches: {len(matches)}")
 for m in matches:

@@ -15,7 +15,7 @@ all_text = "\n".join([p.text for p in doc.paragraphs])
 
 # Find answer section
 ans_start = None
-for marker in ["参考答�?, "参考答案：", "参考答案："]:
+for marker in ["参考答案", "参考答案：", "参考答案："]:
     idx = all_text.rfind(marker)
     if idx >= len(all_text) * 0.5:
         ans_start = idx
@@ -23,7 +23,7 @@ for marker in ["参考答�?, "参考答案：", "参考答案："]:
         break
 
 if ans_start is None:
-    for m in re.finditer(r"(?:^|\n)\s*(\d+)[-–](\d+)\s*[�?]\s*[A-D]", all_text):
+    for m in re.finditer(r"(?:^|\n)\s*(\d+)[-–](\d+)\s*[：:]\s*[A-D]", all_text):
         if m.start() > len(all_text) * 0.5:
             ans_start = m.start()
             print(f"Found answer pattern at {m.start()}")
@@ -35,7 +35,7 @@ if ans_start is not None:
     print(f"Answer section preview:\n{answer_section[:500]}")
     
     # Parse range answers
-    range_pattern = re.compile(r"(\d+)[-–](\d+)\s*[�?]\s*([A-D]{1,20})")
+    range_pattern = re.compile(r"(\d+)[-–](\d+)\s*[：:]\s*([A-D]{1,20})")
     matches = list(range_pattern.finditer(answer_section))
     print(f"\nRange answer matches: {len(matches)}")
     for m in matches:

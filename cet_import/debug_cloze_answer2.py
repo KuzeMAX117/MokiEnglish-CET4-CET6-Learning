@@ -7,27 +7,27 @@ import re
 
 # Let's check what the actual answers should be
 # From the earlier output:
-# �?6-40】JGOKB
-# �?1-45】IFMHA
-# �?6-50】GDAFK
-# �?1-55】HCIBJ
-# �?6-60】CADBA
-# �?1-65】ABCDB
+# 【36-40】JGOKB
+# 【41-45】IFMHA
+# 【46-50】GDAFK
+# 【51-55】HCIBJ
+# 【56-60】CADBA
+# 【61-65】ABCDB
 
 # These are the answer keys for the cloze section
 # Each letter corresponds to a word in the word bank
 
 # Let's check if the answer parser is correctly identifying these
 text = """
-�?6-40】JGOKB   �?1-45】IFMHA 
+【36-40】JGOKB   【41-45】IFMHA 
   
-�?6-50】GDAFK   �?1-55】HCIBJ
+【46-50】GDAFK   【51-55】HCIBJ
 
-�?6-60】CADBA   �?1-65】ABCDB   
+【56-60】CADBA   【61-65】ABCDB   
 """
 
 # Parse range answers
-range_pattern = re.compile(r"[【\[]?\s*(\d+)[-–](\d+)\s*[】\]]?\s*[�?]?\s*([A-D]{1,20})")
+range_pattern = re.compile(r"[【\[]?\s*(\d+)[-–](\d+)\s*[】\]]?\s*[：:]?\s*([A-D]{1,20})")
 matches = list(range_pattern.finditer(text))
 print(f"Range answer matches: {len(matches)}")
 for m in matches:
