@@ -4,8 +4,7 @@ const userStore = useUserStore()
 import { ref, onMounted, watch, computed } from 'vue';
 import * as echarts from 'echarts';
 import { getYearDateRange, getDynamicDateRange } from '@/utils/date';
-import { getWaterBallSVG } from '@/utils/customer';
-import { apiUserHomeCount, apiUserHomeCategory, apiUserTopicCount } from '@/api/home'
+import { apiUserHomeCount, apiUserTopicCount } from '@/api/home'
 import type { UserHomeCount } from '@/api/home/type';
 
 const getUserIdentity = computed(() => {
@@ -14,84 +13,10 @@ const getUserIdentity = computed(() => {
   if (totalProblems >= 1000) return { name: '面试之神', color: '#722ed1' }; 
   if (totalProblems >= 800) return { name: '面试专家', color: '#f5222d' };  
   if (totalProblems >= 500) return { name: '面试达人', color: '#fa8c16' };  
-  if (totalProblems >= 300) return { name: '面试高手', color: '#1677ff' };  
+  if (totalProblems >= 300) return { name: '面试高手', color: '#0a3442' };  
   if (totalProblems >= 100) return { name: '面试新秀', color: '#52c41a' };  
   return { name: '面试新手', color: '#8c8c8c' };  
 })
-
-const categoryChart = ref(null)
-
-const initBubbleChart = () => {
-  const myChart = echarts.init(categoryChart.value);
-  const option = {
-    
-    tooltip: {
-      trigger: 'item',
-      backgroundColor: 'transparent', 
-      borderColor: 'transparent',     
-      padding: 0,                     
-      textStyle: {                    
-        color: 'transparent',
-        fontSize: 0
-      },
-      extraCssText: 'box-shadow: none;', 
-      formatter: function (params: any) {
-        console.log("==========>", params);
-
-        return `<div style="text-align: center;border: 1px solid #ccc; background-color: #fff; padding: 5px; border-radius: 4px;">
-                  <strong style="color: #1a1a1a;">${params.name}</strong><br/>
-                  <span style="color: #1a1a1a;">${params.value}</span><span style="color: #b1b1b1;"> / ${params.data.count}</span>
-                </div>`;
-      }
-    },
-    animationDurationUpdate: function (idx: number) {
-      
-      return idx * 100;
-    },
-    animationEasingUpdate: 'bounceIn' as const,
-    series: [{
-      type: 'graph',
-      layout: 'force',
-      force: {
-        repulsion: 100,
-        edgeLength: 10,
-      },
-      label: {
-        show: true,
-        formatter: [
-          '{b|{b}}'
-        ].join('\n'),
-        fontWeight: '100',
-        fontSize: '18',
-        align: 'center',
-        verticalAlign: 'center',
-        rich: {
-          b: {
-            color: '#fff',
-            fontSize: 11,
-            fontWeight: 'bold',
-          },
-        },
-      },
-      data: rightData.value.map((cat: any) => ({
-        name: cat.categoryName,
-        value: cat.count,
-        count: cat.totalCount,
-        symbol: getWaterBallSVG(cat.count, cat.totalCount),
-        symbolSize: (cat.totalCount < 5 ? 5 : cat.totalCount) * 2, 
-        draggable: true,
-      }))
-    }]
-  };
-  
-  
-  myChart.setOption(option);
-
-  
-  window.addEventListener('resize', () => {
-    myChart.resize();
-  });
-};
 
 const contributionChart = ref(null)
 
@@ -141,7 +66,7 @@ const initContributionChart = () => {
         { min: 10, max: 30, color: '#b3d8ff', label: '10-30' },
         { min: 30, max: 50, color: '#80bfff', label: '30-50' },
         { min: 50, max: 80, color: '#4da6ff', label: '50-80' },
-        { min: 80, max: 120, color: '#1677ff', label: '80-120' },
+        { min: 80, max: 120, color: '#0a3442', label: '80-120' },
         { min: 120, max: 99999, color: '#0050b3', label: '120+' }
 
       ],
@@ -215,7 +140,7 @@ function renderContributionChart(year: number) {
         { min: 10, max: 30, color: '#b3d8ff', label: '10-30' },
         { min: 30, max: 50, color: '#80bfff', label: '30-50' },
         { min: 50, max: 80, color: '#4da6ff', label: '50-80' },
-        { min: 80, max: 120, color: '#1677ff', label: '80-120' },
+        { min: 80, max: 120, color: '#0a3442', label: '80-120' },
         { min: 120, max: 99999, color: '#0050b3', label: '120+' }
       ],
       show: true,
@@ -261,21 +186,12 @@ watch(selectedYear, () => {
 });
 
 const leftData = ref<UserHomeCount>() 
-const rightData = ref() 
 const trendData = ref() 
 
 const getLeftData = async () => {
   const { data } = await apiUserHomeCount();
   if (data) {
     leftData.value = data;
-  }
-};
-
-const getRightData = async () => {
-  const { data } = await apiUserHomeCategory();
-  if (data) {
-    rightData.value = data;
-    initBubbleChart();
   }
 };
 
@@ -295,7 +211,6 @@ const getTrendData = async () => {
 const initData = () => {
   Promise.all([
     getLeftData(),
-    getRightData(),
     getTrendData()
   ])
 }
@@ -317,7 +232,7 @@ onMounted(() => {
             <a-col :span="8" class="user-info-col">
               <div class="user-info-container">
                 <a-avatar
-                  :style="{ 'border': `1px solid ${userStore.userInfo.identity === 1 ? '#ffd700' : '#1677ff'}` }"
+                  :style="{ 'border': `1px solid ${userStore.userInfo.identity === 1 ? '#ffd700' : '#0a3442'}` }"
                   :size="100" :src="userStore.userInfo.avatar">
                   <template #icon>
                     <UserOutlined />
@@ -325,7 +240,7 @@ onMounted(() => {
                 </a-avatar>
                 <div class="user-details">
                   
-                  <div class="username" :style="{ 'color': userStore.userInfo.identity === 1 ? '#ffd700' : '#1677ff' }">
+                  <div class="username" :style="{ 'color': userStore.userInfo.identity === 1 ? '#ffd700' : '#0a3442' }">
                     {{
                       userStore.userInfo.nickname || userStore.userInfo.account
                     }}</div>
@@ -409,12 +324,6 @@ onMounted(() => {
           </a-row>
         </a-card>
       </a-col>
-      
-      <a-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
-        <a-card :bordered="false">
-          <div ref="categoryChart" class="category-chart"></div>
-        </a-card>
-      </a-col>
     </a-row>
     
     <div class="bottom-section">
@@ -474,7 +383,7 @@ onMounted(() => {
   margin-bottom: 10px;
 
   .top-magnitude {
-    color: #1677ff;
+    color: #0a3442;
     font-size: 14px;
   }
 
@@ -514,12 +423,6 @@ onMounted(() => {
       color: #8c92A4;
     }
   }
-}
-
-.category-chart {
-  width: 100%;
-  height: 286px;
-
 }
 
 .contribution-chart {

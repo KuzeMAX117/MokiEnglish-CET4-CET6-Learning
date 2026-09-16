@@ -6,76 +6,8 @@ import * as echarts from 'echarts';
 
 import { useSettingStore } from '@/stores/modules/setting';
 const settingStore = useSettingStore();
-import { apiAdminHomeCount, apiAdminHomeCategory, apiTopicTrend, apiUserTrend, apiAiTrend } from '@/api/home'
+import { apiAdminHomeCount, apiTopicTrend, apiUserTrend, apiAiTrend } from '@/api/home'
 import type { AdminLeftDataType, TopicTrendType } from '@/api/home/type';
-
-const categoryChart = ref(null)
-
-const initBubbleChart = () => {
-  const myChart = echarts.init(categoryChart.value);
-  const option = {
-    animationDurationUpdate: function (idx: number) {
-      
-      return idx * 100;
-    },
-    animationEasingUpdate: 'bounceIn' as const,
-    series: [{
-      type: 'graph',
-      layout: 'force',
-      force: {
-        repulsion: 100,
-        edgeLength: 10,
-      },
-      label: {
-        show: true,
-        formatter: [
-          '{c|{c}}',
-          '{b|{b}}',
-        ].join('\n'),
-        fontWeight: '400',
-        fontSize: 12,
-        color: '#1a1a1a',
-        position: 'inside',
-        rich: {
-          b: {
-            fontSize: 12,
-            color: '#fff',
-            padding: [0, 0, 2, 0],
-            align: 'center',
-            width: 60
-          },
-          c: {
-            fontSize: 14,
-            color: '#fff',
-            fontWeight: 'bold',
-            align: 'center',
-            width: 60
-          }
-        }
-      },
-      itemStyle: {
-        color: '#1677ff',  
-        opacity: 0.8,      
-        borderWidth: 1,    
-        borderColor: '#fff'
-      },
-      data: rightData.value.map((cat: any) => ({
-        name: cat.categoryName,
-        value: cat.count,
-        symbolSize: (cat.count === 0 ? 5 : cat.count) * 2, 
-        draggable: true,
-      }))
-    }]
-  };
-  
-  
-  myChart.setOption(option);
-
-  
-  window.addEventListener('resize', () => {
-    myChart.resize();
-  });
-};
 
 const topicTrendChart = ref(null);
 const initProblemTrendChart = () => {
@@ -141,19 +73,16 @@ const initProblemTrendChart = () => {
         showSymbol: true, 
         lineStyle: {
           width: 3,
-          color: '#1677ff',
+          color: '#0a3442',
           type: 'dashed' 
         },
         itemStyle: {
-          color: '#1677ff',
+          color: '#0a3442',
           borderColor: '#fff',
           borderWidth: 2
         },
         areaStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: 'rgba(22, 119, 255, 0.3)' },
-            { offset: 1, color: 'rgba(22, 119, 255, 0)' }
-          ])
+          color: 'rgba(10, 52, 66, 0.15)'
         },
         emphasis: {
           focus: 'series'
@@ -169,18 +98,15 @@ const initProblemTrendChart = () => {
         showSymbol: true,
         lineStyle: {
           width: 3,
-          color: '#4096ff'
+          color: '#3ad3cd'
         },
         itemStyle: {
-          color: '#4096ff',
+          color: '#3ad3cd',
           borderColor: '#fff',
           borderWidth: 2
         },
         areaStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: 'rgba(64, 150, 255, 0.3)' },
-            { offset: 1, color: 'rgba(64, 150, 255, 0)' }
-          ])
+          color: 'rgba(58, 211, 205, 0.15)'
         },
         emphasis: {
           focus: 'series'
@@ -209,7 +135,7 @@ const initUserGrowthChart = () => {
       axisPointer: {
         type: 'cross',
         label: {
-          backgroundColor: '#1677ff'
+          backgroundColor: '#0a3442'
         }
       }
     },
@@ -262,21 +188,15 @@ const initUserGrowthChart = () => {
         showSymbol: true,
         lineStyle: {
           width: 3,
-          color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
-            { offset: 0, color: '#1677ff' },
-            { offset: 1, color: '#4096ff' }
-          ])
+          color: '#0a3442'
         },
         itemStyle: {
-          color: '#1677ff',
+          color: '#0a3442',
           borderColor: '#fff',
           borderWidth: 2
         },
         areaStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: 'rgba(22, 119, 255, 0.3)' },
-            { offset: 1, color: 'rgba(22, 119, 255, 0)' }
-          ])
+          color: 'rgba(10, 52, 66, 0.15)'
         },
         emphasis: {
           focus: 'series'
@@ -303,7 +223,7 @@ const initAiCallChart = () => {
       axisPointer: {
         type: 'cross',
         label: {
-          backgroundColor: '#1677ff'
+          backgroundColor: '#0a3442'
         }
       }
     },
@@ -356,21 +276,15 @@ const initAiCallChart = () => {
         showSymbol: true,
         lineStyle: {
           width: 3,
-          color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
-            { offset: 0, color: '#1677ff' },
-            { offset: 1, color: '#4096ff' }
-          ])
+          color: '#104455'
         },
         itemStyle: {
-          color: '#1677ff',
+          color: '#104455',
           borderColor: '#fff',
           borderWidth: 2
         },
         areaStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: 'rgba(22, 119, 255, 0.3)' },
-            { offset: 1, color: 'rgba(22, 119, 255, 0)' }
-          ])
+          color: 'rgba(16, 68, 85, 0.15)'
         },
         emphasis: {
           focus: 'series'
@@ -395,7 +309,6 @@ watch(() => settingStore.isDark, () => {
 });
 
 const leftData = ref<AdminLeftDataType>(); 
-const rightData = ref(); 
 const middleData = ref<TopicTrendType>(); 
 const userTrend = ref(); 
 const aiTrend = ref(); 
@@ -404,16 +317,6 @@ const getLeftData = async () => {
   const res = await apiAdminHomeCount();
   if (res.data) {
     leftData.value = res.data
-  }
-}
-
-const getRightData = async () => {
-  const res = await apiAdminHomeCategory();
-  if (res.data) {
-    rightData.value = res.data
-    if (rightData.value) {
-      initBubbleChart();
-    }
   }
 }
 
@@ -444,7 +347,6 @@ const getAiTrendData = async () => {
 const initData = async () => {
   await Promise.all([
     getLeftData(),
-    getRightData(),
     getMiddleData(),
     getUserTrendData(),
     getAiTrendData()
@@ -467,7 +369,7 @@ onMounted(() => {
             <a-col :span="8" class="user-info-col">
               <div class="user-info-container">
                 <a-avatar
-                  :style="{ 'border': `1px solid ${userStore.userInfo.identity === 1 ? '#ffd700' : '#1677ff'}` }"
+                  :style="{ 'border': `1px solid ${userStore.userInfo.identity === 1 ? '#ffd700' : '#0a3442'}` }"
                   :size="100" :src="userStore.userInfo.avatar">
                   <template #icon>
                     <UserOutlined />
@@ -475,14 +377,14 @@ onMounted(() => {
                 </a-avatar>
                 <div class="user-details">
                   
-                  <div class="username" :style="{ 'color': userStore.userInfo.identity === 1 ? '#ffd700' : '#1677ff' }">
+                  <div class="username" :style="{ 'color': userStore.userInfo.identity === 1 ? '#ffd700' : '#0a3442' }">
                     {{
                       userStore.userInfo.nickname || userStore.userInfo.account
                     }}</div>
                   <div class="achievements">
                     
                     <a-tag
-                      style="background: linear-gradient(to right, rgba(243, 156, 18, 0.1), rgba(243, 156, 18, 0.2) 30%, rgba(243, 156, 18, 0.3) 60%, rgba(243, 156, 18, 0.4) 80%);"
+                      style="background: rgba(10, 52, 66, 0.15);"
                       class="user-identity">
                       <CrownOutlined /> 管理员
                     </a-tag>
@@ -494,18 +396,12 @@ onMounted(() => {
             <a-col :span="16" class="user-data-col">
               <a-row :gutter="[16, 16]">
                 <a-col :span="12">
-                  <a-statistic title="刷题次数总数" :value="leftData?.countTodayFrequency || 0" class="stat-item">
+                  <a-statistic title="用户增长" :value="leftData?.userGrowthRate || 0" class="stat-item">
                     <template #prefix>
-                      <CodeOutlined />
+                      <TeamOutlined />
                     </template>
                     <template #suffix>
-                      <span>次</span>
-                      <span class="top-magnitude" v-if="leftData && leftData?.topicGrowthRate > 0">
-                        <ArrowUpOutlined /> {{ leftData?.topicGrowthRate }}次
-                      </span>
-                      <span class="bottom-magnitude" v-else>
-                        <ArrowDownOutlined /> {{ Math.abs(leftData?.topicGrowthRate ?? 0) }}次
-                      </span>
+                      <span>人</span>
                     </template>
                   </a-statistic>
                 </a-col>
@@ -565,12 +461,6 @@ onMounted(() => {
               </a-row>
             </a-col>
           </a-row>
-        </a-card>
-      </a-col>
-      
-      <a-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
-        <a-card :bordered="false">
-          <div ref="categoryChart" class="category-chart"></div>
         </a-card>
       </a-col>
     </a-row>
@@ -634,7 +524,7 @@ onMounted(() => {
   margin-bottom: 10px;
 
   .top-magnitude {
-    color: #1677ff;
+    color: #0a3442;
     font-size: 14px;
   }
 
@@ -642,12 +532,6 @@ onMounted(() => {
     color: #cf1322;
     font-size: 14px;
   }
-}
-
-.category-chart {
-  width: 100%;
-  height: 286px;
-
 }
 
 .middle-section {
@@ -669,7 +553,7 @@ onMounted(() => {
   display: inline-block;
   width: 4px;
   height: 18px;
-  background: #1677ff;
+  background: #0a3442;
   margin-right: 10px;
   border-radius: 2px;
 }
