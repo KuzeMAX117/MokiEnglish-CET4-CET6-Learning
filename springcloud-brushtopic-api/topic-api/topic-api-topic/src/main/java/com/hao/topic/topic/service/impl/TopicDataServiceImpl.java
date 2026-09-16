@@ -3,6 +3,7 @@ package com.hao.topic.topic.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hao.ai.client.ai.AiFeignClient;
 import com.hao.topic.api.utils.enums.StatusEnums;
+import com.hao.topic.api.utils.enums.AiModuleTypeEnum;
 import com.hao.topic.client.security.SecurityFeignClient;
 import com.hao.topic.common.security.utils.SecurityUtils;
 import com.hao.topic.common.utils.StringUtils;
@@ -280,6 +281,46 @@ public class TopicDataServiceImpl implements TopicDataService {
             topicCategoryDataVo.setCount(count);
             return topicCategoryDataVo;
         }).toList();
+    }
+    
+    @Override
+    public Map<String, Object> adminModuleCount() {
+        Map<String, Object> map = new HashMap<>();
+        String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        
+        try {
+            // 获取今日各模块使用次数
+            var todayResult = aiFeignClient.countAllModulesByDate(today);
+            if (todayResult != null && todayResult.getData() != null) {
+                List<Map<String, Object>> todayModules = todayResult.getData();
+                for (Map<String, Object> module : todayModules) {
+                    String moduleType = (String) module.get("moduleType");
+                    Long count = (Long) module.get("count");
+                    map.put("today" + moduleType + "Count", count);
+                }
+            }
+            
+            // 获取各模块总使用次数
+            var wordTotal = aiFeignClient.countModuleTotal("word");
+            var essayTotal = aiFeignClient.countModuleTotal("essay");
+            var translationTotal = aiFeignClient.countModuleTotal("translation");
+            
+            map.put("totalWordCount", wordTotal != null ? wordTotal.getData() : 0);
+            map.put("totalEssayCount", essayTotal != null ? essayTotal.getData() : 0);
+            map.put("totalTranslationCount", translationTotal != null ? translationTotal.getData() : 0);
+            
+        } catch (Exception e) {
+            log.error("获取模块统计数据失败: {}", e.getMessage());
+            // 设置默认值
+            map.put("todaywordCount", 0);
+            map.put("todayessayCount", 0);
+            map.put("todaytranslationCount", 0);
+            map.put("totalWordCount", 0);
+            map.put("totalEssayCount", 0);
+            map.put("totalTranslationCount", 0);
+        }
+        
+        return map;
     }
 
     

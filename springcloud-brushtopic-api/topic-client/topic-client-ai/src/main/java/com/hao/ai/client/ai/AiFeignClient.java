@@ -33,5 +33,17 @@ public interface AiFeignClient {
 
     @PostMapping("/ai/model/translate")
     Result<String> translateText(@RequestBody Map<String, String> body);
+    
+    @GetMapping("/ai/module/count/{moduleType}/{date}")
+    Result<Long> countModuleByDate(@PathVariable String moduleType, @PathVariable String date);
+    
+    @GetMapping("/ai/module/count/{moduleType}")
+    Result<Long> countModuleTotal(@PathVariable String moduleType);
+    
+    @GetMapping("/ai/module/count/all/{date}")
+    Result<List<Map<String, Object>>> countAllModulesByDate(@PathVariable String date);
+    
+    @GetMapping("/ai/module/trend/all")
+    Result<List<Map<String, Object>>> countAllModulesTrend();
 
 }

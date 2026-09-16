@@ -15,6 +15,8 @@ public interface TopicDataService {
     TopicUserRankVo userRank();
 
     Map<String, Object> adminHomeCount();
+    
+    Map<String, Object> adminModuleCount();
 
     List<TopicCategoryDataVo> adminHomeCategory();
 

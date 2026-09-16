@@ -60,6 +60,12 @@ public class TopicDataController {
         Map<String, Object> map = topicDataService.adminHomeCount();
         return Result.success(map);
     }
+    
+    @GetMapping("/adminModuleCount")
+    public Result<Map<String, Object>> adminModuleCount() {
+        Map<String, Object> map = topicDataService.adminModuleCount();
+        return Result.success(map);
+    }
 
     
 

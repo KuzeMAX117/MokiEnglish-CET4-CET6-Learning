@@ -19,6 +19,7 @@ import com.hao.topic.ai.mapper.AiHistoryMapper;
 import com.hao.topic.ai.mapper.AiRecordMapper;
 import com.hao.topic.ai.mapper.AiUserMapper;
 import com.hao.topic.ai.properties.TtsProperties;
+import com.hao.topic.ai.service.AiModuleRecordService;
 import com.hao.topic.ai.service.ModelService;
 import com.hao.topic.api.utils.enums.StatusEnums;
 import com.hao.topic.client.system.SystemFeignClient;

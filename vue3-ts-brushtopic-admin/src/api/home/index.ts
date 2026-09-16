@@ -37,3 +37,10 @@ export const apiUserHomeCategory = () =>
 
 export const apiUserTopicCount = (date: string) =>
     request.get(prefix + "userTopicCount/" + date);
+
+export const apiAdminModuleCount = () => {
+    return request({
+        url: prefix + "adminModuleCount",
+        method: "get",
+    })
+}

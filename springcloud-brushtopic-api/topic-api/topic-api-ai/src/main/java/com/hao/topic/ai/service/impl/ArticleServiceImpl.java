@@ -3,6 +3,7 @@ package com.hao.topic.ai.service.impl;
 import com.alibaba.fastjson2.JSON;
 import com.hao.topic.ai.config.ArticleFunctionConfig;
 import com.hao.topic.ai.constant.ArticlePromptConstant;
+import com.hao.topic.ai.service.AiModuleRecordService;
 import com.hao.topic.ai.service.ArticleService;
 import com.hao.topic.model.dto.ai.ArticleGenerateDto;
 import com.hao.topic.model.vo.ai.ArticleEvaluation;
@@ -73,6 +74,15 @@ public class ArticleServiceImpl implements ArticleService {
                 dto.getWords() != null ? dto.getWords() : Collections.emptyList();
         log.info("📝 [{}] 开始多阶段短文生成 Pipeline, 单词数: {}, 等级: {}",
                 pipelineId, allWords.size(), dto.getLevel());
+        
+        // 记录背单词模块使用
+        try {
+            Long userId = SecurityUtils.getCurrentId();
+            String nickname = SecurityUtils.getCurrentName();
+            aiModuleRecordService.recordModuleUsage(userId, nickname, "word");
+        } catch (Exception e) {
+            log.warn("记录背单词模块使用失败: {}", e.getMessage());
+        }
 
         return Flux.defer(() -> {
             long pipelineStart = System.currentTimeMillis();

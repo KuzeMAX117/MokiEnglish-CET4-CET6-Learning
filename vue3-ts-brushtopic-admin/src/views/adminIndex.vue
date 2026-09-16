@@ -6,7 +6,7 @@ import * as echarts from 'echarts';
 
 import { useSettingStore } from '@/stores/modules/setting';
 const settingStore = useSettingStore();
-import { apiAdminHomeCount, apiTopicTrend, apiUserTrend, apiAiTrend } from '@/api/home'
+import { apiAdminHomeCount, apiTopicTrend, apiUserTrend, apiAiTrend, apiAdminModuleCount } from '@/api/home'
 import type { AdminLeftDataType, TopicTrendType } from '@/api/home/type';
 
 const topicTrendChart = ref(null);
@@ -311,7 +311,8 @@ watch(() => settingStore.isDark, () => {
 const leftData = ref<AdminLeftDataType>(); 
 const middleData = ref<TopicTrendType>(); 
 const userTrend = ref(); 
-const aiTrend = ref(); 
+const aiTrend = ref();
+const moduleData = ref(); 
 
 const getLeftData = async () => {
   const res = await apiAdminHomeCount();
@@ -344,12 +345,20 @@ const getAiTrendData = async () => {
   }
 }
 
+const getModuleData = async () => {
+  const res = await apiAdminModuleCount();
+  if (res.data) {
+    moduleData.value = res.data
+  }
+}
+
 const initData = async () => {
   await Promise.all([
     getLeftData(),
     getMiddleData(),
     getUserTrendData(),
-    getAiTrendData()
+    getAiTrendData(),
+    getModuleData()
   ])
 }
 
@@ -395,63 +404,44 @@ onMounted(() => {
             
             <a-col :span="16" class="user-data-col">
               <a-row :gutter="[16, 16]">
-                <a-col :span="12">
-                  <a-statistic title="用户增长" :value="leftData?.userGrowthRate || 0" class="stat-item">
+                <a-col :span="6">
+                  <a-statistic title="背单词" :value="moduleData?.totalWordCount || 0" class="stat-item">
                     <template #prefix>
-                      <TeamOutlined />
-                    </template>
-                    <template #suffix>
-                      <span>人</span>
-                    </template>
-                  </a-statistic>
-                </a-col>
-                <a-col :span="12">
-                  <a-statistic title="AI调用总次数" :value="leftData?.aiCount" class=" stat-item">
-                    <template #prefix>
-                      <RobotOutlined />
+                      <BookOutlined />
                     </template>
                     <template #suffix>
                       <span>次</span>
-                      <span class="top-magnitude" v-if="leftData && leftData.aiGrowthRate > 0">
-                        <ArrowUpOutlined /> {{ leftData.aiGrowthRate }}次
-                      </span>
-                      <span class="bottom-magnitude" v-else>
-                        <ArrowDownOutlined /> {{ Math.abs(leftData?.aiGrowthRate ?? 0) }}次
-                      </span>
                     </template>
                   </a-statistic>
                 </a-col>
-                <a-col :span="12">
-                  <a-statistic title="用户总数" :value="leftData?.userCount" class="stat-item">
+                <a-col :span="6">
+                  <a-statistic title="作文" :value="moduleData?.totalEssayCount || 0" class="stat-item">
                     <template #prefix>
-                      <TeamOutlined />
+                      <EditOutlined />
                     </template>
                     <template #suffix>
-                      <span>名</span>
-                      <span class="top-magnitude" v-if="leftData && leftData?.userGrowthRate > 0">
-                        <ArrowUpOutlined /> {{ leftData?.userGrowthRate }}名
-                      </span>
-                      <span class="bottom-magnitude">
-                        <ArrowDownOutlined /> {{ Math.abs(leftData?.userGrowthRate ?? 0) }}名
-                      </span>
+                      <span>次</span>
                     </template>
                   </a-statistic>
                 </a-col>
-                <a-col :span="12">
+                <a-col :span="6">
+                  <a-statistic title="翻译" :value="moduleData?.totalTranslationCount || 0" class="stat-item">
+                    <template #prefix>
+                      <TranslationOutlined />
+                    </template>
+                    <template #suffix>
+                      <span>次</span>
+                    </template>
+                  </a-statistic>
+                </a-col>
+                <a-col :span="6">
                   <a-statistic title="收录题目数量" suffix="题" :value="leftData?.totalTopicCount" class="stat-item">
                     <template #prefix>
                       <FileTextOutlined />
                     </template>
                   </a-statistic>
                 </a-col>
-                <a-col :span="12">
-                  <a-statistic title="收录专题数量" :value="leftData?.totalSubjectCount" suffix="个" class="stat-item">
-                    <template #prefix>
-                      <BookOutlined />
-                    </template>
-                  </a-statistic>
-                </a-col>
-                <a-col :span="12">
+                <a-col :span="6">
                   <a-statistic title="收录标签数量" :value="leftData?.topicLabelCount" suffix="个" class="stat-item">
                     <template #prefix>
                       <TagsOutlined />
