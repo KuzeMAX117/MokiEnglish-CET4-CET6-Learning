@@ -32,7 +32,7 @@
 						<uni-icons type="vip-filled" size="24" color="#D97706"></uni-icons>
 					</view>
 					<view class="bar-text">
-						<text class="t1">{{ role === 1 ? 'HaoAi 永久会员特权' : '开通永久会员' }}</text>
+						<text class="t1">{{ role === 1 ? '永久会员特权' : '开通永久会员' }}</text>
 						<text class="t2">{{ role === 1 ? '尊享全站 100% 刷题功能' : '解锁无限AI面试、自定义题库等' }}</text>
 					</view>
 				</view>
@@ -120,7 +120,7 @@
 					<view class="medal-ring">
 						<uni-icons type="vip-filled" size="40" color="#D97706"></uni-icons>
 					</view>
-					<text class="premium-title">HaoAi Premium</text>
+					<text class="premium-title">AI Premium</text>
 					<text class="premium-status" v-if="role === 1">永久会员特权已激活</text>
 				</view>
 
@@ -131,7 +131,7 @@
 					</view>
 					<view class="p-item">
 						<uni-icons type="checkbox-filled" size="16" color="#D97706"></uni-icons>
-						<text>HaoAi 智能面试解析助手</text>
+						<text>AI 智能面试解析助手</text>
 					</view>
 					<view class="p-item">
 						<uni-icons type="checkbox-filled" size="16" color="#D97706"></uni-icons>

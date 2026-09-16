@@ -1176,7 +1176,7 @@ public class ModelServiceImpl implements ModelService {
             log.warn("记录翻译模块使用失败: {}", e.getMessage());
         }
 
-        // 人格设定已内置在 System Prompt 中（HaoTeacher 英语语法与翻译批改专家）
+        // 人格设定已内置在 System Prompt 中（Teacher 英语语法与翻译批改专家）
         String systemPrompt = PromptConstant.TRANSLATION_CORRECT_SYSTEM;
 
         // 逐句内容序列化为 JSON 数组，避免拼接歧义

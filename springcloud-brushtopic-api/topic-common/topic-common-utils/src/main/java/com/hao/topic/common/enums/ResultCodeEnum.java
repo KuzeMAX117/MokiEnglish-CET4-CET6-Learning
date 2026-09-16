@@ -70,7 +70,7 @@ public enum ResultCodeEnum {
 
     
     TOPIC_GENERATE_ANSWER_ERROR(99936, "生成ai答案失败"),
-    TOPIC_GENERATE_ANSWER_PROCESSING(99937, "HaoAi正在努力生成中"),
+    TOPIC_GENERATE_ANSWER_PROCESSING(99937, "AI正在努力生成中"),
 
     USER_NOT_EXIST(99938, "用户不存在"),
     USER_PASSWORD_ERROR(99939, "用户密码错误"),

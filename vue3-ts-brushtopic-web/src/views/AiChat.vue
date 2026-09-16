@@ -75,7 +75,7 @@
                 <MarkdownView v-if="item.content" :content="item.content" />
                 <div v-else class="typing">
                   <a-spin size="small" />
-                  <span>HaoAi 思考中...</span>
+                  <span>AI 思考中...</span>
                 </div>
                 <div v-if="item.content && index > 0" class="msg-actions">
                   <a-tooltip title="语音朗读">
@@ -317,13 +317,13 @@ const sendPrompt = async () => {
       body: JSON.stringify(currentRecord),
     })
     if (!response.ok) {
-      message.error('HaoAi 回复出现点问题请稍后再试！')
+      message.error('AI 回复出现点问题请稍后再试！')
       isReply.value = true
       return
     }
     const body = response.body
     if (!body) {
-      message.error('HaoAi 回复出现点问题请稍后再试！')
+      message.error('AI 回复出现点问题请稍后再试！')
       isReply.value = true
       return
     }

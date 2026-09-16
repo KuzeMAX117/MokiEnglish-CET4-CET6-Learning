@@ -2,6 +2,7 @@ package com.hao.topic.topic;
 
 import com.hao.topic.api.utils.config.MybatisPlusConfig;
 import com.hao.topic.common.config.MyMetaObjectHandler;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -14,6 +15,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 
 @SpringBootApplication
+@MapperScan("com.hao.topic.**.mapper")
 @EnableDiscoveryClient
 @ComponentScans({
         @ComponentScan("com.hao.topic.common.security")

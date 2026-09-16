@@ -79,7 +79,7 @@ const emit = defineEmits(['handleClickTitle']);
 
   .box-plate-title {
     cursor: pointer;
-    background: #1677ff;
+    background: #0a3442;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     font-size: 18px;

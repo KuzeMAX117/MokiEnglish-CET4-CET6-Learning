@@ -27,15 +27,15 @@
 	const aiMode = reactive([{
 		label: '系统模式',
 		value: 'system',
-		desc: role.value === 1 ? 'AI从系统题库和会员自定义题库中随机提取题目HaoAi会校验你的回答' : 'AI从系统题库中随机提取题目HaoAi会校验你的回答'
+		desc: role.value === 1 ? 'AI从系统题库和会员自定义题库中随机提取题目，AI会校验你的回答' : 'AI从系统题库中随机提取题目，AI会校验你的回答'
 	}, {
 		label: '模型模式',
 		value: 'model',
-		desc: '完全使用AI生成的题目HaoAi会校验你的回答'
+		desc: '完全使用AI生成的题目，AI会校验你的回答'
 	}, {
 		label: '混合模式',
 		value: 'mix',
-		desc: 'AI随机混合系统题库和AI生成题目HaoAi会校验你的回答'
+		desc: 'AI随机混合系统题库和AI生成题目，AI会校验你的回答'
 	}, ])
 
 	
@@ -69,7 +69,7 @@
 		prompt: "我是" + userInfo.value.nickname || userInfo.value.account,
 		chatId: currentRecordId.value, 
 		model: aiModeValue.value,
-		content: '你好，我是HaoAi 1.0，你的面试题AI助手！',
+			content: '你好，我是AI 1.0，你的面试题AI助手！',
 		memoryId: aiId.value
 	}])
 
@@ -153,7 +153,7 @@
 			prompt: "我是" + userInfo.value.nickname || userInfo.value.account,
 			chatId: currentRecordId.value, 
 			model: aiModeValue.value,
-			content: '你好，我是HaoAi 1.0，你的面试题AI助手！',
+		content: '你好，我是AI 1.0，你的面试题AI助手！',
 			memoryId: aiId.value
 		})
 	}
@@ -268,7 +268,7 @@
 					
 					if (!response.ok) {
 						uni.showToast({
-							title: "HaoAi回复出现点问题请稍后再试！",
+							title: "AI回复出现点问题请稍后再试！",
 							icon: "none",
 							duration: 2000
 						})
@@ -278,7 +278,7 @@
 				}).then(async body => {
 					if (!body) {
 						uni.showToast({
-							title: "HaoAi回复出现点问题请稍后再试！",
+							title: "AI回复出现点问题请稍后再试！",
 							icon: "none",
 							duration: 2000
 						})
@@ -424,10 +424,10 @@
 	let currentAudio;
 	
 	const loadingTextArr = [
-		"正在召唤HaoAi发声中...",
-		"HaoAi正在努力变声，请稍等~",
+		"正在召唤AI发声中...",
+		"AI正在努力变声，请稍等~",
 		"语音合成中，马上就能听到啦！",
-		"HaoAi正在认真朗读你的内容...",
+		"AI正在认真朗读你的内容...",
 		"别着急，精彩马上开始！"
 	];
 	

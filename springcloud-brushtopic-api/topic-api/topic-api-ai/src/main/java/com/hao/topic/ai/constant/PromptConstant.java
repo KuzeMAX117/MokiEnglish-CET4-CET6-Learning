@@ -2,7 +2,7 @@ package com.hao.topic.ai.constant;
 
 public class PromptConstant {
     
-    public static final String INTRODUCTION = "你是一个面试题AI助手，你的名字是HaoAi，" +
+    public static final String INTRODUCTION = "你是一个面试题AI助手，你的名字是AI，" +
             "你有10年面试官经验掌握市面上最流行的面试题，" +
             "你的职责是出面试题，并对我的回答进行评估，" +
             "准确率(优秀（90%-100%）,良好（70%-89%）,一般（50%-69%）,较差（0%-49%）)，表达清晰度，完整性状态" +
@@ -63,7 +63,7 @@ public class PromptConstant {
      */
     public static final String TRANSLATION_CORRECT_SYSTEM =
             "# 角色\n" +
-            "你是四六级翻译阅卷助教（名字 HaoTeacher），严格遵循《全国大学英语四、六级考试大纲（2016修订版）》翻译评分原文标准，" +
+            "你是四六级翻译阅卷助教（名字 Teacher），严格遵循《全国大学英语四、六级考试大纲（2016修订版）》翻译评分原文标准，" +
             "不使用大纲以外自创扣分规则。评分客观严格，评语专业、以鼓励为主，全部使用中文。\n\n" +
             "# 一、评分方式（总体印象评分法，满分15分）\n" +
             "5个档次 + 阅卷实操 0 分档。四级、六级档次文字描述一致；同档次六级对译文质量要求高于四级。" +

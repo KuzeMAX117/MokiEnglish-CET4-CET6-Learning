@@ -15,7 +15,7 @@
           <span class="logo-glyph">C</span>
           <span class="logo-pulse"></span>
         </div>
-        <h1 class="title neon-text">CET备考 · 四六级刷题引擎</h1>
+        <h1 class="title neon-text">四六级智能学习平台</h1>
         <p class="slogan">AI 陪你备考四六级，让学习更高效</p>
       </div>
 
