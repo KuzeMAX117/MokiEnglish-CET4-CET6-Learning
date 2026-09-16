@@ -85,278 +85,306 @@ onMounted(() => {
 })
 </script>
 <template>
-  <div class="login-body">
-    <div class="login-box">
-      <div class="login-left">
-        <div class="left-content">
-          <h1 class="brand-title">ENGLISH CET4-6</h1>
-          <h2 class="main-title">方便的<span class="highlight">刷题</span>和<span class="highlight">备考</span></h2>
-          <div class="features">
-            <div class="feature-item">
-              <div class="feature-name">作文批改</div>
-              <div class="feature-desc">智能评分与范文学习</div>
-            </div>
-            <div class="feature-item">
-              <div class="feature-name">单词记忆</div>
-              <div class="feature-desc">高效背诵与巩固练习</div>
-            </div>
-          </div>
+  <div class="login-page">
+    <div class="login-header">
+      <div class="header-content">
+        <div class="brand-logo">
+          <span class="logo-glyph">T</span>
         </div>
-        <div class="illustration">
-          <div class="illust-box">
-            <span class="illust-icon">📖</span>
-            <span class="illust-text">Study</span>
-          </div>
+        <span class="brand-name">Topic 管理后台</span>
+      </div>
+    </div>
+
+    <div class="login-body">
+      <div class="slogan-area">
+        <h1 class="main-title">四六级智能学习</h1>
+        <h2 class="sub-title">后台管理系统</h2>
+        <div class="tagline">
+          <span class="tag">题库管理</span>
+          <span class="divider">·</span>
+          <span class="tag">用户管理</span>
+          <span class="divider">·</span>
+          <span class="tag">数据监控</span>
         </div>
       </div>
 
-      <div class="login-right">
-        <div class="login-form-wrapper">
-          <div class="form-header">
-            <div class="logo">
-              <span class="logo-icon">📖</span>
-              <span class="logo-text">CET4-6</span>
-            </div>
-          </div>
+      <div class="login-card">
+        <div class="card-header">
+          <h3>管理员登录</h3>
+          <p>请输入您的账户信息</p>
+        </div>
 
-          <div class="form-member">
-            <a-form :model="formData" ref="adminRef" :rules="formRule" layout="vertical">
-              <a-form-item name="username">
-                <a-input v-model:value="formData.username" placeholder="请输入账号" size="large">
-                  <template #prefix>
-                    <UserOutlined />
-                  </template>
-                </a-input>
-              </a-form-item>
-              <a-form-item name="password">
-                <a-input-password v-model:value="formData.password" placeholder="请输入密码" size="large">
-                  <template #prefix>
-                    <LockOutlined />
-                  </template>
-                </a-input-password>
-              </a-form-item>
-              <a-form-item name="code">
-                <div class="code-box">
-                  <a-input maxlength="4" v-model:value="formData.code" placeholder="验证码" size="large" style="flex: 1;">
-                    <template #prefix>
-                      <CheckCircleOutlined />
-                    </template>
-                  </a-input>
-                  <img @click="getCaptchaImage" :src="codeImage" alt="验证码" class="login-code" />
-                </div>
-              </a-form-item>
-              <a-form-item class="check-item">
-                <a-checkbox v-model:checked="formData.remember">记住密码</a-checkbox>
-              </a-form-item>
-              <a-form-item>
-                <a-button v-if="!loginLoading" type="primary" block size="large" class="login-btn" @click="login()">
-                  登 录
-                </a-button>
-                <a-spin v-else tip="正在登录中...."></a-spin>
-              </a-form-item>
-            </a-form>
-          </div>
+        <a-form :model="formData" ref="adminRef" :rules="formRule" layout="vertical" class="login-form">
+          <a-form-item name="username">
+            <div class="input-label">账号</div>
+            <a-input v-model:value="formData.username" placeholder="请输入账号" size="large" class="login-input">
+              <template #prefix><UserOutlined class="input-icon" /></template>
+            </a-input>
+          </a-form-item>
+          <a-form-item name="password">
+            <div class="input-label">密码</div>
+            <a-input-password v-model:value="formData.password" placeholder="请输入密码" size="large" class="login-input">
+              <template #prefix><LockOutlined class="input-icon" /></template>
+            </a-input-password>
+          </a-form-item>
+          <a-form-item name="code">
+            <div class="input-label">验证码</div>
+            <div class="code-box">
+              <a-input maxlength="4" v-model:value="formData.code" placeholder="请输入验证码" size="large" class="login-input code-input">
+                <template #prefix><CheckCircleOutlined class="input-icon" /></template>
+              </a-input>
+              <img @click="getCaptchaImage" :src="codeImage" alt="验证码" class="login-code" />
+            </div>
+          </a-form-item>
+          <a-form-item class="check-item">
+            <a-checkbox v-model:checked="formData.remember">记住密码</a-checkbox>
+          </a-form-item>
+          <a-form-item>
+            <a-button v-if="!loginLoading" type="primary" block size="large" class="submit-btn" @click="login()">
+              登录
+            </a-button>
+            <a-spin v-else tip="正在登录中...."></a-spin>
+          </a-form-item>
+        </a-form>
+
+        <div class="terms-text">
+          管理后台仅限授权人员使用
         </div>
       </div>
     </div>
   </div>
 </template>
+
 <style lang="scss" scoped>
-.login-body {
-  width: 100%;
-  height: 100vh;
-  background-color: var(--base-background);
+.login-page {
+  min-height: 100vh;
+  background: #f5f7fa;
+  display: flex;
+  flex-direction: column;
+}
 
-  .login-box {
-    width: 100%;
-    height: 100%;
+.login-header {
+  background: #fff;
+  border-bottom: 1px solid #e8eaed;
+  padding: 16px 40px;
+
+  .header-content {
     display: flex;
+    align-items: center;
+    gap: 12px;
 
-    .login-left {
-      width: 55%;
-      background: url('../assets/images/login-bg.png') center/cover no-repeat;
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #2ab5a0, #1e9e8a);
       display: flex;
-      flex-direction: column;
+      align-items: center;
       justify-content: center;
-      padding: 60px 80px;
-      position: relative;
-      overflow: hidden;
 
-      .left-content {
-        position: relative;
-        z-index: 2;
-
-        .brand-title {
-          font-size: 14px;
-          font-weight: 500;
-          color: var(--dashboard-primary);
-          margin: 0 0 16px 0;
-          letter-spacing: 2px;
-        }
-
-        .main-title {
-          font-size: 36px;
-          font-weight: 700;
-          color: var(--dashboard-primary);
-          margin: 0 0 40px 0;
-          line-height: 1.4;
-
-          .highlight {
-            color: var(--dashboard-accent);
-          }
-        }
-
-        .features {
-          .feature-item {
-            margin-bottom: 24px;
-
-            .feature-name {
-              font-size: 16px;
-              font-weight: 600;
-              color: var(--dashboard-primary);
-              margin-bottom: 4px;
-            }
-
-            .feature-desc {
-              font-size: 14px;
-              color: #666;
-            }
-          }
-        }
-      }
-
-      .illustration {
-        position: absolute;
-        right: 60px;
-        bottom: 60px;
-        z-index: 1;
-
-        .illust-box {
-          width: 200px;
-          height: 200px;
-          background: rgba(255, 255, 255, 0.6);
-          border-radius: 24px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 12px;
-
-          .illust-icon {
-            font-size: 64px;
-          }
-
-          .illust-text {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--dashboard-primary);
-          }
-        }
+      .logo-glyph {
+        color: #fff;
+        font-weight: 700;
+        font-size: 18px;
       }
     }
 
-    .login-right {
-      width: 45%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background-color: #fff;
-      padding: 40px;
-
-      .login-form-wrapper {
-        max-width: 360px;
-        width: 100%;
-
-        .form-header {
-          margin-bottom: 40px;
-
-          .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-
-            .logo-icon {
-              font-size: 24px;
-            }
-
-            .logo-text {
-              font-size: 18px;
-              font-weight: 600;
-              color: var(--dashboard-primary);
-            }
-          }
-        }
-
-        .form-member {
-          ::v-deep(.ant-form-item) {
-            margin-bottom: 20px;
-          }
-
-          ::v-deep(.ant-input-affix-wrapper) {
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
-            padding: 10px 14px;
-
-            &:hover, &:focus {
-              border-color: var(--dashboard-primary);
-              box-shadow: none;
-            }
-          }
-
-          .check-item {
-            margin: 0 0 20px 0;
-          }
-
-          .code-box {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-
-            .login-code {
-              cursor: pointer;
-              height: 44px;
-              border-radius: 8px;
-              border: 1px solid #e0e0e0;
-            }
-          }
-
-          .login-btn {
-            height: 44px;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 500;
-            background-color: var(--dashboard-primary);
-            border-color: var(--dashboard-primary);
-
-            &:hover {
-              background-color: var(--dashboard-secondary);
-              border-color: var(--dashboard-secondary);
-            }
-          }
-        }
-      }
+    .brand-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1a1a1a;
     }
   }
 }
 
-@media (max-width: 992px) {
-  .login-body .login-box {
+.login-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 80px;
+  padding: 40px;
+}
+
+.slogan-area {
+  text-align: right;
+
+  .main-title {
+    font-size: 42px;
+    font-weight: 800;
+    color: #1a1a1a;
+    margin: 0 0 8px 0;
+    line-height: 1.2;
+  }
+
+  .sub-title {
+    font-size: 36px;
+    font-weight: 800;
+    color: #2ab5a0;
+    margin: 0 0 24px 0;
+    line-height: 1.2;
+  }
+
+  .tagline {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+
+    .tag {
+      font-size: 14px;
+      color: #666;
+      background: #f0f7f5;
+      padding: 6px 14px;
+      border-radius: 20px;
+    }
+
+    .divider {
+      color: #ccc;
+    }
+  }
+}
+
+.login-card {
+  width: 420px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 40px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+
+  .card-header {
+    margin-bottom: 32px;
+
+    h3 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin: 0 0 8px 0;
+    }
+
+    p {
+      font-size: 14px;
+      color: #666;
+      margin: 0;
+    }
+  }
+}
+
+.login-form {
+  :deep(.ant-form-item) {
+    margin-bottom: 20px;
+  }
+}
+
+.input-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.login-input {
+  border-radius: 8px;
+
+  :deep(.ant-input) {
+    background: #f5f7fa;
+    border-color: transparent;
+
+    &:hover,
+    &:focus {
+      background: #fff;
+      border-color: #2ab5a0;
+    }
+  }
+
+  :deep(.ant-input-prefix .input-icon) {
+    color: #999;
+  }
+}
+
+:deep(.ant-input-affix-wrapper) {
+  border-radius: 8px;
+  background: #f5f7fa;
+  border-color: transparent;
+
+  &:hover,
+  &:focus-within {
+    background: #fff;
+    border-color: #2ab5a0;
+  }
+}
+
+.code-box {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+
+  .code-input {
+    flex: 1;
+  }
+
+  .login-code {
+    cursor: pointer;
+    height: 44px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+  }
+}
+
+.check-item {
+  margin: 0 0 20px 0;
+}
+
+.submit-btn {
+  height: 48px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #2ab5a0, #1e9e8a);
+  border-color: #2ab5a0;
+
+  &:hover,
+  &:focus {
+    background: linear-gradient(135deg, #23a693, #178f7d) !important;
+    border-color: #23a693 !important;
+  }
+}
+
+.terms-text {
+  text-align: center;
+  font-size: 12px;
+  color: #999;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #f0f0f0;
+}
+
+@media (max-width: 900px) {
+  .login-body {
     flex-direction: column;
+    gap: 40px;
+    padding: 32px 20px;
+  }
 
-    .login-left {
-      width: 100%;
-      padding: 40px 20px;
-      min-height: auto;
+  .slogan-area {
+    text-align: center;
 
-      .illustration {
-        display: none;
-      }
+    .tagline {
+      justify-content: center;
     }
 
-    .login-right {
-      width: 100%;
-      padding: 40px 20px;
+    .main-title {
+      font-size: 32px;
     }
+
+    .sub-title {
+      font-size: 28px;
+    }
+  }
+
+  .login-card {
+    width: 100%;
+    max-width: 420px;
   }
 }
 </style>

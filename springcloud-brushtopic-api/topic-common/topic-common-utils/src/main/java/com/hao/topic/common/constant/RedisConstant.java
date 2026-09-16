@@ -24,4 +24,16 @@ public class RedisConstant {
     public static final String TOPIC_RANK_TODAY_PREFIX = "topic:rank:today:";
     
     public static final String USER_RANK_PREFIX = "user:rank:";
+
+    
+    public static final String PK_QUEUE = "pk:queue";
+    public static final String PK_USER_MATCHING_PREFIX = "pk:user:matching:";
+    public static final String PK_USER_MATCHING_SUFFIX = ":matching";
+    public static final String PK_ROOM_PREFIX = "pk:room:";
+    public static final String PK_ROOM_QUESTIONS_SUFFIX = ":questions";
+    public static final int PK_ROOM_TTL = 10;
+    public static final int PK_QUESTIONS_PER_USER = 5;
+    public static final int PK_TOTAL_QUESTIONS = 10;
+    public static final String PK_RANK_DAILY_PREFIX = "pk:rank:daily:";
+    public static final String PK_RANK_ALL = "pk:rank:all";
 }

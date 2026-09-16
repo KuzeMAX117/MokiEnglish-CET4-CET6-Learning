@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hao.topic.ai.mapper.AiModuleRecordMapper">
+    
+    <select id="countModuleFrequency" resultType="java.lang.Long">
+        SELECT COALESCE(SUM(count), 0) FROM ai_module_record
+        <where>
+            <if test="moduleType != null and moduleType != ''">
+                AND module_type = #{moduleType}
+            </if>
+            <if test="date != null and date != ''">
+                AND record_date = #{date}
+            </if>
+        </where>
+    </select>
+    
+    <select id="countModuleDay7" resultType="com.hao.topic.model.vo.topic.TopicDataVo">
+        WITH RECURSIVE dates AS (
+            SELECT CURDATE() - INTERVAL 6 DAY AS date_value
+            UNION ALL
+            SELECT date_value + INTERVAL 1 DAY
+            FROM dates
+            WHERE date_value &lt; CURDATE()
+        )
+        SELECT d.date_value AS date,
+               COALESCE(SUM(r.count), 0) AS count
+        FROM dates d
+        LEFT JOIN ai_module_record r ON r.record_date = d.date_value
+        <where>
+            <if test="moduleType != null and moduleType != ''">
+                AND r.module_type = #{moduleType}
+            </if>
+        </where>
+        GROUP BY d.date_value
+        ORDER BY d.date_value;
+    </select>
+    
+    <select id="countModuleByUser" resultType="java.lang.Long">
+        SELECT COALESCE(SUM(count), 0) FROM ai_module_record
+        <where>
+            <if test="userId != null">
+                AND user_id = #{userId}
+            </if>
+            <if test="moduleType != null and moduleType != ''">
+                AND module_type = #{moduleType}
+            </if>
+        </where>
+    </select>
+    
+    <select id="countAllModulesByDate" resultType="java.util.Map">
+        SELECT module_type AS moduleType,
+               COALESCE(SUM(count), 0) AS count
+        FROM ai_module_record
+        <where>
+            <if test="date != null and date != ''">
+                AND record_date = #{date}
+            </if>
+        </where>
+        GROUP BY module_type
+    </select>
+    
+    <select id="countAllModulesTrend" resultType="java.util.Map">
+        WITH RECURSIVE dates AS (
+            SELECT CURDATE() - INTERVAL #{days} DAY AS date_value
+            UNION ALL
+            SELECT date_value + INTERVAL 1 DAY
+            FROM dates
+            WHERE date_value &lt; CURDATE()
+        )
+        SELECT d.date_value AS date,
+               r.module_type AS moduleType,
+               COALESCE(SUM(r.count), 0) AS count
+        FROM dates d
+        LEFT JOIN ai_module_record r ON r.record_date = d.date_value
+        GROUP BY d.date_value, r.module_type
+        ORDER BY d.date_value, r.module_type;
+    </select>
+</mapper>

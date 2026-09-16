@@ -2,6 +2,8 @@ package com.hao.topic.ai.agent;
 
 import com.hao.topic.ai.agent.tool.AgentTool;
 import com.hao.topic.ai.agent.tool.ToolResult;
+import com.hao.topic.ai.service.AiModuleRecordService;
+import com.hao.topic.common.security.utils.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -39,10 +41,12 @@ public class EssayAgent {
 
     private final List<AgentTool> tools;
     private final ExecutorService executor = Executors.newFixedThreadPool(3);
+    private final AiModuleRecordService aiModuleRecordService;
 
     @Autowired
-    public EssayAgent(List<AgentTool> tools) {
+    public EssayAgent(List<AgentTool> tools, AiModuleRecordService aiModuleRecordService) {
         this.tools = tools;
+        this.aiModuleRecordService = aiModuleRecordService;
         log.info("EssayAgent 初始化完成，注册 Tool 数量: {}", tools.size());
         tools.forEach(t -> log.info("  - Tool: {} ({})", t.getToolName(), t.getDescription()));
     }
@@ -56,8 +60,30 @@ public class EssayAgent {
      * @return 批改结果
      */
     public EssayAgentResult execute(String essay, String topic, Integer level) {
+        return execute(essay, topic, level, null);
+    }
+    
+    /**
+     * 执行作文批改全链路（带业务关联）
+     * 
+     * @param essay 作文内容
+     * @param topic 作文题目
+     * @param level 四级=4，六级=6
+     * @param essayId 作文ID（用于关联AI使用记录）
+     * @return 批改结果
+     */
+    public EssayAgentResult execute(String essay, String topic, Integer level, Long essayId) {
         long startTime = System.currentTimeMillis();
-        log.info("Agent 开始执行作文批改，题目: {}, 级别: CET-{}", topic, level);
+        log.info("Agent 开始执行作文批改，题目: {}, 级别: CET-{}, essayId: {}", topic, level, essayId);
+        
+        // 记录作文模块使用
+        try {
+            Long userId = SecurityUtils.getCurrentId();
+            String nickname = SecurityUtils.getCurrentName();
+            aiModuleRecordService.recordModuleUsage(userId, nickname, "essay", essayId, "essay");
+        } catch (Exception e) {
+            log.warn("记录作文模块使用失败: {}", e.getMessage());
+        }
 
         // 1. 编排 Tool 执行顺序（这里三个 Tool 无依赖，可以并行）
         List<CompletableFuture<ToolResult>> futures = new ArrayList<>();

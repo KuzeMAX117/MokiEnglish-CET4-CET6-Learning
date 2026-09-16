@@ -100,6 +100,9 @@ public class ModelServiceImpl implements ModelService {
     @Autowired
     private AiRecordMapper aiRecordMapper;
 
+    @Autowired
+    private com.hao.topic.ai.service.AiModuleRecordService aiModuleRecordService;
+
     
 
     private static final String[] ENCOURAGEMENTS = {
@@ -1162,6 +1165,15 @@ public class ModelServiceImpl implements ModelService {
     public TranslationCorrectionVo correctTranslation(TranslationCorrectDto dto) {
         if (dto == null || CollectionUtils.isEmpty(dto.getItems())) {
             throw new TopicException("批改内容不能为空");
+        }
+
+        // 记录翻译模块使用
+        try {
+            Long userId = SecurityUtils.getCurrentId();
+            String nickname = SecurityUtils.getCurrentName();
+            aiModuleRecordService.recordModuleUsage(userId, nickname, "translation", dto.getTranslationId(), "translation");
+        } catch (Exception e) {
+            log.warn("记录翻译模块使用失败: {}", e.getMessage());
         }
 
         // 人格设定已内置在 System Prompt 中（HaoTeacher 英语语法与翻译批改专家）

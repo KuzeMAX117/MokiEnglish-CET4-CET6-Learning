@@ -38,6 +38,10 @@ spring:
             - Path=/api/ai/**
           filters:
             - StripPrefix=1
+        - id: ws-pk
+          uri: lb://service-topic
+          predicates:
+            - Path=/ws/**
                
 security:
   # captcha:
@@ -54,3 +58,4 @@ security:
       - /api/security/user/sendEmail
       - /api/security/user/resetPassword
       - /api/security/user/register
+      - /ws/**

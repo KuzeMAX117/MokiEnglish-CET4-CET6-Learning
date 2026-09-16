@@ -4,11 +4,11 @@ const prefix = "/topic/data/"
 export const apiQueryWebHomeCount = () =>
   request(prefix + 'webHomeCount')
 
-export const apiQueryRank = (type) =>
-  request(prefix + 'rank/' + type)
+export const apiQueryRank = () =>
+  request(prefix + 'rank')
 
-export const apiQueryUserRank = (type) =>
-  request(prefix + 'userRank/' + type)
+export const apiQueryUserRank = () =>
+  request(prefix + 'userRank')
 
 export const apiQueryTopicTodayVo = () =>
   request(prefix + 'topicTodayVo')

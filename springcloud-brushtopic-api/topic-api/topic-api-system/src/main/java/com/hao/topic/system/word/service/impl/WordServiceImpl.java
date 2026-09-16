@@ -24,6 +24,7 @@ import com.hao.topic.system.word.mapper.WordBookMapper;
 import com.hao.topic.system.word.mapper.WordDictionaryMapper;
 import com.hao.topic.system.word.mapper.WordItemMapper;
 import com.hao.topic.system.word.service.WordService;
+import com.hao.topic.system.word.service.WordRankRedisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -47,6 +48,7 @@ public class WordServiceImpl implements WordService {
     private final UserWordRecordMapper userWordRecordMapper;
     private final UserWordCollectionMapper userWordCollectionMapper;
     private final AiFeignClient aiFeignClient;
+    private final WordRankRedisService wordRankRedisService;
 
     @Override
     public List<WordBookVo> listBooks() {
@@ -197,6 +199,9 @@ public class WordServiceImpl implements WordService {
         long hours = (long) Math.pow(2, record.getProficiency());
         record.setNextReviewTime(LocalDateTime.now().plusHours(hours));
         userWordRecordMapper.updateById(record);
+
+        // 更新Redis排行榜
+        wordRankRedisService.updateStreak(userId);
     }
 
     @Override

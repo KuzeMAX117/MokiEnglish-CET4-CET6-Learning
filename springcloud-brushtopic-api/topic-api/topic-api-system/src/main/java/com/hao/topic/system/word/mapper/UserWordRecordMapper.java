@@ -52,4 +52,50 @@ public interface UserWordRecordMapper extends BaseMapper<UserWordRecord> {
             "AND last_study_time >= #{startDate} " +
             "GROUP BY DATE(last_study_time)")
     List<Map<String, Object>> selectDailyCounts(@Param("userId") Long userId, @Param("startDate") String startDate);
+
+    @Select("SELECT ranked.`rank`, ranked.user_id AS userId, ranked.streak AS scope, " +
+            "COALESCE(NULLIF(u.nickname, ''), u.account) AS nickname, u.avatar, " +
+            "r.role_key AS role FROM " +
+            "(SELECT user_id, COUNT(DISTINCT DATE(last_study_time)) AS streak, " +
+            "RANK() OVER (ORDER BY COUNT(DISTINCT DATE(last_study_time)) DESC) AS `rank` " +
+            "FROM user_word_record WHERE is_deleted = 0 AND status != 0 " +
+            "AND last_study_time IS NOT NULL " +
+            "GROUP BY user_id) AS ranked " +
+            "JOIN sys_user AS u ON ranked.user_id = u.id " +
+            "JOIN (SELECT user_id, MIN(role_id) AS role_id FROM sys_user_role GROUP BY user_id) AS ur ON u.id = ur.user_id " +
+            "JOIN sys_role AS r ON ur.role_id = r.id " +
+            "ORDER BY ranked.`rank` LIMIT 100")
+    List<Map<String, Object>> getWordCountRank();
+
+    @Select("SELECT ranked.`rank`, ranked.user_id AS userId, ranked.streak AS scope, " +
+            "COALESCE(NULLIF(u.nickname, ''), u.account) AS nickname, u.avatar, " +
+            "r.role_key AS role FROM " +
+            "(SELECT user_id, COUNT(DISTINCT DATE(last_study_time)) AS streak, " +
+            "RANK() OVER (ORDER BY COUNT(DISTINCT DATE(last_study_time)) DESC) AS `rank` " +
+            "FROM user_word_record WHERE is_deleted = 0 AND status != 0 " +
+            "AND last_study_time IS NOT NULL " +
+            "GROUP BY user_id) AS ranked " +
+            "JOIN sys_user AS u ON ranked.user_id = u.id " +
+            "JOIN (SELECT user_id, MIN(role_id) AS role_id FROM sys_user_role GROUP BY user_id) AS ur ON u.id = ur.user_id " +
+            "JOIN sys_role AS r ON ur.role_id = r.id " +
+            "WHERE ranked.user_id = #{userId}")
+    Map<String, Object> getWordUserRank(@Param("userId") Long userId);
+
+    @Select("SELECT `rank` FROM (SELECT user_id, COUNT(DISTINCT DATE(last_study_time)) AS streak, " +
+            "RANK() OVER (ORDER BY COUNT(DISTINCT DATE(last_study_time)) DESC) AS `rank` " +
+            "FROM user_word_record WHERE is_deleted = 0 AND status != 0 " +
+            "AND last_study_time IS NOT NULL " +
+            "GROUP BY user_id) AS ranked WHERE user_id = #{userId}")
+    Long getWordRank(@Param("userId") Long userId);
+
+    @Select("SELECT u.id AS userId, COALESCE(NULLIF(u.nickname, ''), u.account) AS nickname, " +
+            "u.avatar, r.role_key AS role FROM sys_user u " +
+            "JOIN (SELECT user_id, MIN(role_id) AS role_id FROM sys_user_role GROUP BY user_id) AS ur ON u.id = ur.user_id " +
+            "JOIN sys_role AS r ON ur.role_id = r.id " +
+            "WHERE u.id = #{userId}")
+    Map<String, Object> getUserInfo(@Param("userId") Long userId);
+
+    @Select("SELECT COUNT(DISTINCT DATE(last_study_time)) AS streak FROM user_word_record " +
+            "WHERE user_id = #{userId} AND is_deleted = 0 AND status != 0 AND last_study_time IS NOT NULL")
+    Long countStreakDays(@Param("userId") Long userId);
 }

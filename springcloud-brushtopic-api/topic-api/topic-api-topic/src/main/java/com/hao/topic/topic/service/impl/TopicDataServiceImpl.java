@@ -4,27 +4,25 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hao.ai.client.ai.AiFeignClient;
 import com.hao.topic.api.utils.enums.StatusEnums;
 import com.hao.topic.client.security.SecurityFeignClient;
-import com.hao.topic.common.constant.RedisConstant;
 import com.hao.topic.common.security.utils.SecurityUtils;
 import com.hao.topic.common.utils.StringUtils;
 import com.hao.topic.model.entity.topic.*;
 import com.hao.topic.model.vo.ai.AiTrendVo;
 import com.hao.topic.model.vo.system.SysUserTrentVo;
 import com.hao.topic.model.vo.topic.*;
+import com.hao.topic.system.word.mapper.UserWordRecordMapper;
+import com.hao.topic.system.word.service.WordRankRedisService;
 import com.hao.topic.topic.mapper.*;
 import com.hao.topic.topic.service.TopicDataService;
 import com.hao.topic.topic.service.TopicSubjectService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -33,7 +31,6 @@ public class TopicDataServiceImpl implements TopicDataService {
     private final SecurityFeignClient securityFeignClient;
     private final TopicRecordMapper topicRecordMapper;
     private final TopicMapper topicMapper;
-    private final StringRedisTemplate stringRedisTemplate;
     private final TopicSubjectMapper subjectMapper;
     private final TopicLabelMapper topicLabelMapper;
     private final AiFeignClient aiFeignClient;
@@ -44,6 +41,8 @@ public class TopicDataServiceImpl implements TopicDataService {
     private final TopicDailyStagingMapper topicDailyStagingMapper;
     private final TopicLabelTopicMapper topicLabelTopicMapper;
     private final TopicDailyBrushMapper topicDailyBrushMapper;
+    private final UserWordRecordMapper userWordRecordMapper;
+    private final WordRankRedisService wordRankRedisService;
 
     
 
@@ -57,7 +56,7 @@ public class TopicDataServiceImpl implements TopicDataService {
         
         Long count = securityFeignClient.count();
         
-        Long rank = topicRecordMapper.getRank(userId);
+        Long rank = userWordRecordMapper.getWordRank(userId);
         
         Long todayCount = null;
         LambdaQueryWrapper<TopicRecord> wrapper = new LambdaQueryWrapper<>();
@@ -113,168 +112,54 @@ public class TopicDataServiceImpl implements TopicDataService {
 
     
 
-    public List<TopicUserRankVo> rank(Integer type) {
-        if (type == null) {
-            return null;
+    public List<TopicUserRankVo> rank() {
+        // 优先从Redis读取排行榜
+        List<Map<String, Object>> rankData = wordRankRedisService.getRankFromRedis(100);
+        if (CollectionUtils.isEmpty(rankData)) {
+            // Redis没有数据，从MySQL读取
+            rankData = userWordRecordMapper.getWordCountRank();
         }
-        
+        if (CollectionUtils.isEmpty(rankData)) {
+            return new ArrayList<>();
+        }
         List<TopicUserRankVo> rankList = new ArrayList<>();
-        if (type == 1) {
-            
-            String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-            String todayKey = RedisConstant.TOPIC_RANK_TODAY_PREFIX + date;
-            
-            Set<ZSetOperations.TypedTuple<String>> tuples = stringRedisTemplate.opsForZSet()
-                    .reverseRangeWithScores(todayKey, 0, 99);
-            if (CollectionUtils.isEmpty(tuples)) {
-                
-                List<TopicUserRankVo> countRank = topicRecordMapper.getCountRank(date);
-                if (CollectionUtils.isNotEmpty(countRank)) {
-                    readRankTodayCache(countRank);
-                }
-                return countRank;
-            }
-            getRankVo(rankList, tuples);
-        } else {
-            
-            
-            Set<ZSetOperations.TypedTuple<String>> tuples = stringRedisTemplate.opsForZSet()
-                    .reverseRangeWithScores(RedisConstant.TOPIC_RANK_PREFIX, 0, 99);
-            if (CollectionUtils.isEmpty(tuples)) {
-                
-                List<TopicUserRankVo> countRank = topicRecordMapper.getCountRank(null);
-                if (CollectionUtils.isNotEmpty(countRank)) {
-                    readRankTodayCache(countRank);
-                    readRankCache(countRank);
-                }
-                return countRank;
-            }
-            getRankVo(rankList, tuples);
+        for (Map<String, Object> row : rankData) {
+            TopicUserRankVo vo = new TopicUserRankVo();
+            vo.setUserId(row.get("userId") != null ? ((Number) row.get("userId")).longValue() : null);
+            vo.setScope(row.get("scope") != null ? ((Number) row.get("scope")).longValue() : 0);
+            vo.setNickname((String) row.get("nickname"));
+            vo.setAvatar((String) row.get("avatar"));
+            vo.setRole((String) row.get("role"));
+            vo.setRank(row.get("rank") != null ? ((Number) row.get("rank")).longValue() : null);
+            rankList.add(vo);
         }
         return rankList;
     }
 
     
 
-    private void getRankVo(List<TopicUserRankVo> rankList, Set<ZSetOperations.TypedTuple<String>> tuples) {
-        if (tuples != null) {
-            
-            for (ZSetOperations.TypedTuple<String> tuple : tuples) {
-                
-                String userId = tuple.getValue();
-                Double score = tuple.getScore();
-                log.info("用户ID:{},分数:{}", userId, score);
-                
-                Map<Object, Object> userInfo = stringRedisTemplate.opsForHash()
-                        .entries(RedisConstant.USER_RANK_PREFIX + userId);
-
-                
-                TopicUserRankVo topicUserRankVo = new TopicUserRankVo();
-                if (score != null) {
-                    topicUserRankVo.setScope(score.longValue());
-                }
-                if (userInfo.get("avatar") == null) {
-                    topicUserRankVo.setAvatar(null);
-                } else {
-                    topicUserRankVo.setAvatar((String) userInfo.get("avatar"));
-                }
-                topicUserRankVo.setNickname((String) userInfo.get("nickname"));
-                if (userId != null) {
-                    topicUserRankVo.setUserId(Long.valueOf(userId));
-                }
-                topicUserRankVo.setRole((String) userInfo.get("role"));
-
-                rankList.add(topicUserRankVo);
-            }
-        }
-    }
-
-    
-
-    public TopicUserRankVo userRank(Integer type) {
-        
+    public TopicUserRankVo userRank() {
         Long userId = SecurityUtils.getCurrentId();
         if (userId == null) {
             return null;
         }
-        String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-
-        String key;
-        if (type == 1) {
-            
-            key = RedisConstant.TOPIC_RANK_TODAY_PREFIX + date;
-        } else {
-            
-            key = RedisConstant.TOPIC_RANK_PREFIX;
+        // 优先从Redis读取
+        Map<String, Object> data = wordRankRedisService.getUserRankFromRedis(userId);
+        if (data == null) {
+            // Redis没有数据，从MySQL读取
+            data = userWordRecordMapper.getWordUserRank(userId);
         }
-
-        
-        Long rank = stringRedisTemplate.opsForZSet().reverseRank(key, userId.toString());
-        if (type == 1) {
-            
-            if (rank == null) {
-                
-                return topicRecordMapper.getUserCountRank(date, userId);
-            }
-        } else {
-            
-            if (rank == null) {
-                
-                return topicRecordMapper.getUserCountRank(null, userId);
-            }
-        }
-
-        
-        Double score = stringRedisTemplate.opsForZSet().score(key, userId.toString());
-
-        
-        if (score == null) {
+        if (data == null) {
             return null;
         }
-
-        
-        Map<Object, Object> userInfo = stringRedisTemplate.opsForHash()
-                .entries(RedisConstant.USER_RANK_PREFIX + userId);
-
-        
-        TopicUserRankVo topicUserRankVo = new TopicUserRankVo();
-        topicUserRankVo.setUserId(userId);
-        topicUserRankVo.setNickname((String) userInfo.get("nickname"));
-        topicUserRankVo.setAvatar((String) userInfo.get("avatar"));
-        topicUserRankVo.setScope(score.longValue());
-        topicUserRankVo.setRank(rank + 1);
-        topicUserRankVo.setRole((String) userInfo.get("role"));
-
-        return topicUserRankVo;
-    }
-
-    
-
-    public void readRankTodayCache(List<TopicUserRankVo> countRank) {
-        
-        String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        
-        for (TopicUserRankVo topicUserRankVo : countRank) {
-            
-            Map<String, String> userInfo = new HashMap<>();
-            userInfo.put("nickname", topicUserRankVo.getNickname());
-            userInfo.put("avatar", topicUserRankVo.getAvatar());
-            userInfo.put("role", topicUserRankVo.getRole());
-            stringRedisTemplate.opsForHash().putAll(RedisConstant.USER_RANK_PREFIX + topicUserRankVo.getUserId(), userInfo);
-            
-            if (date.equals(topicUserRankVo.getTopicTime())) {
-                stringRedisTemplate.opsForZSet().add(RedisConstant.TOPIC_RANK_TODAY_PREFIX + date, String.valueOf(topicUserRankVo.getUserId()), topicUserRankVo.getScope());
-            }
-        }
-    }
-
-    
-
-    public void readRankCache(List<TopicUserRankVo> countRank) {
-        for (TopicUserRankVo topicUserRankVo : countRank) {
-            
-            stringRedisTemplate.opsForZSet().add(RedisConstant.TOPIC_RANK_PREFIX, String.valueOf(topicUserRankVo.getUserId()), topicUserRankVo.getScope());
-        }
+        TopicUserRankVo vo = new TopicUserRankVo();
+        vo.setUserId(userId);
+        vo.setNickname((String) data.get("nickname"));
+        vo.setAvatar((String) data.get("avatar"));
+        vo.setScope(data.get("scope") != null ? ((Number) data.get("scope")).longValue() : 0);
+        vo.setRank(data.get("rank") != null ? ((Number) data.get("rank")).longValue() : null);
+        vo.setRole((String) data.get("role"));
+        return vo;
     }
 
     
@@ -474,14 +359,10 @@ public class TopicDataServiceImpl implements TopicDataService {
 
         
         
-        Long rank = topicRecordMapper.getRank(currentId);
+        Long rank = userWordRecordMapper.getWordRank(currentId);
 
         
-        long todayRank = topicRecordMapper.getDateRank(currentId, today) == null ? 0L : topicRecordMapper.getDateRank(currentId, today);
-        long yesterdayRank = topicRecordMapper.getDateRank(currentId, yesterday) == null ? 0L : topicRecordMapper.getDateRank(currentId, yesterday);
-
-        
-        long rankGrowthRate = todayRank - yesterdayRank;
+        long rankGrowthRate = 0;
 
         
         

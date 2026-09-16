@@ -1,16 +1,7 @@
 <template>
 	<view class="ranking-container" :style="{ background: themeConfig.bg }">
-		
-		<view class="header-tab">
-			<view class="tab-pill">
-				<view :class="['tab-btn', screen ? 'active' : '']" @click="toggleTab(true)">日榜</view>
-				<view :class="['tab-btn', !screen ? 'active' : '']" @click="toggleTab(false)">总榜</view>
-			</view>
-		</view>
 
-		
 		<view class="podium-box">
-			
 			<view class="podium-col">
 				<view class="podium-item silver" v-if="top3[1]">
 					<view class="avatar-wrap">
@@ -24,7 +15,6 @@
 				<view class="placeholder" v-else></view>
 			</view>
 
-			
 			<view class="podium-col">
 				<view class="podium-item gold" v-if="top3[0]">
 					<view class="avatar-wrap">
@@ -38,7 +28,6 @@
 				<view class="placeholder" v-else></view>
 			</view>
 
-			
 			<view class="podium-col">
 				<view class="podium-item bronze" v-if="top3[2]">
 					<view class="avatar-wrap">
@@ -53,9 +42,8 @@
 			</view>
 		</view>
 
-		
 		<view class="rank-list-card">
-			<scroll-view scroll-y class="scroll-v" style="height: calc(100vh - 680rpx)">
+			<scroll-view scroll-y class="scroll-v" style="height: calc(100vh - 600rpx)">
 				<view v-if="rankList && rankList.length > 0">
 					<view class="rank-row" v-for="(item, index) in rankList" :key="index">
 						<text class="rank-index">{{ index + 4 }}</text>
@@ -75,9 +63,7 @@
 			</scroll-view>
 		</view>
 
-		
 		<view class="my-status-fixed" v-if="currentRank">
-			
 			<view class="my-card" :style="{ background: themeConfig.bg }">
 				<view class="my-left">
 					<text class="my-no">{{ currentRank.rank || '-' }}</text>
@@ -110,31 +96,29 @@
 		apiQueryUserRank
 	} from '@/api/home'
 
-	const screen = ref(true)
 	const rankList = ref([])
 	const top3 = ref([])
 	const currentRank = ref(null)
 	const userInfo = ref(JSON.parse(uni.getStorageSync('h5UserInfo') || '{}'))
 	const role = ref(uni.getStorageSync('role') || 0)
 
-	
 	const themeConfig = computed(() => {
 		const configs = {
-			2: { 
+			2: {
 				name: '管理员',
 				accent: '#4F46E5',
 				bg: 'linear-gradient(135deg, #1E293B 0%, #334155 100%)',
 				doneBg: '#EEF2FF',
 				doneBorder: 'rgba(255,255,255,0.6)'
 			},
-			1: { 
+			1: {
 				name: '高级会员',
 				accent: '#D97706',
 				bg: 'linear-gradient(135deg, #2D241E 0%, #78350F 100%)',
 				doneBg: '#FFFBEB',
 				doneBorder: 'rgba(255,255,255,0.6)'
 			},
-			0: { 
+			0: {
 				name: '普通用户',
 				accent: '#1677ff',
 				bg: 'linear-gradient(135deg, #1677ff 0%, #40a9ff 100%)',
@@ -145,12 +129,12 @@
 		return configs[role.value] || configs[0]
 	})
 
-	const fetchData = async (type) => {
+	const fetchData = async () => {
 		uni.showLoading({
 			title: '加载中'
 		})
 		try {
-			const [resRank, resUser] = await Promise.all([apiQueryRank(type), apiQueryUserRank(type)])
+			const [resRank, resUser] = await Promise.all([apiQueryRank(), apiQueryUserRank()])
 			if (resRank.data) {
 				const raw = resRank.data
 				top3.value = raw.slice(0, 3)
@@ -162,13 +146,7 @@
 		}
 	}
 
-	const toggleTab = (isDay) => {
-		if (screen.value === isDay) return
-		screen.value = isDay
-		fetchData(isDay ? 1 : 2)
-	}
-
-	onMounted(() => fetchData(1))
+	onMounted(() => fetchData())
 
 	const getRoleColor = (r) => {
 		const map = {
@@ -188,42 +166,12 @@
 		transition: all 0.4s ease;
 	}
 
-	
-	.header-tab {
-		padding: 40rpx 0 0rpx;
-		display: flex;
-		justify-content: center;
-
-		.tab-pill {
-			display: flex;
-			background: rgba(255, 255, 255, 0.15);
-			padding: 8rpx;
-			border-radius: 100rpx;
-			backdrop-filter: blur(10px);
-
-			.tab-btn {
-				padding: 12rpx 50rpx;
-				border-radius: 100rpx;
-				font-size: 26rpx;
-				color: rgba(255, 255, 255, 0.8);
-
-				&.active {
-					background: #fff;
-					color: #333;
-					font-weight: bold;
-					box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.1);
-				}
-			}
-		}
-	}
-
-	
 	.podium-box {
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-end;
-		padding: 0rpx 10rpx 60rpx;
-		height: 320rpx;
+		padding: 60rpx 10rpx 60rpx;
+		height: 360rpx;
 
 		.podium-col {
 			flex: 1;
@@ -274,16 +222,6 @@
 					align-items: center;
 					justify-content: center;
 					box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.2);
-				}
-
-				.crown-icon {
-					position: absolute;
-					top: -50rpx;
-					left: 50%;
-					transform: translateX(-50%);
-					width: 70rpx;
-					height: 70rpx;
-					z-index: 2;
 				}
 			}
 
@@ -337,7 +275,6 @@
 		}
 	}
 
-	
 	.rank-list-card {
 		flex: 1;
 		background: #fff;
@@ -396,7 +333,6 @@
 		}
 	}
 
-	
 	.my-status-fixed {
 		position: fixed;
 		bottom: 0;
@@ -406,7 +342,6 @@
 		background: linear-gradient(to top, #fff 80%, transparent);
 
 		.my-card {
-			
 			border-radius: 36rpx;
 			padding: 24rpx 36rpx;
 			display: flex;

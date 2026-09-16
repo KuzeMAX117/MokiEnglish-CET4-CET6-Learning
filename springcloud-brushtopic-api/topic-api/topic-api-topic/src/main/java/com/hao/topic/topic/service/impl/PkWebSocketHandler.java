@@ -198,11 +198,21 @@ public class PkWebSocketHandler {
             if (stringRedisTemplate == null) {
                 return null;
             }
-            String key = "user:login:" + token;
-            String username = stringRedisTemplate.opsForValue().get(key);
-            if (username != null) {
-                return Long.valueOf(username);
+            Map<String, Object> tokenInfo = com.hao.topic.common.utils.JWTUtils.getTokenInfo(token);
+            String username = (String) tokenInfo.get("username");
+            String userIdStr = (String) tokenInfo.get("id");
+
+            if (username == null || userIdStr == null) {
+                return null;
             }
+
+            String cachedToken = stringRedisTemplate.opsForValue().get(username);
+            if (cachedToken == null || !cachedToken.equals(token)) {
+                log.warn("WebSocket Token验证失败: {}", username);
+                return null;
+            }
+
+            return Long.valueOf(userIdStr);
         } catch (Exception e) {
             log.error("解析token失败", e);
         }

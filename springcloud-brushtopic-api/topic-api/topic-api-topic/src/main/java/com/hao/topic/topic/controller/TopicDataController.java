@@ -31,17 +31,17 @@ public class TopicDataController {
 
     
 
-    @GetMapping("/rank/{type}")
-    public Result<List<TopicUserRankVo>> rank(@PathVariable Integer type) {
-        List<TopicUserRankVo> topicUserRankVos = topicDataService.rank(type);
+    @GetMapping("/rank")
+    public Result<List<TopicUserRankVo>> rank() {
+        List<TopicUserRankVo> topicUserRankVos = topicDataService.rank();
         return Result.success(topicUserRankVos);
     }
 
     
 
-    @GetMapping("/userRank/{type}")
-    public Result<TopicUserRankVo> userRank(@PathVariable Integer type) {
-        TopicUserRankVo topicUserRankVo = topicDataService.userRank(type);
+    @GetMapping("/userRank")
+    public Result<TopicUserRankVo> userRank() {
+        TopicUserRankVo topicUserRankVo = topicDataService.userRank();
         return Result.success(topicUserRankVo);
     }
 
