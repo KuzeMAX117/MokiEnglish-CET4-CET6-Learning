@@ -29,6 +29,29 @@ export interface WebHomeCount {
   userCount?: number
 }
 
+export interface TopicTrendVo {
+  dateList: string[]
+  countUserList: number[]
+  countTopicList: number[]
+}
+
+export interface UserTrendVo {
+  dateList: string[]
+  countList: number[]
+}
+
+export interface CategoryDataVo {
+  categoryName: string
+  count: number
+  [key: string]: any
+}
+
+export interface UserTopicCountVo {
+  date: string
+  count: number
+  [key: string]: any
+}
+
 export interface TodayTopicVo {
   id: number
   topicId: number

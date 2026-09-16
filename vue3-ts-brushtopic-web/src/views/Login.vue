@@ -1,144 +1,140 @@
 <template>
   <div class="login-page">
-    
-    <div class="bg-glow">
-      <div class="glow-orb orb-1"></div>
-      <div class="glow-orb orb-2"></div>
-      <div class="glow-orb orb-3"></div>
-      <div class="grid-overlay"></div>
-    </div>
-
-    <div class="login-card">
-      
-      <div class="brand-area">
-        <div class="brand-logo">
-          <span class="logo-glyph">C</span>
-          <span class="logo-pulse"></span>
+    <div class="login-main">
+      <div class="login-left">
+        <div class="left-content">
+          <span class="line1">DONE</span>
+          <span class="line2">IS BETTER THAN</span>
+          <span class="line3">PERFECT</span>
         </div>
-        <h1 class="title neon-text">四六级智能学习平台</h1>
-        <p class="slogan">AI 陪你备考四六级，让学习更高效</p>
       </div>
 
-      
-      <template v-if="mode === 'login'">
-        <div class="tab-switch">
-          <div
-            class="tab-item"
-            :class="{ active: loginWay === 0 }"
-            @click="loginWay = 0"
-          >账户登录</div>
-          <div
-            class="tab-item"
-            :class="{ active: loginWay === 1 }"
-            @click="loginWay = 1"
-          >邮箱登录</div>
-        </div>
-        <a-form layout="vertical" :model="loginForm" @finish="handleLogin">
-          <a-form-item>
-            <a-input
-              v-model:value="loginForm.account"
-              :placeholder="loginWay === 0 ? '请输入账户名称' : '请输入 QQ 邮箱'"
-              size="large"
-              allow-clear
-              class="glass-input"
-            >
-              <template #prefix><UserOutlined class="input-icon" /></template>
-            </a-input>
-          </a-form-item>
-          <a-form-item>
-            <a-input-password
-              v-model:value="loginForm.password"
-              placeholder="请输入密码"
-              size="large"
-              class="glass-input"
-              @press-enter="handleLogin"
-            >
-              <template #prefix><LockOutlined class="input-icon" /></template>
-            </a-input-password>
-          </a-form-item>
-          <a-form-item>
-            <a-button type="primary" html-type="submit" size="large" block :loading="loading" class="neon-btn">
-              开始备考
-            </a-button>
-          </a-form-item>
-          <div class="action-row">
-            <a class="link-btn" @click="mode = 'forget'">忘记密码</a>
-            <a class="link-btn" @click="mode = 'register'">立即注册 →</a>
+      <div class="login-right">
+        <div class="login-card">
+          <div class="brand-area">
+            <div class="brand-logo">
+              <span class="logo-glyph">T</span>
+            </div>
+            <p class="brand-name">Topic</p>
+            <h1 class="headline">四六级智能学习平台</h1>
+            <p class="subtitle">作文批改 · 单词记忆 · 智能翻译，一站式备考助手</p>
           </div>
-        </a-form>
-      </template>
 
-      
-      <template v-else-if="mode === 'register'">
-        <div class="form-header">
-          <h2>加入 CET备考</h2>
-          <a class="link-btn" @click="mode = 'login'">← 返回登录</a>
-        </div>
-        <a-form layout="vertical" :model="registerForm" @finish="handleRegister">
-          <a-form-item label="账户名称">
-            <a-input v-model:value="registerForm.account" placeholder="创建你的专属账户 (注册后不可更改)" size="large" allow-clear class="glass-input" />
-          </a-form-item>
-          <a-form-item label="昵称">
-            <a-input v-model:value="registerForm.nickname" placeholder="给自己起个独特的昵称" size="large" allow-clear class="glass-input" />
-          </a-form-item>
-          <a-form-item label="QQ 邮箱">
-            <div class="input-group">
-              <a-input
-                v-model:value="registerForm.email"
-                placeholder="请输入 QQ 邮箱"
-                size="large"
-                class="glass-input"
-              />
-              <a-button size="large" :loading="emailLoading" @click="getCode('register')" class="code-btn">
-                发送验证码
-              </a-button>
-            </div>
-          </a-form-item>
-          <a-form-item label="邮箱验证码">
-            <a-input v-model:value="registerForm.code" placeholder="请输入 6 位验证码" size="large" maxlength="6" class="glass-input" />
-          </a-form-item>
-          <a-form-item label="登录密码">
-            <a-input-password v-model:value="registerForm.password" placeholder="请输入登录密码" size="large" class="glass-input" />
-          </a-form-item>
-          <a-form-item>
-            <a-button type="primary" html-type="submit" size="large" block :loading="loading" class="neon-btn">
-              开启四六级备考之旅
-            </a-button>
-          </a-form-item>
-        </a-form>
-      </template>
+          <template v-if="mode === 'login'">
+            <a-form layout="vertical" :model="loginForm" @finish="handleLogin" class="login-form">
+              <a-form-item>
+                <div class="tab-switch">
+                  <div class="tab-item" :class="{ active: loginWay === 0 }" @click="loginWay = 0">账户登录</div>
+                  <div class="tab-item" :class="{ active: loginWay === 1 }" @click="loginWay = 1">邮箱登录</div>
+                </div>
+              </a-form-item>
+              <a-form-item>
+                <div class="input-label">账号</div>
+                <a-input
+                  v-model:value="loginForm.account"
+                  :placeholder="loginWay === 0 ? '请输入账户名称' : '请输入 QQ 邮箱'"
+                  size="large"
+                  allow-clear
+                  class="login-input"
+                >
+                  <template #prefix><UserOutlined class="input-icon" /></template>
+                </a-input>
+              </a-form-item>
+              <a-form-item>
+                <div class="input-label">密码</div>
+                <a-input-password
+                  v-model:value="loginForm.password"
+                  placeholder="请输入密码"
+                  size="large"
+                  class="login-input"
+                  @press-enter="handleLogin"
+                >
+                  <template #prefix><LockOutlined class="input-icon" /></template>
+                </a-input-password>
+              </a-form-item>
+              <a-form-item>
+                <a-button type="primary" html-type="submit" size="large" block :loading="loading" class="submit-btn">
+                  登录
+                </a-button>
+              </a-form-item>
+              <div class="action-row">
+                <a class="link-btn" @click="mode = 'forget'">忘记密码</a>
+                <a class="link-btn" @click="mode = 'register'">立即注册</a>
+              </div>
+            </a-form>
+          </template>
 
-      
-      <template v-else>
-        <div class="form-header">
-          <h2>重置密码</h2>
-          <a class="link-btn" @click="mode = 'login'">← 返回登录</a>
-        </div>
-        <a-form layout="vertical" :model="forgetForm" @finish="handleForget">
-          <a-form-item label="QQ 邮箱">
-            <div class="input-group">
-              <a-input v-model:value="forgetForm.email" placeholder="请输入 QQ 邮箱" size="large" class="glass-input" />
-              <a-button size="large" :loading="emailLoading" @click="getCode('forget')" class="code-btn">
-                发送验证码
-              </a-button>
+          <template v-else-if="mode === 'register'">
+            <div class="form-header">
+              <h2>创建账户</h2>
+              <a class="link-btn back-link" @click="mode = 'login'">已有账户？立即登录</a>
             </div>
-          </a-form-item>
-          <a-form-item label="邮箱验证码">
-            <a-input v-model:value="forgetForm.code" placeholder="请输入 6 位验证码" size="large" maxlength="6" class="glass-input" />
-          </a-form-item>
-          <a-form-item label="新密码">
-            <a-input-password v-model:value="forgetForm.password" placeholder="请输入新密码" size="large" class="glass-input" />
-          </a-form-item>
-          <a-form-item label="确认新密码">
-            <a-input-password v-model:value="forgetForm.newPassword" placeholder="请再次输入新密码" size="large" class="glass-input" />
-          </a-form-item>
-          <a-form-item>
-            <a-button type="primary" html-type="submit" size="large" block :loading="loading" class="neon-btn">
-              确认修改
-            </a-button>
-          </a-form-item>
-        </a-form>
-      </template>
+            <a-form layout="vertical" :model="registerForm" @finish="handleRegister" class="login-form">
+              <a-form-item>
+                <div class="input-label">账户名称</div>
+                <a-input v-model:value="registerForm.account" placeholder="创建你的专属账户 (注册后不可更改)" size="large" allow-clear class="login-input" />
+              </a-form-item>
+              <a-form-item>
+                <div class="input-label">昵称</div>
+                <a-input v-model:value="registerForm.nickname" placeholder="给自己起个独特的昵称" size="large" allow-clear class="login-input" />
+              </a-form-item>
+              <a-form-item>
+                <div class="input-label">QQ 邮箱</div>
+                <a-input v-model:value="registerForm.email" placeholder="请输入 QQ 邮箱" size="large" class="login-input" />
+              </a-form-item>
+              <a-form-item>
+                <div class="input-label">邮箱验证码</div>
+                <div class="input-group">
+                  <a-input v-model:value="registerForm.code" placeholder="请输入 6 位验证码" size="large" maxlength="6" class="login-input code-input" />
+                  <a-button size="large" :loading="emailLoading" @click="getCode('register')" class="code-btn">发送验证码</a-button>
+                </div>
+              </a-form-item>
+              <a-form-item>
+                <div class="input-label">登录密码</div>
+                <a-input-password v-model:value="registerForm.password" placeholder="请输入登录密码" size="large" class="login-input" />
+              </a-form-item>
+              <a-form-item>
+                <a-button type="primary" html-type="submit" size="large" block :loading="loading" class="submit-btn">注册</a-button>
+              </a-form-item>
+            </a-form>
+          </template>
+
+          <template v-else>
+            <div class="form-header">
+              <h2>重置密码</h2>
+              <a class="link-btn back-link" @click="mode = 'login'">← 返回登录</a>
+            </div>
+            <a-form layout="vertical" :model="forgetForm" @finish="handleForget" class="login-form">
+              <a-form-item>
+                <div class="input-label">QQ 邮箱</div>
+                <a-input v-model:value="forgetForm.email" placeholder="请输入 QQ 邮箱" size="large" class="login-input" />
+              </a-form-item>
+              <a-form-item>
+                <div class="input-label">邮箱验证码</div>
+                <div class="input-group">
+                  <a-input v-model:value="forgetForm.code" placeholder="请输入 6 位验证码" size="large" maxlength="6" class="login-input code-input" />
+                  <a-button size="large" :loading="emailLoading" @click="getCode('forget')" class="code-btn">发送验证码</a-button>
+                </div>
+              </a-form-item>
+              <a-form-item>
+                <div class="input-label">新密码</div>
+                <a-input-password v-model:value="forgetForm.password" placeholder="请输入新密码" size="large" class="login-input" />
+              </a-form-item>
+              <a-form-item>
+                <div class="input-label">确认新密码</div>
+                <a-input-password v-model:value="forgetForm.newPassword" placeholder="请再次输入新密码" size="large" class="login-input" />
+              </a-form-item>
+              <a-form-item>
+                <a-button type="primary" html-type="submit" size="large" block :loading="loading" class="submit-btn">确认修改</a-button>
+              </a-form-item>
+            </a-form>
+          </template>
+
+          <div class="terms-text">
+            登录即表示您同意我们的<a>服务条款</a>和<a>隐私政策</a>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -272,205 +268,199 @@ const handleForget = async () => {
 <style scoped lang="scss">
 .login-page {
   min-height: 100vh;
-  background: var(--card-bg);
-  position: relative;
+  background: #e8f5f0;
+  display: flex;
+}
+
+.login-main {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.login-left {
+  flex: 1;
+  background: linear-gradient(135deg, #2ab5a0, #1e9e8a);
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
-  padding: 40px 20px;
-}
-
-.bg-glow {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
+  padding: 60px;
+  position: relative;
   overflow: hidden;
 
-  .glow-orb {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(120px);
-  }
-
-  .orb-1 {
-    width: 520px;
-    height: 520px;
-    top: -180px;
-    left: 8%;
-    background: radial-gradient(circle, rgba(66, 87, 178, 0.14), transparent 70%);
-    animation: float 14s infinite ease-in-out;
-  }
-
-  .orb-2 {
-    width: 460px;
-    height: 460px;
-    bottom: -160px;
-    right: 6%;
-    background: radial-gradient(circle, rgba(66, 87, 178, 0.08), transparent 70%);
-    animation: float 18s infinite ease-in-out reverse;
-  }
-
-  .orb-3 {
-    width: 380px;
-    height: 380px;
-    top: 30%;
-    right: 30%;
-    background: radial-gradient(circle, rgba(66, 87, 178, 0.06), transparent 70%);
-    animation: float 22s infinite ease-in-out;
-  }
-
-  .grid-overlay {
+  &::before {
+    content: '';
     position: absolute;
     inset: 0;
     background-image:
-      linear-gradient(rgba(66, 87, 178, 0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(66, 87, 178, 0.05) 1px, transparent 1px);
-    background-size: 44px 44px;
-    mask-image: radial-gradient(circle at 50% 40%, #000 0%, transparent 70%);
+      linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(circle at 50% 50%, #000 0%, transparent 70%);
   }
 }
 
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0) scale(1);
+.left-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .line1,
+  .line2,
+  .line3 {
+    font-weight: 900;
+    text-transform: uppercase;
+    line-height: 1;
+    color: rgba(255, 255, 255, 0.2);
+    letter-spacing: 6px;
   }
-  50% {
-    transform: translateY(-40px) scale(1.08);
+
+  .line1 {
+    font-size: 120px;
   }
+
+  .line2 {
+    font-size: 64px;
+  }
+
+  .line3 {
+    font-size: 120px;
+  }
+}
+
+.login-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background: #fff;
 }
 
 .login-card {
-  position: relative;
-  z-index: 2;
-  width: 460px;
-  background: var(--page-bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 40px 44px;
-  box-shadow: var(--shadow-hover);
+  width: 100%;
+  max-width: 400px;
 }
 
 .brand-area {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 32px;
 
   .brand-logo {
-    position: relative;
-    width: 62px;
-    height: 62px;
-    border-radius: 16px;
-    background: linear-gradient(135deg, #4257B2, #364899);
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #2ab5a0, #1e9e8a);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 16px;
-    box-shadow: 0 8px 20px rgba(66, 87, 178, 0.28);
+    margin-bottom: 12px;
 
     .logo-glyph {
       color: #fff;
-      font-weight: 800;
-      font-size: calc(32px + var(--font-offset, 0px));
-    }
-
-    .logo-pulse {
-      position: absolute;
-      inset: -4px;
-      border-radius: 18px;
-      border: 1px solid rgba(66, 87, 178, 0.35);
-      animation: pulse 2.4s infinite;
+      font-weight: 700;
+      font-size: 24px;
     }
   }
 
-  .title {
-    font-size: calc(24px + var(--font-offset, 0px));
-    font-weight: 800;
-    letter-spacing: 1px;
+  .brand-name {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 16px;
   }
 
-  .slogan {
-    margin-top: 8px;
-    font-size: calc(14px + var(--font-offset, 0px));
-    color: var(--text-muted);
-    letter-spacing: 0.5px;
+  .headline {
+    font-size: 26px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.5;
   }
 }
 
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 0.6;
-    transform: scale(1);
+.login-form {
+  :deep(.ant-form-item) {
+    margin-bottom: 18px;
   }
-  50% {
-    opacity: 0.1;
-    transform: scale(1.12);
-  }
-}
-
-.neon-text {
-  color: var(--primary);
 }
 
 .tab-switch {
   display: flex;
+  background: #f0f7f5;
+  border-radius: 8px;
   padding: 4px;
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  margin-bottom: 22px;
 
   .tab-item {
     flex: 1;
     text-align: center;
-    padding: 9px 0;
-    font-size: calc(14px + var(--font-offset, 0px));
-    color: var(--text-muted);
-    border-radius: 9px;
+    padding: 10px 0;
+    font-size: 14px;
+    color: #666;
+    border-radius: 6px;
     cursor: pointer;
     transition: all 0.25s;
     user-select: none;
 
     &.active {
-      color: var(--primary);
+      color: #1e9e8a;
       font-weight: 600;
-      background: var(--page-bg);
-      box-shadow: var(--shadow-card);
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0, 128, 100, 0.1);
     }
   }
 }
 
-.glass-input {
+.input-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.login-input {
   border-radius: 8px;
 
   :deep(.ant-input) {
-    background: transparent;
+    background: #f0f7f5;
+    border-color: transparent;
+
+    &:hover,
+    &:focus {
+      background: #fff;
+      border-color: #2ab5a0;
+    }
   }
 
   :deep(.ant-input-prefix .input-icon) {
-    color: var(--text-muted);
+    color: #999;
   }
 }
 
 :deep(.ant-input-affix-wrapper) {
-  background: var(--card-bg);
-  border-color: var(--border);
   border-radius: 8px;
+  background: #f0f7f5;
+  border-color: transparent;
 
   &:hover,
   &:focus-within {
-    background: var(--page-bg);
-    border-color: rgba(66, 87, 178, 0.5);
-    box-shadow: 0 0 0 2px rgba(66, 87, 178, 0.12);
+    background: #fff;
+    border-color: #2ab5a0;
   }
 }
 
 .input-group {
   display: flex;
-  gap: 10px;
+  gap: 12px;
 
-  .glass-input {
+  .code-input {
     flex: 1;
   }
 }
@@ -478,72 +468,117 @@ const handleForget = async () => {
 .code-btn {
   height: 40px;
   border-radius: 8px;
-  background: var(--primary-light);
-  border-color: rgba(66, 87, 178, 0.35);
-  color: var(--primary);
+  background: #f0f7f5;
+  border-color: #d4ebe5;
+  color: #1e9e8a;
+  white-space: nowrap;
 
   &:hover {
-    background: rgba(66, 87, 178, 0.14);
-    border-color: rgba(66, 87, 178, 0.55);
-    color: var(--primary-hover);
+    background: #e0f2ed;
+    border-color: #2ab5a0;
+    color: #168a78;
   }
 }
 
-.neon-btn {
-  height: 46px;
-  border-radius: var(--radius-md);
-  font-size: calc(16px + var(--font-offset, 0px));
+.submit-btn {
+  height: 48px;
+  border-radius: 8px;
+  font-size: 16px;
   font-weight: 600;
-  letter-spacing: 2px;
-  border: none;
-  background: var(--primary);
-  box-shadow: 0 8px 20px rgba(66, 87, 178, 0.3);
+  background: linear-gradient(135deg, #2ab5a0, #1e9e8a);
+  border-color: #2ab5a0;
 
   &:hover,
   &:focus {
-    background: var(--primary-hover) !important;
-    box-shadow: 0 10px 26px rgba(66, 87, 178, 0.4);
-  }
-}
-
-.form-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 22px;
-
-  h2 {
-    font-size: calc(20px + var(--font-offset, 0px));
-    font-weight: 700;
-    color: var(--text-title);
+    background: linear-gradient(135deg, #23a693, #178f7d) !important;
+    border-color: #23a693 !important;
   }
 }
 
 .action-row {
   display: flex;
   justify-content: space-between;
-  font-size: calc(14px + var(--font-offset, 0px));
+  font-size: 14px;
 }
 
 .link-btn {
-  color: var(--text-muted);
+  color: #666;
+  cursor: pointer;
   transition: color 0.25s;
 
   &:hover {
-    color: var(--primary);
+    color: #2ab5a0;
   }
 }
 
-:deep(.ant-form-item-label > label) {
-  color: var(--text-body) !important;
-  font-size: calc(14px + var(--font-offset, 0px));
+.back-link {
+  font-size: 14px;
 }
 
-:deep(.ant-input) {
-  color: var(--text-title);
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+
+  h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1a1a1a;
+  }
 }
 
-:deep(.ant-input::placeholder) {
-  color: var(--text-muted);
+.terms-text {
+  text-align: center;
+  font-size: 12px;
+  color: #999;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #f0f0f0;
+
+  a {
+    color: #666;
+    text-decoration: underline;
+
+    &:hover {
+      color: #2ab5a0;
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .login-main {
+    flex-direction: column;
+  }
+
+  .login-left {
+    padding: 48px 32px;
+    min-height: 240px;
+  }
+
+  .left-content {
+    .line1, .line3 {
+      font-size: 64px;
+    }
+    .line2 {
+      font-size: 36px;
+    }
+  }
+
+  .login-right {
+    width: 100%;
+    padding: 32px 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .left-content {
+    .line1, .line3 {
+      font-size: 48px;
+    }
+    .line2 {
+      font-size: 24px;
+    }
+  }
 }
 </style>

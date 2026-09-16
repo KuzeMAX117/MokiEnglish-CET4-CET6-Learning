@@ -1,6 +1,5 @@
 <template>
 	<view class="page-container">
-		
 		<view class="header-section" :style="{ background: themeConfig.bg }">
 			<view class="user-info">
 				<view class="greeting">
@@ -11,8 +10,6 @@
 					<text class="nickname">{{ userInfo.nickname || userInfo.account || '同学' }}</text>
 				</view>
 			</view>
-
-			
 			<view class="stats-board">
 				<view class="stats-item">
 					<text class="label">今日已刷</text>
@@ -27,8 +24,7 @@
 				<view class="stats-item">
 					<text class="label">累计数量</text>
 					<view class="value-box">
-						<text class="current"
-							:style="{ color: themeConfig.accent }">{{ webHomeCount.totalTopicRecordCount || 0 }}</text>
+						<text class="current" :style="{ color: themeConfig.accent }">{{ webHomeCount.totalTopicRecordCount || 0 }}</text>
 						<text class="split">/</text>
 						<text class="total">{{ webHomeCount.totalTopicCount || 0 }}</text>
 					</view>
@@ -36,7 +32,6 @@
 			</view>
 		</view>
 
-		
 		<view class="ranking-bar" @click="tapRanking">
 			<view class="bar-left">
 				<image class="medal-icon" src="../../static/images/zzjb.png" mode="aspectFit" />
@@ -48,40 +43,68 @@
 			<uni-icons type="right" size="14" color="#999"></uni-icons>
 		</view>
 
-		
 		<view class="task-section">
-			<view class="section-header">
-				<view class="title-left">
-					<view class="indicator" :style="{ background: themeConfig.accent }"></view>
-					<text class="title">每日必刷</text>
+			<view class="section-title">开始学习</view>
+			<view class="task-grid">
+				<view class="task-card primary" @click="navigateTo('/pages/database/database')">
+					<view class="task-icon primary-icon">
+						<uni-icons type="compose" size="20" color="#fff"></uni-icons>
+					</view>
+					<view class="task-content">
+						<text class="task-name">真题刷题</text>
+						<text class="task-desc">历年真题模拟练习</text>
+					</view>
+					<uni-icons type="right" size="14" color="#fff"></uni-icons>
 				</view>
-				<text class="subtitle">{{ currentDate }}</text>
+				<view class="task-card" @click="navigateTo('/pages/word/study/study')">
+					<view class="task-icon vocab-icon">
+						<uni-icons type="book" size="20" :color="themeConfig.accent"></uni-icons>
+					</view>
+					<view class="task-content">
+						<text class="task-name">背单词</text>
+						<text class="task-desc">CET核心词汇</text>
+					</view>
+					<uni-icons type="right" size="14" color="#999"></uni-icons>
+				</view>
+				<view class="task-card" @click="navigateTo('/pages/ai/ai')">
+					<view class="task-icon ai-icon">
+						<uni-icons type="chatbubble" size="20" :color="themeConfig.accent"></uni-icons>
+					</view>
+					<view class="task-content">
+						<text class="task-name">AI 练习</text>
+						<text class="task-desc">智能个性化学习</text>
+					</view>
+					<uni-icons type="right" size="14" color="#999"></uni-icons>
+				</view>
 			</view>
+		</view>
 
-			<view class="list-wrapper">
-				<view v-if="loading" class="state-box">数据加载中...</view>
-				<view v-else-if="topicTodayVo.length === 0" class="state-box">今日暂无推荐题目</view>
-
-				<view v-for="(item, index) in topicTodayVo" :key="index" class="topic-card"
-					@click="handleQuestion(item)">
-					<view class="topic-main">
-						<text class="topic-title">{{ item.topicName }}</text>
-						<view class="topic-tags">
-							<text v-for="tag in item.labelNames" :key="tag" class="tag">{{ tag }}</text>
-						</view>
+		<view class="quick-section">
+			<view class="section-title">更多功能</view>
+			<view class="quick-grid">
+				<view class="quick-item" @click="navigateTo('/pages/database/database?level=4')">
+					<view class="quick-icon q1">
+						<uni-icons type="compose" size="18" :color="themeConfig.accent"></uni-icons>
 					</view>
-
-					
-					<view class="status-btn" :style="item.status == 1 ? { 
-							background: themeConfig.doneBg, 
-							color: themeConfig.accent,
-							border: `1px solid ${themeConfig.doneBorder}`
-						} : { 
-							background: themeConfig.accent, 
-							color: '#fff' 
-						}">
-						{{ item.status == 1 ? '已刷' : '练习' }}
+					<text class="quick-text">四级真题</text>
+				</view>
+				<view class="quick-item" @click="navigateTo('/pages/database/database?level=6')">
+					<view class="quick-icon q2">
+						<uni-icons type="compose" size="18" :color="themeConfig.accent"></uni-icons>
 					</view>
+					<text class="quick-text">六级真题</text>
+				</view>
+				<view class="quick-item" @click="navigateTo('/pages/index/ranking/ranking')">
+					<view class="quick-icon q3">
+						<uni-icons type="star" size="18" :color="themeConfig.accent"></uni-icons>
+					</view>
+					<text class="quick-text">排行榜</text>
+				</view>
+				<view class="quick-item" @click="navigateTo('/pages/user/user')">
+					<view class="quick-icon q4">
+						<uni-icons type="person" size="18" :color="themeConfig.accent"></uni-icons>
+					</view>
+					<text class="quick-text">个人中心</text>
 				</view>
 			</view>
 		</view>
@@ -89,95 +112,32 @@
 </template>
 
 <script setup>
-	import {
-		ref,
-		computed,
-		onMounted
-	} from 'vue'
-	import {
-		getTimeOfDay
-	} from '@/utils/time'
-	import {
-		apiQueryWebHomeCount,
-		apiQueryTopicTodayVo,
-		apiFlushTopic
-	} from '@/api/home/index'
+	import { ref, computed, onMounted } from 'vue'
+	import { getTimeOfDay } from '@/utils/time'
+	import { apiQueryWebHomeCount } from '@/api/home/index'
 
-	const loading = ref(true)
 	const webHomeCount = ref({})
-	const topicTodayVo = ref([])
 	const userInfo = ref(JSON.parse(uni.getStorageSync('h5UserInfo') || '{}'))
 	const role = ref(uni.getStorageSync('role') || 0)
 
 	const initData = async () => {
-		loading.value = true
-		try {
-			const [resCount, resTopic] = await Promise.all([apiQueryWebHomeCount(), apiQueryTopicTodayVo()])
-			if (resCount.code === 200) webHomeCount.value = resCount.data
-			if (resTopic.code === 200) topicTodayVo.value = resTopic.data
-		} finally {
-			loading.value = false
-		}
+		const resCount = await apiQueryWebHomeCount()
+		if (resCount.code === 200) webHomeCount.value = resCount.data
 	}
 
-	onMounted(() => {
-		initData()
-	})
+	onMounted(() => { initData() })
 
-	
 	const themeConfig = computed(() => {
 		const configs = {
-			2: { 
-				name: '管理员',
-				accent: '#4F46E5',
-				bg: 'linear-gradient(135deg, #1E293B 0%, #334155 100%)',
-				doneBg: '#EEF2FF', 
-				doneBorder: '#E0E7FF'
-			},
-			1: { 
-				name: '普通会员',
-				accent: '#D97706',
-				bg: 'linear-gradient(135deg, #2D241E 0%, #78350F 100%)',
-				doneBg: '#FFFBEB', 
-				doneBorder: '#FEF3C7'
-			},
-			0: { 
-				name: '普通用户',
-				accent: '#1677ff',
-				bg: 'linear-gradient(135deg, #1677ff 0%, #40a9ff 100%)',
-				doneBg: '#f0f7ff', 
-				doneBorder: '#d0e7ff'
-			}
+			2: { name: '管理员', accent: '#7585ff', bg: 'linear-gradient(135deg, #7585ff 0%, #75a7ff 100%)' },
+			1: { name: '普通会员', accent: '#75caff', bg: 'linear-gradient(135deg, #75caff 0%, #75ecff 100%)' },
+			0: { name: '普通用户', accent: '#75a7ff', bg: 'linear-gradient(135deg, #75a7ff 0%, #75ffef 100%)' }
 		}
 		return configs[role.value] || configs[0]
 	})
 
-	const currentDate = computed(() => {
-		const date = new Date()
-		return `${date.getMonth() + 1}月${date.getDate()}日`
-	})
-
-	const tapRanking = () => uni.navigateTo({
-		url: '/pages/index/ranking/ranking'
-	})
-
-	const handleQuestion = async (item) => {
-		if (!item.subjectId) {
-			uni.showToast({
-				title: '专题不可用',
-				icon: 'none'
-			});
-			return;
-		}
-		uni.showLoading({
-			title: '加载中'
-		})
-		await apiFlushTopic(item.id)
-		uni.hideLoading()
-		uni.navigateTo({
-			url: `/pages/database/topic/topic?id=${item.topicId}&name=${item.topicName}&subjectId=${item.subjectId}`
-		})
-	}
+	const navigateTo = (url) => { uni.navigateTo({ url }) }
+	const tapRanking = () => { uni.navigateTo({ url: '/pages/index/ranking/ranking' }) }
 </script>
 
 <style lang="scss" scoped>
@@ -191,7 +151,7 @@
 		height: 280rpx;
 		padding: 70rpx 40rpx 0;
 		position: relative;
-		border-radius: 0 0 40rpx 40rpx;
+		border-radius: 0 0 8rpx 8rpx;
 
 		.user-info {
 			.greeting {
@@ -199,28 +159,17 @@
 					display: flex;
 					align-items: center;
 					margin-bottom: 6rpx;
-
-					.time-text {
-						font-size: 26rpx;
-						color: rgba(255, 255, 255, 0.85);
-					}
-
+					.time-text { font-size: 26rpx; color: rgba(255, 255, 255, 0.85); }
 					.role-badge {
 						margin-left: 12rpx;
 						padding: 2rpx 14rpx;
 						background: rgba(255, 255, 255, 0.15);
-						border-radius: 100rpx;
+						border-radius: 4rpx;
 						font-size: 18rpx;
 						color: #fff;
-						backdrop-filter: blur(4px);
 					}
 				}
-
-				.nickname {
-					font-size: 44rpx;
-					font-weight: bold;
-					color: #fff;
-				}
+				.nickname { font-size: 44rpx; font-weight: bold; color: #fff; }
 			}
 		}
 	}
@@ -231,10 +180,9 @@
 		left: 30rpx;
 		right: 30rpx;
 		background: #fff;
-		border-radius: 20rpx;
+		border-radius: 8rpx;
 		display: flex;
 		padding: 34rpx 0;
-		box-shadow: 0 10rpx 25rpx rgba(0, 0, 0, 0.05);
 		z-index: 10;
 
 		.stats-item {
@@ -242,57 +190,26 @@
 			display: flex;
 			flex-direction: column;
 			align-items: center;
-
-			.label {
-				font-size: 22rpx;
-				color: #999;
-				margin-bottom: 8rpx;
-			}
-
-			.value {
-				font-size: 36rpx;
-				font-weight: bold;
-				color: #333;
-				line-height: 1;
-			}
-
+			.label { font-size: 22rpx; color: #999; margin-bottom: 8rpx; }
+			.value { font-size: 36rpx; font-weight: bold; color: #333; line-height: 1; }
 			.value-box {
 				display: flex;
 				align-items: baseline;
 				line-height: 1;
-
-				.current {
-					font-size: 36rpx;
-					font-weight: bold;
-				}
-
-				.split {
-					font-size: 22rpx;
-					color: #cbd5e1;
-					margin: 0 4rpx;
-				}
-
-				.total {
-					font-size: 22rpx;
-					color: #999;
-					font-weight: 500;
-				}
+				.current { font-size: 36rpx; font-weight: bold; }
+				.split { font-size: 22rpx; color: #cbd5e1; margin: 0 4rpx; }
+				.total { font-size: 22rpx; color: #999; font-weight: 500; }
 			}
 		}
 
-		.v-divider {
-			width: 1px;
-			height: 32rpx;
-			background: #f0f0f0;
-			align-self: center;
-		}
+		.v-divider { width: 1px; height: 32rpx; background: #f0f0f0; align-self: center; }
 	}
 
 	.ranking-bar {
 		margin: 90rpx 30rpx 40rpx;
 		background: #fff;
 		padding: 26rpx 30rpx;
-		border-radius: 20rpx;
+		border-radius: 8rpx;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
@@ -300,118 +217,100 @@
 		.bar-left {
 			display: flex;
 			align-items: center;
-
-			.medal-icon {
-				width: 44rpx;
-				height: 44rpx;
-				margin-right: 20rpx;
-			}
-
+			.medal-icon { width: 44rpx; height: 44rpx; margin-right: 20rpx; }
 			.rank-text {
 				display: flex;
 				flex-direction: column;
-
-				.main-rank {
-					font-size: 26rpx;
-					color: #333;
-					font-weight: 500;
-				}
-
-				.sub-rank {
-					font-size: 20rpx;
-					color: #bbb;
-					margin-top: 2rpx;
-				}
+				.main-rank { font-size: 26rpx; color: #333; font-weight: 500; }
+				.sub-rank { font-size: 20rpx; color: #bbb; margin-top: 2rpx; }
 			}
 		}
 	}
 
+	.section-title {
+		font-size: 32rpx;
+		font-weight: bold;
+		color: #333;
+		margin-bottom: 20rpx;
+	}
+
 	.task-section {
 		padding: 0 30rpx;
+		margin-bottom: 40rpx;
 
-		.section-header {
-			margin-bottom: 24rpx;
+		.task-grid {
 			display: flex;
-			justify-content: space-between;
-			align-items: flex-end;
-
-			.title-left {
-				display: flex;
-				align-items: center;
-
-				.indicator {
-					width: 8rpx;
-					height: 32rpx;
-					border-radius: 4rpx;
-					margin-right: 14rpx;
-				}
-
-				.title {
-					font-size: 32rpx;
-					font-weight: bold;
-					color: #333;
-				}
-			}
-
-			.subtitle {
-				font-size: 24rpx;
-				color: #ccc;
-				font-weight: 500;
-			}
+			flex-direction: column;
+			gap: 16rpx;
 		}
 
-		.topic-card {
-			background: #fff;
-			border-radius: 20rpx;
-			padding: 30rpx;
-			margin-bottom: 20rpx;
+		.task-card {
 			display: flex;
-			justify-content: space-between;
 			align-items: center;
-			transition: all 0.2s;
+			background: #fff;
+			border-radius: 8rpx;
+			padding: 28rpx;
 
-			&:active {
-				transform: scale(0.98);
-				background: #fafafa;
+			&.primary {
+				background: linear-gradient(135deg, #75a7ff, #7585ff);
+				.task-icon.primary-icon { background: rgba(255, 255, 255, 0.2); }
+				.task-name { color: #fff; }
+				.task-desc { color: rgba(255, 255, 255, 0.8); }
 			}
 
-			.topic-main {
-				flex: 1;
-				margin-right: 20rpx;
-
-				.topic-title {
-					font-size: 29rpx;
-					color: #333;
-					font-weight: 500;
-					margin-bottom: 14rpx;
-					display: block;
-					line-height: 1.4;
-				}
-
-				.topic-tags {
-					display: flex;
-					flex-wrap: wrap;
-					gap: 10rpx;
-
-					.tag {
-						padding: 4rpx 14rpx;
-						background: #f1f4f8;
-						color: #7a8b9a;
-						font-size: 20rpx;
-						border-radius: 6rpx;
-					}
-				}
-			}
-
-			.status-btn {
-				width: 100rpx;
-				height: 54rpx;
-				line-height: 54rpx;
-				text-align: center;
-				font-size: 24rpx;
+			.task-icon {
+				width: 76rpx;
+				height: 76rpx;
 				border-radius: 12rpx;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				margin-right: 24rpx;
 				flex-shrink: 0;
-				transition: all 0.2s;
+				&.primary-icon { background: rgba(255, 255, 255, 0.2); }
+				&.vocab-icon { background: rgba(117, 236, 255, 0.15); }
+				&.ai-icon { background: rgba(117, 167, 255, 0.15); }
+			}
+
+			.task-content {
+				flex: 1;
+				.task-name { font-size: 30rpx; font-weight: bold; color: #333; display: block; }
+				.task-desc { font-size: 24rpx; color: #999; display: block; margin-top: 4rpx; }
+			}
+		}
+	}
+
+	.quick-section {
+		padding: 0 30rpx;
+
+		.quick-grid {
+			display: grid;
+			grid-template-columns: repeat(4, 1fr);
+			gap: 16rpx;
+
+			.quick-item {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				background: #fff;
+				border-radius: 8rpx;
+				padding: 28rpx 10rpx;
+
+				.quick-icon {
+					width: 68rpx;
+					height: 68rpx;
+					border-radius: 12rpx;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					margin-bottom: 12rpx;
+					&.q1 { background: rgba(117, 236, 255, 0.15); }
+					&.q2 { background: rgba(117, 202, 255, 0.15); }
+					&.q3 { background: rgba(117, 255, 239, 0.15); }
+					&.q4 { background: rgba(117, 167, 255, 0.15); }
+				}
+
+				.quick-text { font-size: 24rpx; color: #666; text-align: center; }
 			}
 		}
 	}

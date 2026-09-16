@@ -86,28 +86,6 @@ export const constantRoute = [
           title: '题目管理',
         },
       },
-
-      {
-        path: '/topic/category',
-        component: () => import('@/views/topic/category/index.vue'),
-        meta: {
-          title: '分类管理',
-        },
-      },
-      {
-        path: '/topic/label',
-        component: () => import('@/views/topic/label/index.vue'),
-        meta: {
-          title: '标签管理',
-        },
-      },
-      {
-        path: '/topic/subject',
-        component: () => import('@/views/topic/subject/index.vue'),
-        meta: {
-          title: '专题管理',
-        },
-      },
       {
         path: '/topic/paper',
         component: () => import('@/views/topic/paper/index.vue'),

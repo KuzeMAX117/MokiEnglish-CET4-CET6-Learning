@@ -93,12 +93,7 @@ const router = createRouter({
           component: () => import('@/views/TranslationPractice.vue'),
           meta: { title: '翻译练习' },
         },
-        {
-          path: 'ai',
-          name: 'AiChat',
-          component: () => import('@/views/AiChat.vue'),
-          meta: { title: 'AI 练习' },
-        },
+
         {
           path: 'user',
           name: 'UserCenter',
