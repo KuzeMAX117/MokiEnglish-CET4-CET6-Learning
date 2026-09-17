@@ -26,12 +26,16 @@ SELECT '文章管理', '/content/article', 'ReadOutlined', @content_menu_id, 3, 
 WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE route = '/content/article' AND is_deleted = 0);
 
 INSERT INTO sys_menu (menu_name, route, icon, parent_id, sorted, create_time, update_time, is_deleted)
-SELECT '作文记录', '/content/writing', 'EditOutlined', @content_menu_id, 4, NOW(), NOW(), 0 FROM DUAL
-WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE route = '/content/writing' AND is_deleted = 0);
+SELECT '作文管理', '/content/essay', 'EditOutlined', @content_menu_id, 4, NOW(), NOW(), 0 FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE route = '/content/essay' AND is_deleted = 0);
 
 INSERT INTO sys_menu (menu_name, route, icon, parent_id, sorted, create_time, update_time, is_deleted)
-SELECT '翻译记录', '/content/translation', 'TranslationOutlined', @content_menu_id, 5, NOW(), NOW(), 0 FROM DUAL
+SELECT '翻译管理', '/content/translation', 'TranslationOutlined', @content_menu_id, 5, NOW(), NOW(), 0 FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE route = '/content/translation' AND is_deleted = 0);
+
+INSERT INTO sys_menu (menu_name, route, icon, parent_id, sorted, create_time, update_time, is_deleted)
+SELECT '作文记录', '/content/writing', 'AuditOutlined', @content_menu_id, 6, NOW(), NOW(), 0 FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE route = '/content/writing' AND is_deleted = 0);
 
 -- 3. 新增PK管理菜单组（幂等：先检查是否已存在）
 INSERT INTO sys_menu (menu_name, route, icon, parent_id, sorted, create_time, update_time, is_deleted)
@@ -53,5 +57,5 @@ WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE route = '/pk/record' AND is_delet
 INSERT INTO sys_role_menu (role_id, menu_id, create_time, update_time, is_deleted)
 SELECT 1, m.id, NOW(), NOW(), 0
 FROM sys_menu m
-WHERE m.route IN ('/content', '/content/paper', '/content/wordbook', '/content/article', '/content/writing', '/content/translation', '/pk', '/pk/rank', '/pk/record')
+WHERE m.route IN ('/content', '/content/paper', '/content/wordbook', '/content/article', '/content/essay', '/content/writing', '/content/translation', '/pk', '/pk/rank', '/pk/record')
   AND NOT EXISTS (SELECT 1 FROM sys_role_menu rm WHERE rm.role_id = 1 AND rm.menu_id = m.id);

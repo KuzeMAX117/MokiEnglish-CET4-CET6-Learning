@@ -32,7 +32,7 @@
           spellcheck="false"
         />
         <div class="write-actions">
-          <a-button @click="essayContent = ''">
+          <a-button @click="clearEssay">
             <ClearOutlined /> 清空
           </a-button>
           <a-button
@@ -121,7 +121,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, reactive } from 'vue'
+import { computed, ref, reactive, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import {
@@ -133,15 +133,54 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
 } from '@ant-design/icons-vue'
+import { apiCorrectEssay } from '@/api/ai'
+import type { EssayCorrectionResult } from '@/types'
 
 const route = useRoute()
 const router = useRouter()
 
-const topic = ref({
-  id: Number(route.params.id),
-  title: 'The Importance of Reading in the Digital Age',
-  description: 'Write an essay on the importance of reading, discussing why reading remains essential despite the prevalence of digital media. You should write at least 150 words but no more than 200 words.',
-  wordLimit: 200,
+const essayTopics = [
+  {
+    id: 1,
+    title: 'The Importance of Reading in the Digital Age',
+    description: 'Write an essay on the importance of reading, discussing why reading remains essential despite the prevalence of digital media.',
+    level: 4,
+    type: 'essay',
+    typeLabel: '议论文',
+    wordLimit: 200,
+  },
+  {
+    id: 2,
+    title: 'A Letter of Application',
+    description: 'Write a letter applying for a volunteer position at an international conference. Include your qualifications and motivation.',
+    level: 4,
+    type: 'letter',
+    typeLabel: '应用文',
+    wordLimit: 150,
+  },
+  {
+    id: 3,
+    title: 'Should Universities Charge Tuition Fees?',
+    description: 'Some people believe university education should be free. Discuss both views and give your opinion.',
+    level: 6,
+    type: 'essay',
+    typeLabel: '议论文',
+    wordLimit: 250,
+  },
+  {
+    id: 4,
+    title: 'The Impact of Social Media on Young People',
+    description: 'Write an essay discussing how social media affects the mental health and social skills of young people.',
+    level: 6,
+    type: 'essay',
+    typeLabel: '议论文',
+    wordLimit: 250,
+  },
+]
+
+const topicId = computed(() => Number(route.params.id))
+const topic = computed(() => {
+  return essayTopics.find(t => t.id === topicId.value) || essayTopics[0]
 })
 
 const essayContent = ref('')
@@ -169,29 +208,103 @@ const submitEssay = async () => {
   submitting.value = true
   submitted.value = true
 
-  setTimeout(() => {
-    result.score = 11.5
-    result.overall = 'Your essay demonstrates a good understanding of the topic with clear arguments. The structure is logical, moving from introduction to body paragraphs and conclusion. However, there are some grammatical errors and areas where vocabulary could be more varied.'
-    result.grammarErrors = [
-      {
-        original: 'Reading is very importance in our life.',
-        correction: 'Reading is very important in our lives.',
-        explanation: '"importance" is a noun; use the adjective "important" after "is". Also, "life" should be plural "lives" when referring to people in general.',
-      },
-      {
-        original: 'Digital media have change the way we get information.',
-        correction: 'Digital media has changed the way we obtain information.',
-        explanation: 'Use present perfect "has changed" for actions that started in the past and continue. "Obtain" is more formal than "get".',
-      },
-    ]
-    result.suggestions = [
-      { original: 'very important', suggestion: 'crucial / essential / vital' },
-      { original: 'get information', suggestion: 'obtain / acquire information' },
-      { original: 'a lot of', suggestion: 'numerous / a multitude of' },
-    ]
-    submitting.value = false
+  try {
+    const res = await apiCorrectEssay({
+      essay: essayContent.value,
+      topic: topic.value.title,
+      level: topic.value.level,
+    })
+    const data = res as any
+    result.score = data.score
+    result.overall = data.overall || ''
+    result.grammarErrors = (data.grammarErrors || []).map((e: any) => ({
+      original: e.original || '',
+      correction: e.correction || '',
+      explanation: e.explanation || '',
+    }))
+    result.suggestions = (data.vocabularySuggestions || []).map((s: any) => ({
+      original: s.original || '',
+      suggestion: s.suggestion || '',
+    }))
+    saveProgress()
     message.success('批改完成！')
-  }, 2000)
+  } catch (e: any) {
+    message.error(e?.message || '批改失败，请重试')
+  } finally {
+    submitting.value = false
+  }
+}
+
+const progressKey = computed(() => `essay-progress-${topicId.value}`)
+let saveTimer: ReturnType<typeof setTimeout> | null = null
+
+const saveProgress = () => {
+  try {
+    localStorage.setItem(
+      progressKey.value,
+      JSON.stringify({
+        essayContent: essayContent.value,
+        submitted: submitted.value,
+        result: {
+          score: result.score,
+          overall: result.overall,
+          grammarErrors: result.grammarErrors,
+          suggestions: result.suggestions,
+        },
+        savedAt: Date.now(),
+      })
+    )
+  } catch { /* ignore */ }
+}
+
+watch([essayContent, submitted, () => result.score], () => {
+  if (saveTimer) clearTimeout(saveTimer)
+  saveTimer = setTimeout(saveProgress, 600)
+}, { deep: true })
+
+const restoreProgress = () => {
+  essayContent.value = ''
+  submitted.value = false
+  result.score = null
+  result.overall = ''
+  result.grammarErrors = []
+  result.suggestions = []
+
+  try {
+    const raw = localStorage.getItem(progressKey.value)
+    if (!raw) return
+    const saved = JSON.parse(raw)
+    if (saved.essayContent) {
+      essayContent.value = saved.essayContent
+    }
+    if (saved.result && saved.result.score !== null && saved.result.score !== undefined) {
+      Object.assign(result, saved.result)
+      submitted.value = !!saved.submitted
+    }
+    if (essayContent.value || result.score !== null) {
+      message.info('已恢复上次写作进度')
+    }
+  } catch {
+    localStorage.removeItem(progressKey.value)
+  }
+}
+
+watch(topicId, () => {
+  restoreProgress()
+})
+
+onMounted(() => {
+  restoreProgress()
+})
+
+const clearEssay = () => {
+  essayContent.value = ''
+  submitted.value = false
+  result.score = null
+  result.overall = ''
+  result.grammarErrors = []
+  result.suggestions = []
+  localStorage.removeItem(progressKey.value)
 }
 </script>
 

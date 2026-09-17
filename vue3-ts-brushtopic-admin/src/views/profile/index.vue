@@ -119,7 +119,7 @@ import type { UploadChangeParam, UploadProps } from 'ant-design-vue';
 
 const { VITE_SERVE } = import.meta.env
 
-const uploadUrl = VITE_SERVE + '/api/system/user/avatar'
+const uploadUrl = '/api/system/user/avatar'
 
 const headers = { authorization: userStore.token };
 

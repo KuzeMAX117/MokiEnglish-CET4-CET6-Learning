@@ -19,7 +19,8 @@ import org.springframework.security.config.annotation.web.reactive.EnableWebFlux
 @EnableDiscoveryClient
 @ComponentScans({
         @ComponentScan("com.hao.topic.common.security")
-        , @ComponentScan("com.hao.topic.common.handler"),
+        , @ComponentScan("com.hao.topic.common.handler")
+        , @ComponentScan("com.hao.topic.system")
 })
 @Import({MyMetaObjectHandler.class, MybatisPlusConfig.class})  
 @ComponentScan({"com.hao.topic.api.utils", "com.hao.topic.common.auth"})

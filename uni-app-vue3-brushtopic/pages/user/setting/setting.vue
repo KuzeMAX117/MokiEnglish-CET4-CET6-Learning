@@ -9,7 +9,7 @@ const imageStyles = ref({
 	border: false,
 })
 
-const uploadUrl = 'http://localhost:9993/api/system/user/avatar';
+const uploadUrl = '/api/system/user/avatar';
 
 const imageTypes = ['jpg', 'jpeg', 'png', 'gif']
 

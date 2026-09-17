@@ -53,13 +53,16 @@ INSERT INTO sys_menu (menu_name, parent_id, sorted, route, icon, create_time, up
 SELECT '文章管理', id, 2, '/content/article', 'ReadOutlined', NOW(), NOW(), 0 FROM sys_menu WHERE route = '/content' AND parent_id = 0 LIMIT 1;
 
 INSERT INTO sys_menu (menu_name, parent_id, sorted, route, icon, create_time, update_time, is_deleted)
-SELECT '翻译记录', id, 3, '/content/translation', 'TranslationOutlined', NOW(), NOW(), 0 FROM sys_menu WHERE route = '/content' AND parent_id = 0 LIMIT 1;
+SELECT '作文管理', id, 3, '/content/essay', 'EditOutlined', NOW(), NOW(), 0 FROM sys_menu WHERE route = '/content' AND parent_id = 0 LIMIT 1;
 
 INSERT INTO sys_menu (menu_name, parent_id, sorted, route, icon, create_time, update_time, is_deleted)
-SELECT '词书管理', id, 4, '/content/wordbook', 'BookOutlined', NOW(), NOW(), 0 FROM sys_menu WHERE route = '/content' AND parent_id = 0 LIMIT 1;
+SELECT '翻译管理', id, 4, '/content/translation', 'TranslationOutlined', NOW(), NOW(), 0 FROM sys_menu WHERE route = '/content' AND parent_id = 0 LIMIT 1;
 
 INSERT INTO sys_menu (menu_name, parent_id, sorted, route, icon, create_time, update_time, is_deleted)
-SELECT '作文记录', id, 5, '/content/writing', 'EditOutlined', NOW(), NOW(), 0 FROM sys_menu WHERE route = '/content' AND parent_id = 0 LIMIT 1;
+SELECT '词书管理', id, 5, '/content/wordbook', 'BookOutlined', NOW(), NOW(), 0 FROM sys_menu WHERE route = '/content' AND parent_id = 0 LIMIT 1;
+
+INSERT INTO sys_menu (menu_name, parent_id, sorted, route, icon, create_time, update_time, is_deleted)
+SELECT '作文记录', id, 6, '/content/writing', 'AuditOutlined', NOW(), NOW(), 0 FROM sys_menu WHERE route = '/content' AND parent_id = 0 LIMIT 1;
 
 -- PK管理的子菜单
 INSERT INTO sys_menu (menu_name, parent_id, sorted, route, icon, create_time, update_time, is_deleted)

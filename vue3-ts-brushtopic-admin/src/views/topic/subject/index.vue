@@ -21,7 +21,7 @@ const userStore = useUserStore()
 
 const { VITE_SERVE } = import.meta.env
 
-const uploadUrl = VITE_SERVE + '/api/topic/subject/img'
+const uploadUrl = '/api/topic/subject/img'
 
 const params = ref<SubjectCatgoryQueryType>({
   pageNum: 1,
@@ -277,7 +277,7 @@ const upload = reactive({
   
   uploadLoading: false,
   
-  url: VITE_SERVE + "/api/topic/subject/import",
+  url: "/api/topic/subject/import",
   
   uploadFileList: [],
   

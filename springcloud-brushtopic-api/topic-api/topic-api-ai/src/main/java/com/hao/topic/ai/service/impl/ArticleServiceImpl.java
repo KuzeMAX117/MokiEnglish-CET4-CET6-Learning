@@ -5,6 +5,7 @@ import com.hao.topic.ai.config.ArticleFunctionConfig;
 import com.hao.topic.ai.constant.ArticlePromptConstant;
 import com.hao.topic.ai.service.AiModuleRecordService;
 import com.hao.topic.ai.service.ArticleService;
+import com.hao.topic.common.security.utils.SecurityUtils;
 import com.hao.topic.model.dto.ai.ArticleGenerateDto;
 import com.hao.topic.model.vo.ai.ArticleEvaluation;
 import com.hao.topic.model.vo.ai.ArticlePlan;
@@ -55,6 +56,8 @@ import java.util.stream.Collectors;
 public class ArticleServiceImpl implements ArticleService {
 
     private final ChatClient chatClient;
+
+    private final AiModuleRecordService aiModuleRecordService;
 
     /** 定向补词循环最大轮数（每轮针对代码实测出的缺失词精准修补） */
     private static final int MAX_PATCH = 3;

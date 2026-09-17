@@ -21,7 +21,7 @@ const userStore = useUserStore()
 
 const { VITE_SERVE } = import.meta.env
 
-const uploadUrl = VITE_SERVE + '/api/system/user/avatar'
+const uploadUrl = '/api/system/user/avatar'
 
 const headers = { authorization: userStore.token };
 
@@ -396,7 +396,7 @@ const upload = reactive({
   
   uploadLoading: false,
   
-  url: VITE_SERVE + "/api/system/user/import",
+  url: "/api/system/user/import",
   
   uploadFileList: [],
   

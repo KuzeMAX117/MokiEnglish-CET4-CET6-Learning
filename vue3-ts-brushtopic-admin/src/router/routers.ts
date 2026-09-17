@@ -139,7 +139,39 @@ export const constantRoute = [
         meta: {
           title: '词书管理',
         },
+      },
+      {
+        path: '/content/writing',
+        component: () => import('@/views/content/writing/index.vue'),
+        meta: {
+          title: '作文记录',
+        },
       }
+    ]
+  },
+  
+  {
+    path: '/pk',
+    redirect: '/pk/rank',
+    meta: {
+      title: 'PK管理',
+    },
+    component: () => import('../layout/index.vue'),
+    children: [
+      {
+        path: '/pk/rank',
+        component: () => import('@/views/pk/rank/index.vue'),
+        meta: {
+          title: 'PK排行榜',
+        },
+      },
+      {
+        path: '/pk/record',
+        component: () => import('@/views/pk/record/index.vue'),
+        meta: {
+          title: '对战记录',
+        },
+      },
     ]
   },
   
