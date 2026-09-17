@@ -1,0 +1,497 @@
+<div align="center">
+
+# 🎯 Topic - AI 智能刷题平台
+
+一款面向求职者与在校学生的 **AI 智能刷题平台**，提供题库刷题、每日专属推荐、AI 陪背/问答、实时排行榜、背单词、真题试卷、作文批改、翻译练习、PK 对战等核心学习能力。
+
+[![Spring Cloud](https://img.shields.io/badge/Spring_Cloud-2023-6db33f?logo=spring)](https://spring.io/projects/spring-cloud)
+[![Spring AI](https://img.shields.io/badge/Spring_AI-1.0-6db33f?logo=spring)](https://spring.io/projects/spring-ai)
+[![MyBatis Plus](https://img.shields.io/badge/MyBatis_Plus-3.5-0093e3?logo=mybatis)](https://baomidou.com/)
+[![Redis](https://img.shields.io/badge/Redis-7.0-dc382d?logo=redis)](https://redis.io/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+</div>
+
+---
+
+## ✨ 核心特性
+
+- 🤖 **AI 智能问答** - Spring AI + 阿里云百炼，支持 AI 陪背、答疑、TTS 语音朗读
+- 📊 **实时排行榜** - Redis ZSET 高性能排序，实时更新排名
+- 🎮 **PK 对战** - 在线 PK 模式，答题竞速
+- 📝 **真题试卷** - 真题模拟考试环境
+- 📖 **背单词** - 词书学习、复习、AI 短文阅读
+- ✍️ **作文批改** - AI 智能批改作文
+- 🌐 **翻译练习** - 多语言翻译训练
+- 📱 **多端支持** - PC 网页 + 管理后台 + 移动端 H5
+
+---
+
+## 🖼️ 项目截图
+
+<!-- 替换为实际截图 -->
+
+<div align="center">
+
+**用户端界面**
+
+![用户端首页](screenshots/web-home.png)
+
+![题库浏览](screenshots/web-topic.png)
+
+![AI 问答](screenshots/web-ai.png)
+
+![排行榜](screenshots/web-rank.png)
+
+**管理后台**
+
+![数据大屏](screenshots/admin-screen.png)
+
+![题库管理](screenshots/admin-topic.png)
+
+![用户管理](screenshots/admin-user.png)
+
+</div>
+
+---
+
+## 🏗️ 技术架构
+
+```
+前端三端
+├── PC 网页端   (Vue3 + Vite6 + TS + Ant Design Vue 4 + Tailwind CSS 4)  :9990
+├── 管理后台    (Vue3 + Vite6 + TS + Ant Design Vue 4 + ECharts 5)       :9991
+└── 移动端 H5  (Vue3 + uni-app + Uv-ui)                                  :9090
+
+          │ /api                       │ /prod-api
+    ┌─────▼─────┐              ┌───────▼───────┐
+    │ web-gateway│              │ admin-gateway  │
+    │   :9993    │              │    :9992       │
+    └─────┬─────┘              └───────┬───────┘
+          │ OpenFeign                    │ OpenFeign
+    ┌─────▼─────────────────────────────▼──────┐
+    │              Nacos 注册/配置中心            │
+    │  topic-security(:9999)  JWT+Security      │
+    │  service-system         用户/角色/菜单     │
+    │  service-topic          题目/刷题/排行/单词 │
+    │  service-ai(:9998)      对话/审核/TTS      │
+    └────┬──────────┬──────────┬────────────────┘
+    ┌────▼──┐  ┌────▼──┐  ┌───▼───┐  ┌─────┐  ┌──────┐
+    │MySQL 8│  │ Redis │  │RabbitMQ│  │MinIO│  │阿里云│
+    │25+ 张表│  │缓存/排行│  │异步/审核│  │存储  │  │ AI   │
+    └───────┘  └───────┘  └────────┘  └─────┘  └──────┘
+```
+
+---
+
+## 📦 项目结构
+
+```
+Hao-Topic/
+├── springcloud-brushtopic-api/         # 后端微服务集群
+│   ├── topic-gateway/                  # 网关层
+│   │   ├── admin-gateway/              #   管理后台网关 (9992)
+│   │   └── web-gateway/                #   用户端网关 (9993)
+│   ├── topic-security/                 # 认证服务 (9999)
+│   ├── topic-api/                      # 业务服务层
+│   │   ├── topic-api-system/           #   系统服务
+│   │   ├── topic-api-topic/            #   题库服务
+│   │   └── topic-api-ai/               #   AI 服务
+│   ├── topic-client/                   # OpenFeign 客户端
+│   ├── topic-common/                   # 公共模块
+│   └── topic-model/                    # 模型层
+├── vue3-ts-brushtopic-web/             # PC 网页端 (9990)
+├── vue3-ts-brushtopic-admin/           # 管理后台 (9991)
+├── uni-app-vue3-brushtopic/            # 移动端 H5
+├── sql/                                # 数据库脚本
+├── 配置文件/                            # Nacos 配置
+├── docker-compose.yml                  # Docker 编排
+└── deploy.sh                           # 部署脚本
+```
+
+---
+
+## 🛠️ 技术栈
+
+<div align="center">
+
+| Spring Cloud | Spring AI | MyBatis-Plus | Redis |
+|:---:|:---:|:---:|:---:|
+| ☁️ 微服务架构 | 🤖 AI 能力集成 | 📦 高效 ORM | ⚡ 高性能缓存 |
+| OpenFeign / Gateway / Nacos | 对话 / TTS / 流式响应 | CRUD 增强 / 分页 / 代码生成 | 排行榜 / 分布式锁 / 会话缓存 |
+
+</div>
+
+---
+
+### 🏗️ Spring Cloud 微服务架构
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        Nacos 注册/配置中心                        │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+        ┌─────────────────────┼─────────────────────┐
+        │                     │                     │
+   ┌────▼────┐           ┌────▼────┐           ┌────▼────┐
+   │ Gateway │           │ Gateway │           │ Security│
+   │  :9993  │           │  :9992  │           │  :9999  │
+   │ 用户端  │           │ 管理后台 │           │ 认证服务 │
+   └────┬────┘           └────┬────┘           └────┬────┘
+        │ OpenFeign           │ OpenFeign           │
+   ┌────▼─────────────────────▼─────────────────────▼────┐
+   │                    业务服务集群                        │
+   │  ┌──────────┐  ┌──────────┐  ┌──────────┐          │
+   │  │ System   │  │  Topic   │  │    AI    │          │
+   │  │ 用户/权限 │  │ 题库/排行 │  │ 对话/TTS │          │
+   │  └──────────┘  └──────────┘  └──────────┘          │
+   └─────────────────────────────────────────────────────┘
+```
+
+---
+
+### 🤖 Spring AI 智能能力
+
+| 能力 | 实现 | 说明 |
+|:---:|:---:|:---|
+| 💬 智能对话 | OpenAI / Ollama | 支持多模型切换，流式响应 |
+| 🔊 语音合成 | 阿里云百炼 TTS | 文字转语音，朗读题目/单词 |
+| 📝 内容生成 | AI 答案生成 | 异步生成题目答案与解析 |
+| ✅ 智能审核 | AI 内容审核 | 自动审核会员提交的题目 |
+| 📖 短文阅读 | AI 阅读辅助 | 背单词模块的 AI 短文生成 |
+
+---
+
+### 📦 MyBatis-Plus 数据持久层
+
+| 特性 | 应用场景 |
+|:---:|:---|
+| 🔧 通用 CRUD | 25+ 张表的快速开发 |
+| 📄 分页插件 | 题库、用户列表分页查询 |
+| 🎯 条件构造器 | 复杂查询条件构建 |
+| 📊 数据导入 | EasyExcel 批量导入题目/用户 |
+| 🔄 逻辑删除 | 软删除用户、题目等数据 |
+
+---
+
+### ⚡ Redis 高性能缓存
+
+| 场景 | 数据结构 | 说明 |
+|:---:|:---:|:---|
+| 🏆 实时排行榜 | ZSET | O(1) 复杂度排名查询，实时更新 |
+| 🔒 分布式锁 | STRING | 防止 RabbitMQ 消息重复消费 |
+| 🎯 刷题记录 | HASH | 记录用户刷题进度 |
+| 📊 统计数据 | STRING | 首页学习统计缓存 |
+| 🔑 会话管理 | STRING | JWT Token 黑名单 |
+
+---
+
+### 🖥️ 前端技术（AI 辅助开发）
+
+| 端 | 技术栈 |
+|:---:|:---|
+| PC 网页端 | Vue 3 + Vite 6 + TypeScript + Ant Design Vue 4 + Tailwind CSS 4 |
+| 管理后台 | Vue 3 + Vite 6 + TypeScript + Ant Design Vue 4 + ECharts 5 |
+| 移动端 H5 | Vue 3 + uni-app + Uv-ui |
+
+---
+
+## 🚀 快速开始
+
+### 📋 前置要求
+
+| 环境 | 版本要求 |
+|:---:|:---:|
+| JDK | 17+ |
+| Node.js | 18+ |
+| Maven | 3.8+ |
+| MySQL | 8.0+ |
+| Redis | 6.0+ |
+| Nacos | 2.2+ |
+
+---
+
+### 🔧 后端启动
+
+#### 1. 初始化数据库
+
+```bash
+# 导入数据库脚本
+mysql -u root -p topic < sql/topic.sql
+```
+
+#### 2. 配置 Nacos
+
+```bash
+# 启动 Nacos（单机模式）
+sh startup.sh -m standalone
+
+# 导入配置文件
+# 将 配置文件/ 目录下的 YAML 文件导入 Nacos 配置中心
+```
+
+#### 3. 构建公共模块
+
+```bash
+cd springcloud-brushtopic-api
+
+# 构建公共模块
+mvn clean install -DskipTests -pl topic-common,topic-model,topic-client
+```
+
+#### 4. 启动服务（按顺序）
+
+```bash
+# 1. 启动认证服务
+cd topic-security
+mvn spring-boot:run
+
+# 2. 启动业务服务
+cd ../topic-api/topic-api-system
+mvn spring-boot:run
+
+cd ../topic-api-topic
+mvn spring-boot:run
+
+cd ../topic-api-ai
+mvn spring-boot:run
+
+# 3. 启动网关服务
+cd ../../topic-gateway/admin-gateway
+mvn spring-boot:run
+
+cd ../web-gateway
+mvn spring-boot:run
+```
+
+---
+
+### 💻 用户端 Web 启动
+
+```bash
+cd vue3-ts-brushtopic-web
+
+# 安装依赖
+npm install
+
+# 启动开发服务器 (端口 9990)
+npm run dev
+
+# 生产构建
+npm run build
+
+# 预览构建结果
+npm run preview
+```
+
+---
+
+### 🖥️ 管理后台启动
+
+```bash
+cd vue3-ts-brushtopic-admin
+
+# 安装依赖
+npm install
+
+# 启动开发服务器 (端口 9991)
+npm run dev
+
+# 生产构建
+npm run build
+
+# 代码检查
+npm run lint
+
+# 代码格式化
+npm run format
+```
+
+---
+
+### 📱 移动端启动
+
+使用 [HBuilderX](https://www.dcloud.io/hbuilderx.html) 打开 `uni-app-vue3-brushtopic` 目录，运行到浏览器或小程序模拟器。
+
+---
+
+## 🐳 Docker 部署
+
+### 一键部署
+
+```bash
+# 1. 配置环境变量
+cp .env.example .env
+# 编辑 .env 文件，填入真实的密码配置
+
+# 2. 一键启动所有服务
+docker-compose up -d --build
+
+# 或使用部署脚本
+chmod +x deploy.sh
+./deploy.sh
+```
+
+### 服务端口一览
+
+| 服务 | 端口 | 说明 |
+|:---:|:---:|:---|
+| Nginx | 80/443 | 反向代理 |
+| MySQL | 3306 | 数据库 |
+| Redis | 6379 | 缓存 |
+| RabbitMQ | 5672/15672 | 消息队列 |
+| Nacos | 8848 | 注册/配置中心 |
+| MinIO | 9000/9001 | 对象存储 |
+| topic-security | 9999 | 认证服务 |
+| admin-gateway | 9992 | 管理后台网关 |
+| web-gateway | 9993 | 用户端网关 |
+| service-ai | 9998 | AI 服务 |
+| PC 网页端 | 9990 | 前端开发服务器 |
+| 管理后台 | 9991 | 前端开发服务器 |
+
+---
+
+## 🎯 功能模块
+
+### 用户端
+
+| 模块 | 功能 |
+|:---:|:---|
+| 🏠 首页 | 欢迎横幅、学习统计、刷题趋势、今日推荐 |
+| 📚 题库 | 分类浏览、专题筛选、标签过滤 |
+| ✏️ 刷题 | 题目展示、答案切换、收藏功能 |
+| 📝 真题 | 真题试卷、模拟考试 |
+| 📖 背单词 | 词书学习、单词复习、AI 短文 |
+| ✍️ 作文 | 作文列表、AI 批改 |
+| 🌐 翻译 | 翻译练习、多语言支持 |
+| 🏆 排行榜 | 实时排名、荣誉展示 |
+| 🤖 AI 问答 | 智能对话、TTS 朗读 |
+| ⚔️ PK | 在线 PK、匹配对战 |
+| 👤 我的 | 个人资料、收藏、反馈 |
+
+### 管理后台
+
+| 模块 | 功能 |
+|:---:|:---|
+| 📊 数据大屏 | 等级分布、刷题 Top10、活跃用户 |
+| 👥 系统管理 | 用户/角色/菜单/反馈/公告 |
+| 📚 题库管理 | 分类/标签/专题/题目 CRUD |
+| 🤖 AI 管理 | 模型配置、记录管理、异步审核 |
+| 📄 内容管理 | 文章、阅读内容管理 |
+| ⚔️ PK 管理 | PK 对战管理 |
+
+---
+
+## 🌟 核心亮点
+
+<div align="center">
+
+| 🏗️ Spring Cloud | 🤖 Spring AI | 📦 MyBatis-Plus | ⚡ Redis |
+|:---:|:---:|:---:|:---:|
+| 微服务架构 | AI 能力集成 | 高效持久化 | 高性能缓存 |
+| 6 个独立服务 | 对话 + TTS + 审核 | 25+ 张表管理 | 排行榜 + 锁 |
+| 服务解耦扩展 | 流式响应异步 | 代码生成分页 | O(1) 排名查询 |
+
+</div>
+
+---
+
+### 🏗️ Spring Cloud 微服务
+
+| 特性 | 实现 |
+|:---|:---|
+| 服务注册发现 | Nacos 动态服务注册与发现 |
+| 配置中心 | Nacos 统一配置管理，动态刷新 |
+| API 网关 | Gateway 路由转发、限流、鉴权 |
+| 服务调用 | OpenFeign 声明式 HTTP 调用 |
+| 负载均衡 | Spring Cloud LoadBalancer |
+
+---
+
+### 🤖 Spring AI 智能对话
+
+| 特性 | 实现 |
+|:---|:---|
+| 多模型适配 | OpenAI / Ollama 灵活切换 |
+| 流式响应 | SSE 实时返回 AI 生成内容 |
+| 语音合成 | 阿里云百炼 TTS 语音朗读 |
+| 异步处理 | RabbitMQ 异步 AI 生成答案 |
+| 内容审核 | AI 自动审核会员提交内容 |
+
+---
+
+### 📦 MyBatis-Plus 快速开发
+
+| 特性 | 实现 |
+|:---|:---|
+| 通用 CRUD | 单表操作零 SQL |
+| 条件构造器 | LambdaQueryWrapper 链式查询 |
+| 分页插件 | 物理分页，性能优化 |
+| 自动填充 | 创建时间、更新时间自动注入 |
+| 代码生成器 | Entity / Mapper / Service 一键生成 |
+
+---
+
+### ⚡ Redis 多场景应用
+
+| 场景 | 数据结构 | 说明 |
+|:---|:---:|:---|
+| 实时排行榜 | ZSET | 刷题排名实时更新，O(1) 查询 |
+| 分布式锁 | SETNX | 防止消息重复消费 |
+| 刷题记录 | HASH | 用户答题进度持久化 |
+| 验证码 | STRING | 登录/注册验证码缓存 |
+| Token 黑名单 | SET | JWT 退出登录失效处理 |
+
+---
+
+## 📄 环境变量配置
+
+复制 `.env.example` 为 `.env` 并配置：
+
+```env
+# 数据库配置
+MYSQL_ROOT_PASSWORD=your_password
+MYSQL_DATABASE=topic
+
+# Redis 配置
+REDIS_PASSWORD=your_password
+
+# Nacos 配置
+NACOS_PASSWORD=your_password
+
+# RabbitMQ 配置
+RABBITMQ_DEFAULT_PASS=your_password
+
+# AI 配置
+ALIYUN_AI_API_KEY=your_api_key
+```
+
+---
+
+## 📝 更新日志
+
+详见 [CHANGELOG.md](CHANGELOG.md)
+
+---
+
+## 🤝 参与贡献
+
+1. Fork 本仓库
+2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 创建 Pull Request
+
+---
+
+## 📄 许可证
+
+本项目基于 [MIT License](LICENSE) 开源。
+
+---
+
+<div align="center">
+
+**⭐ 如果觉得有帮助，欢迎给个 Star 支持一下！⭐**
+
+</div>
