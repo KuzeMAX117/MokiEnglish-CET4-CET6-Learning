@@ -1,11 +1,10 @@
 <div align="center">
 
-# 🎯 Topic - AI 智能刷题平台
+# 🎯 Topic - 英语学习平台
 
-一款面向求职者与在校学生的 **AI 智能刷题平台**，提供题库刷题、每日专属推荐、AI 陪背/问答、实时排行榜、背单词、真题试卷、作文批改、翻译练习、PK 对战等核心学习能力。
+一款面向求职者与在校学生的 **英语学习平台**，提供题库刷题、每日专属推荐、实时排行榜、背单词、真题试卷、作文批改、翻译练习等核心学习能力。
 
 [![Spring Cloud](https://img.shields.io/badge/Spring_Cloud-2023-6db33f?logo=spring)](https://spring.io/projects/spring-cloud)
-[![Spring AI](https://img.shields.io/badge/Spring_AI-1.0-6db33f?logo=spring)](https://spring.io/projects/spring-ai)
 [![MyBatis Plus](https://img.shields.io/badge/MyBatis_Plus-3.5-0093e3?logo=mybatis)](https://baomidou.com/)
 [![Redis](https://img.shields.io/badge/Redis-7.0-dc382d?logo=redis)](https://redis.io/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -16,14 +15,12 @@
 
 ## ✨ 核心特性
 
-- 🤖 **AI 智能问答** - Spring AI + 阿里云百炼，支持 AI 陪背、答疑、TTS 语音朗读
-- 📊 **实时排行榜** - Redis ZSET 高性能排序，实时更新排名
-- 🎮 **PK 对战** - 在线 PK 模式，答题竞速
+- 📊 **实时排行榜** - Redis ZSET 高性能排序，基于背单词打卡天数排名
+- 📖 **背单词** - 词书学习、单词复习、打卡记录
 - 📝 **真题试卷** - 真题模拟考试环境
-- 📖 **背单词** - 词书学习、复习、AI 短文阅读
 - ✍️ **作文批改** - AI 智能批改作文
 - 🌐 **翻译练习** - 多语言翻译训练
-- 📱 **多端支持** - PC 网页 + 管理后台 + 移动端 H5
+- 📱 **PC 端 + 管理后台**
 
 ---
 
@@ -38,8 +35,6 @@
 ![用户端首页](screenshots/web-home.png)
 
 ![题库浏览](screenshots/web-topic.png)
-
-![AI 问答](screenshots/web-ai.png)
 
 ![排行榜](screenshots/web-rank.png)
 
@@ -58,10 +53,9 @@
 ## 🏗️ 技术架构
 
 ```
-前端三端
+前端两端
 ├── PC 网页端   (Vue3 + Vite6 + TS + Ant Design Vue 4 + Tailwind CSS 4)  :9990
-├── 管理后台    (Vue3 + Vite6 + TS + Ant Design Vue 4 + ECharts 5)       :9991
-└── 移动端 H5  (Vue3 + uni-app + Uv-ui)                                  :9090
+└── 管理后台    (Vue3 + Vite6 + TS + Ant Design Vue 4 + ECharts 5)       :9991
 
           │ /api                       │ /prod-api
     ┌─────▼─────┐              ┌───────▼───────┐
@@ -74,12 +68,11 @@
     │  topic-security(:9999)  JWT+Security      │
     │  service-system         用户/角色/菜单     │
     │  service-topic          题目/刷题/排行/单词 │
-    │  service-ai(:9998)      对话/审核/TTS      │
     └────┬──────────┬──────────┬────────────────┘
-    ┌────▼──┐  ┌────▼──┐  ┌───▼───┐  ┌─────┐  ┌──────┐
-    │MySQL 8│  │ Redis │  │RabbitMQ│  │MinIO│  │阿里云│
-    │25+ 张表│  │缓存/排行│  │异步/审核│  │存储  │  │ AI   │
-    └───────┘  └───────┘  └────────┘  └─────┘  └──────┘
+    ┌────▼──┐  ┌────▼──┐  ┌───▼───┐  ┌─────┐
+    │MySQL 8│  │ Redis │  │RabbitMQ│  │MinIO│
+    │25+ 张表│  │缓存/排行│  │异步处理│  │存储  │
+    └───────┘  └───────┘  └────────┘  └─────┘
 ```
 
 ---
@@ -95,14 +88,12 @@ Hao-Topic/
 │   ├── topic-security/                 # 认证服务 (9999)
 │   ├── topic-api/                      # 业务服务层
 │   │   ├── topic-api-system/           #   系统服务
-│   │   ├── topic-api-topic/            #   题库服务
-│   │   └── topic-api-ai/               #   AI 服务
+│   │   └── topic-api-topic/            #   题库服务
 │   ├── topic-client/                   # OpenFeign 客户端
 │   ├── topic-common/                   # 公共模块
 │   └── topic-model/                    # 模型层
 ├── vue3-ts-brushtopic-web/             # PC 网页端 (9990)
 ├── vue3-ts-brushtopic-admin/           # 管理后台 (9991)
-├── uni-app-vue3-brushtopic/            # 移动端 H5
 ├── sql/                                # 数据库脚本
 ├── 配置文件/                            # Nacos 配置
 ├── docker-compose.yml                  # Docker 编排
@@ -115,10 +106,10 @@ Hao-Topic/
 
 <div align="center">
 
-| Spring Cloud | Spring AI | MyBatis-Plus | Redis |
-|:---:|:---:|:---:|:---:|
-| ☁️ 微服务架构 | 🤖 AI 能力集成 | 📦 高效 ORM | ⚡ 高性能缓存 |
-| OpenFeign / Gateway / Nacos | 对话 / TTS / 流式响应 | CRUD 增强 / 分页 / 代码生成 | 排行榜 / 分布式锁 / 会话缓存 |
+| Spring Cloud | MyBatis-Plus | Redis |
+|:---:|:---:|:---:|
+| ☁️ 微服务架构 | 📦 高效 ORM | ⚡ 高性能缓存 |
+| OpenFeign / Gateway / Nacos | CRUD 增强 / 分页 / 代码生成 | 排行榜 / 分布式锁 / 会话缓存 |
 
 </div>
 
@@ -141,24 +132,12 @@ Hao-Topic/
         │ OpenFeign           │ OpenFeign           │
    ┌────▼─────────────────────▼─────────────────────▼────┐
    │                    业务服务集群                        │
-   │  ┌──────────┐  ┌──────────┐  ┌──────────┐          │
-   │  │ System   │  │  Topic   │  │    AI    │          │
-   │  │ 用户/权限 │  │ 题库/排行 │  │ 对话/TTS │          │
-   │  └──────────┘  └──────────┘  └──────────┘          │
+   │  ┌──────────┐  ┌──────────┐                        │
+   │  │ System   │  │  Topic   │                        │
+   │  │ 用户/权限 │  │ 题库/排行 │                        │
+   │  └──────────┘  └──────────┘                        │
    └─────────────────────────────────────────────────────┘
 ```
-
----
-
-### 🤖 Spring AI 智能能力
-
-| 能力 | 实现 | 说明 |
-|:---:|:---:|:---|
-| 💬 智能对话 | OpenAI / Ollama | 支持多模型切换，流式响应 |
-| 🔊 语音合成 | 阿里云百炼 TTS | 文字转语音，朗读题目/单词 |
-| 📝 内容生成 | AI 答案生成 | 异步生成题目答案与解析 |
-| ✅ 智能审核 | AI 内容审核 | 自动审核会员提交的题目 |
-| 📖 短文阅读 | AI 阅读辅助 | 背单词模块的 AI 短文生成 |
 
 ---
 
@@ -178,21 +157,19 @@ Hao-Topic/
 
 | 场景 | 数据结构 | 说明 |
 |:---:|:---:|:---|
-| 🏆 实时排行榜 | ZSET | O(1) 复杂度排名查询，实时更新 |
-| 🔒 分布式锁 | STRING | 防止 RabbitMQ 消息重复消费 |
-| 🎯 刷题记录 | HASH | 记录用户刷题进度 |
+| 🏆 实时排行榜 | ZSET | 基于打卡天数排名，O(1) 查询 |
+| 🔒 分布式锁 | STRING | 防止消息重复消费 |
 | 📊 统计数据 | STRING | 首页学习统计缓存 |
 | 🔑 会话管理 | STRING | JWT Token 黑名单 |
 
 ---
 
-### 🖥️ 前端技术（AI 辅助开发）
+### 🖥️ 前端技术
 
 | 端 | 技术栈 |
 |:---:|:---|
 | PC 网页端 | Vue 3 + Vite 6 + TypeScript + Ant Design Vue 4 + Tailwind CSS 4 |
 | 管理后台 | Vue 3 + Vite 6 + TypeScript + Ant Design Vue 4 + ECharts 5 |
-| 移动端 H5 | Vue 3 + uni-app + Uv-ui |
 
 ---
 
@@ -253,9 +230,6 @@ mvn spring-boot:run
 cd ../topic-api-topic
 mvn spring-boot:run
 
-cd ../topic-api-ai
-mvn spring-boot:run
-
 # 3. 启动网关服务
 cd ../../topic-gateway/admin-gateway
 mvn spring-boot:run
@@ -309,12 +283,6 @@ npm run format
 
 ---
 
-### 📱 移动端启动
-
-使用 [HBuilderX](https://www.dcloud.io/hbuilderx.html) 打开 `uni-app-vue3-brushtopic` 目录，运行到浏览器或小程序模拟器。
-
----
-
 ## 🐳 Docker 部署
 
 ### 一键部署
@@ -345,7 +313,6 @@ chmod +x deploy.sh
 | topic-security | 9999 | 认证服务 |
 | admin-gateway | 9992 | 管理后台网关 |
 | web-gateway | 9993 | 用户端网关 |
-| service-ai | 9998 | AI 服务 |
 | PC 网页端 | 9990 | 前端开发服务器 |
 | 管理后台 | 9991 | 前端开发服务器 |
 
@@ -357,28 +324,24 @@ chmod +x deploy.sh
 
 | 模块 | 功能 |
 |:---:|:---|
-| 🏠 首页 | 欢迎横幅、学习统计、刷题趋势、今日推荐 |
+| 🏠 首页 | 欢迎横幅、学习统计、打卡记录 |
 | 📚 题库 | 分类浏览、专题筛选、标签过滤 |
 | ✏️ 刷题 | 题目展示、答案切换、收藏功能 |
 | 📝 真题 | 真题试卷、模拟考试 |
-| 📖 背单词 | 词书学习、单词复习、AI 短文 |
+| 📖 背单词 | 词书学习、单词复习、打卡记录 |
 | ✍️ 作文 | 作文列表、AI 批改 |
 | 🌐 翻译 | 翻译练习、多语言支持 |
-| 🏆 排行榜 | 实时排名、荣誉展示 |
-| 🤖 AI 问答 | 智能对话、TTS 朗读 |
-| ⚔️ PK | 在线 PK、匹配对战 |
+| 🏆 排行榜 | 基于打卡天数排名、荣誉展示 |
 | 👤 我的 | 个人资料、收藏、反馈 |
 
 ### 管理后台
 
 | 模块 | 功能 |
 |:---:|:---|
-| 📊 数据大屏 | 等级分布、刷题 Top10、活跃用户 |
+| 📊 数据大屏 | 等级分布、打卡 Top10、活跃用户 |
 | 👥 系统管理 | 用户/角色/菜单/反馈/公告 |
 | 📚 题库管理 | 分类/标签/专题/题目 CRUD |
-| 🤖 AI 管理 | 模型配置、记录管理、异步审核 |
 | 📄 内容管理 | 文章、阅读内容管理 |
-| ⚔️ PK 管理 | PK 对战管理 |
 
 ---
 
@@ -386,11 +349,11 @@ chmod +x deploy.sh
 
 <div align="center">
 
-| 🏗️ Spring Cloud | 🤖 Spring AI | 📦 MyBatis-Plus | ⚡ Redis |
-|:---:|:---:|:---:|:---:|
-| 微服务架构 | AI 能力集成 | 高效持久化 | 高性能缓存 |
-| 6 个独立服务 | 对话 + TTS + 审核 | 25+ 张表管理 | 排行榜 + 锁 |
-| 服务解耦扩展 | 流式响应异步 | 代码生成分页 | O(1) 排名查询 |
+| 🏗️ Spring Cloud | 📦 MyBatis-Plus | ⚡ Redis |
+|:---:|:---:|:---:|
+| 微服务架构 | 高效持久化 | 高性能缓存 |
+| 4 个独立服务 | 25+ 张表管理 | 排行榜 + 锁 |
+| 服务解耦扩展 | 代码生成分页 | O(1) 排名查询 |
 
 </div>
 
@@ -405,18 +368,6 @@ chmod +x deploy.sh
 | API 网关 | Gateway 路由转发、限流、鉴权 |
 | 服务调用 | OpenFeign 声明式 HTTP 调用 |
 | 负载均衡 | Spring Cloud LoadBalancer |
-
----
-
-### 🤖 Spring AI 智能对话
-
-| 特性 | 实现 |
-|:---|:---|
-| 多模型适配 | OpenAI / Ollama 灵活切换 |
-| 流式响应 | SSE 实时返回 AI 生成内容 |
-| 语音合成 | 阿里云百炼 TTS 语音朗读 |
-| 异步处理 | RabbitMQ 异步 AI 生成答案 |
-| 内容审核 | AI 自动审核会员提交内容 |
 
 ---
 
@@ -436,9 +387,8 @@ chmod +x deploy.sh
 
 | 场景 | 数据结构 | 说明 |
 |:---|:---:|:---|
-| 实时排行榜 | ZSET | 刷题排名实时更新，O(1) 查询 |
+| 实时排行榜 | ZSET | 基于打卡天数排名，O(1) 查询 |
 | 分布式锁 | SETNX | 防止消息重复消费 |
-| 刷题记录 | HASH | 用户答题进度持久化 |
 | 验证码 | STRING | 登录/注册验证码缓存 |
 | Token 黑名单 | SET | JWT 退出登录失效处理 |
 
@@ -461,9 +411,6 @@ NACOS_PASSWORD=your_password
 
 # RabbitMQ 配置
 RABBITMQ_DEFAULT_PASS=your_password
-
-# AI 配置
-ALIYUN_AI_API_KEY=your_api_key
 ```
 
 ---
