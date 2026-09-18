@@ -57,12 +57,6 @@
 
 ---
 
-## 🏗️ 技术架构
-
-<p align="center"><img src="pic/mermaid.png" width="600"></p>
-
----
-
 ## 📦 项目结构
 
 ```
@@ -316,18 +310,6 @@ chmod +x deploy.sh
 | 服务解耦扩展 | 代码生成分页 | O(1) 排名查询 |
 
 </div>
-
----
-
-### 🏗️ Spring Cloud 微服务
-
-| 特性 | 实现 |
-|:---|:---|
-| 服务注册发现 | Nacos 动态服务注册与发现 |
-| 配置中心 | Nacos 统一配置管理，动态刷新 |
-| API 网关 | Gateway 路由转发、限流、鉴权 |
-| 服务调用 | OpenFeign 声明式 HTTP 调用 |
-| 负载均衡 | Spring Cloud LoadBalancer |
 
 ---
 
