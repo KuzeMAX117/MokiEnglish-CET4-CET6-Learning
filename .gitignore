@@ -38,6 +38,7 @@ application-local.yaml
 # 配置文件（含敏感信息，不上传）
 配置文件/common-config.yaml
 配置文件/common-minio-config.yaml
+配置文件/配置文件.rar
 
 # 大文件 / 数据文件
 logo.png
@@ -59,9 +60,32 @@ sql/update_cet4_examples.sql
 sql/topic.sql
 sql/cet4_2026_first_half.sql
 
+# 本地运维/数据脚本
+check_nacos.ps1
+fix_vm.sh
+run_sql.bat
+generate_syllable_sql.py
+generate_word_sql.py
+update_cet4_data.py
+update_meaning.py
+sql/init_ranking.bat
+sql/run_check.bat
+sql/run_import.bat
+sql/init_ranking_redis.py
+sql/sync_word_rank_redis.py
+sql/test_streak_redis.txt
+
+
+
+# 文档/表格
+功能清单/
+
 # Nginx 配置
 nginx/
 
 # Python 缓存
 __pycache__/
 *.pyc
+
+# 小程序（暂不上传）
+uni-app-vue3-brushtopic/
