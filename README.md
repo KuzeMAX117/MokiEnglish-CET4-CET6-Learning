@@ -30,55 +30,19 @@
 
 <table>
   <tr>
-    <td align="center">
-      <img src="pic/用户-首页.png" width="300"><br>
-      <b>首页</b><br>
-      <sub>欢迎横幅、学习统计、打卡记录</sub>
-    </td>
-    <td align="center">
-      <img src="pic/用户-登录.png" width="300"><br>
-      <b>登录</b><br>
-      <sub>账号密码登录、验证码验证</sub>
-    </td>
-    <td align="center">
-      <img src="pic/用户-题目.png" width="300"><br>
-      <b>刷题</b><br>
-      <sub>题目展示、答案切换、收藏功能</sub>
-    </td>
+    <td align="center"><img src="pic/用户-首页.png" width="300"><br><b>首页</b></td>
+    <td align="center"><img src="pic/用户-登录.png" width="300"><br><b>登录</b></td>
+    <td align="center"><img src="pic/用户-题目.png" width="300"><br><b>刷题</b></td>
   </tr>
   <tr>
-    <td align="center">
-      <img src="pic/用户-单词%20(2).png" width="300"><br>
-      <b>背单词</b><br>
-      <sub>词书学习、单词复习、打卡记录</sub>
-    </td>
-    <td align="center">
-      <img src="pic/用户-作文.png" width="300"><br>
-      <b>作文</b><br>
-      <sub>作文列表、AI智能批改</sub>
-    </td>
-    <td align="center">
-      <img src="pic/用户-翻译.png" width="300"><br>
-      <b>翻译练习</b><br>
-      <sub>多语言翻译训练</sub>
-    </td>
+    <td align="center"><img src="pic/用户-单词%20(2).png" width="300"><br><b>单词</b></td>
+    <td align="center"><img src="pic/用户-作文.png" width="300"><br><b>作文</b></td>
+    <td align="center"><img src="pic/用户-翻译.png" width="300"><br><b>翻译</b></td>
   </tr>
   <tr>
-    <td align="center">
-      <img src="pic/用户-翻译批改.png" width="300"><br>
-      <b>翻译批改</b><br>
-      <sub>翻译结果智能评分</sub>
-    </td>
-    <td align="center">
-      <img src="pic/用户-长句翻译.png" width="300"><br>
-      <b>长句翻译</b><br>
-      <sub>复杂句式翻译练习</sub>
-    </td>
-    <td align="center">
-      <img src="pic/用户-ai短文.png" width="300"><br>
-      <b>AI短文</b><br>
-      <sub>AI生成英语短文阅读</sub>
-    </td>
+    <td align="center"><img src="pic/用户-翻译批改.png" width="300"><br><b>批改</b></td>
+    <td align="center"><img src="pic/用户-长句翻译.png" width="300"><br><b>长句</b></td>
+    <td align="center"><img src="pic/用户-ai短文.png" width="300"><br><b>AI短文</b></td>
   </tr>
 </table>
 
@@ -86,16 +50,8 @@
 
 <table>
   <tr>
-    <td align="center">
-      <img src="pic/管理员登录.png" width="300"><br>
-      <b>管理员登录</b><br>
-      <sub>后台管理员认证入口</sub>
-    </td>
-    <td align="center">
-      <img src="pic/管理员-载入试卷.png" width="300"><br>
-      <b>试卷管理</b><br>
-      <sub>真题试卷导入与配置</sub>
-    </td>
+    <td align="center"><img src="pic/管理员登录.png" width="300"><br><b>登录</b></td>
+    <td align="center"><img src="pic/管理员-载入试卷.png" width="300"><br><b>试卷</b></td>
   </tr>
 </table>
 
