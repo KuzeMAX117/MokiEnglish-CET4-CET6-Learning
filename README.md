@@ -26,25 +26,33 @@
 
 ## 🖼️ 项目截图
 
-<!-- 替换为实际截图 -->
-
 <div align="center">
 
 **用户端界面**
 
-![用户端首页](screenshots/web-home.png)
+![用户端首页](pic/用户-首页.png)
 
-![题库浏览](screenshots/web-topic.png)
+![用户登录](pic/用户-登录.png)
 
-![排行榜](screenshots/web-rank.png)
+![刷题界面](pic/用户-题目.png)
+
+![背单词](pic/用户-单词%20(2).png)
+
+![作文批改](pic/用户-作文.png)
+
+![翻译练习](pic/用户-翻译.png)
+
+![翻译批改](pic/用户-翻译批改.png)
+
+![长句翻译](pic/用户-长句翻译.png)
+
+![AI短文](pic/用户-ai短文.png)
 
 **管理后台**
 
-![数据大屏](screenshots/admin-screen.png)
+![管理员登录](pic/管理员登录.png)
 
-![题库管理](screenshots/admin-topic.png)
-
-![用户管理](screenshots/admin-user.png)
+![载入试卷](pic/管理员-载入试卷.png)
 
 </div>
 
