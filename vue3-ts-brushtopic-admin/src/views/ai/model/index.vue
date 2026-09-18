@@ -647,7 +647,7 @@ const handleAiModeChange = (ev: any) => {
                     <a-avatar class="avatar" :src="userStore.userInfo.avatar" />
                   </template>
                   <template v-else>
-                    <a-avatar class="avatar" :style="{ backgroundColor: '#1677ff', fontSize: '20px' }">
+                    <a-avatar class="avatar" :style="{ backgroundColor: '#0a3442', fontSize: '20px' }">
                       {{ userStore.userInfo.account?.charAt(0)?.toUpperCase() }}
                     </a-avatar>
                   </template>
@@ -792,9 +792,9 @@ const handleAiModeChange = (ev: any) => {
             }
 
             &.ant-radio-button-wrapper-checked {
-              border-color: #1677ff;
+              border-color: #0a3442;
               background: #e6f4ff;
-              color: #1677ff;
+              color: #0a3442;
             }
           }
         }
@@ -827,7 +827,7 @@ const handleAiModeChange = (ev: any) => {
             cursor: pointer;
 
             &:hover {
-              color: #1677ff;
+              color: #0a3442;
             }
           }
         }
@@ -835,7 +835,7 @@ const handleAiModeChange = (ev: any) => {
         .right-icons {
           .send-icon {
             font-size: 25px;
-            color: #1677ff;
+            color: #0a3442;
             cursor: pointer;
 
             &.disabled {
@@ -844,11 +844,11 @@ const handleAiModeChange = (ev: any) => {
             }
 
             &:not(.disabled):hover {
-              color: #4096ff;
+              color: #3ad3cd;
             }
 
             &:hover {
-              color: #4096ff;
+              color: #3ad3cd;
             }
           }
 
@@ -965,7 +965,7 @@ const handleAiModeChange = (ev: any) => {
           cursor: pointer;
 
           &:hover {
-            color: #1677ff;
+            color: #0a3442;
           }
 
         }
@@ -1040,7 +1040,7 @@ const handleAiModeChange = (ev: any) => {
             cursor: pointer;
 
             &:hover {
-              color: #1677ff;
+              color: #0a3442;
             }
           }
         }

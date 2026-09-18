@@ -4,7 +4,7 @@ import BoxPlate from './BoxPlate.vue'
 import * as echarts from 'echarts'
 
 const usageData = ref([
-    { name: '用户使用率', value: 8.6, color: '#1677ff' },
+    { name: '用户使用率', value: 8.6, color: '#0a3442' },
     { name: '系统使用率', value: 9.55, color: '#52c41a' },
     { name: '当前空闲率', value: 80.85, color: '#8c8c8c' }
 ])
@@ -17,7 +17,7 @@ const generateNewData = () => {
     const idle = +(100 - user - system).toFixed(2)
 
     usageData.value = [
-        { name: '用户使用率', value: user, color: '#1677ff' },
+        { name: '用户使用率', value: user, color: '#0a3442' },
         { name: '系统使用率', value: system, color: '#52c41a' },
         { name: '当前空闲率', value: idle, color: '#8c8c8c' }
     ]
@@ -84,8 +84,8 @@ const getOption = () => {
                     scaleSize: 6,
                     itemStyle: {
                         shadowBlur: 20,
-                        shadowColor: 'rgba(22, 119, 255, 0.45)',
-                        borderColor: '#1677ff'
+                        shadowColor: 'rgba(10, 52, 66, 0.45)',
+                        borderColor: '#0a3442'
                     }
                 },
 

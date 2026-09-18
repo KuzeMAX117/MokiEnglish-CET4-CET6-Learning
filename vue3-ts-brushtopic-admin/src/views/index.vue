@@ -3,21 +3,18 @@ import { useUserStore } from '@/stores/modules/user';
 import AdminIndex from './adminIndex.vue';
 import CommonIndex from './commonIndex.vue';
 const userStore = useUserStore()
-
 const identity = userStore.userInfo.identity
-console.log('身份', identity);
-
 </script>
 <template>
-  <div class="index-body">
-    
+  <div class="dashboard-container">
     <template v-if="identity === 2">
       <AdminIndex />
     </template>
-    
     <template v-else>
       <CommonIndex />
     </template>
   </div>
 </template>
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.dashboard-container { width: 100%; min-height: 100%; padding: 0; }
+</style>

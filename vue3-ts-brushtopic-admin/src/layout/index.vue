@@ -32,10 +32,7 @@ import Tabbar from './tabbar/index.vue'
     </div>
     
     <div class="layout_main" :class="{ fold: settingStore.fold ? true : false }">
-      <a-card style="height: 100%;">
-        
-        <router-view></router-view>
-      </a-card>
+      <router-view></router-view>
     </div>
   </div>
 </template>
@@ -85,7 +82,7 @@ import Tabbar from './tabbar/index.vue'
     height: calc(100vh - $base-tabbar-height);
     left: $base-menu-width;
     top: $base-tabbar-height;
-    padding: 12px;
+    padding: 24px;
     overflow: auto;
     transition: all 0.3s;
     background-color: $base-content-background;

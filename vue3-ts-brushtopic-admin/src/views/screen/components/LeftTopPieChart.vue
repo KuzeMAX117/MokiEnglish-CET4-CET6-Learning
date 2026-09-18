@@ -6,7 +6,7 @@ import * as echarts from 'echarts'
 const LEVELS = [
   { name: '面试新手', color: '#8c8c8c', min: 0, max: 99 },
   { name: '面试新秀', color: '#52c41a', min: 100, max: 299 },
-  { name: '面试高手', color: '#1677ff', min: 300, max: 499 },
+  { name: '面试高手', color: '#0a3442', min: 300, max: 499 },
   { name: '面试达人', color: '#fa8c16', min: 500, max: 799 },
   { name: '面试专家', color: '#f5222d', min: 800, max: 999 },
   { name: '面试之神', color: '#722ed1', min: 1000, max: Infinity }
@@ -21,7 +21,7 @@ const userLevels = ref([
   { name: '面试之神', value: 0 }
 ])
 
-const color = ['#8c8c8c', '#52c41a', '#1677ff', '#fa8c16', '#f5222d', '#722ed1']
+const color = ['#8c8c8c', '#52c41a', '#0a3442', '#fa8c16', '#f5222d', '#722ed1']
 
 const generateRandomData = () => {
   const total = 1000 
@@ -117,8 +117,8 @@ const getOption = () => {
           scaleSize: 6,
           itemStyle: {
             shadowBlur: 20,
-            shadowColor: 'rgba(22, 119, 255, 0.45)',
-            borderColor: '#1677ff'
+            shadowColor: 'rgba(10, 52, 66, 0.45)',
+            borderColor: '#0a3442'
           }
         },
 

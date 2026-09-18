@@ -521,7 +521,7 @@ onMounted(() => {
                 <a-image :width="48" :src="record.avatar" />
               </template>
               <template v-else>
-                <a-avatar :size="48" :style="{ backgroundColor: '#1677ff', fontSize: '20px' }">
+                <a-avatar :size="48" :style="{ backgroundColor: '#0a3442', fontSize: '20px' }">
                   {{ record.account?.charAt(0)?.toUpperCase() }}
                 </a-avatar>
               </template>

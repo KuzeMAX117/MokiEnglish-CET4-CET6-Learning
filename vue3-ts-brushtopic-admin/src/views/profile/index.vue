@@ -40,7 +40,7 @@
               <SafetyCertificateOutlined />
               
               账号状态：
-              <a-tag :color="userInfo.status === 0 ? '#1677ff' : 'error'">
+              <a-tag :color="userInfo.status === 0 ? '#0a3442' : 'error'">
                 <CheckCircleOutlined v-if="userInfo.status === 0" />
                 <CloseCircleOutlined v-else />
                 {{ userInfo.status === 0 ? '正常' : '停用' }}

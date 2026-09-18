@@ -45,7 +45,7 @@ const viewSetting = () => {
 }
 
 const defaultTheme = ref({
-  themeColor: '#1677ff',
+  themeColor: '#0a3442',
   isDark: false,
   fold: false,
   isCompact: false,
@@ -254,7 +254,7 @@ onMounted(() => {
       <img class="user-avatar" @error="handleErrorImg" :src="userStore.userInfo.avatar" alt="" />
     </template>
     <template v-else>
-      <a-avatar class="user-avatar" :style="{ backgroundColor: '#1677ff' }">
+      <a-avatar class="user-avatar" :style="{ backgroundColor: '#0a3442' }">
         {{ userStore.userInfo?.account?.charAt(0)?.toUpperCase() }}
       </a-avatar>
     </template>
@@ -311,7 +311,7 @@ onMounted(() => {
 
     &:hover {
       cursor: pointer;
-      color: #1677ff;
+      color: #0a3442;
     }
   }
 }
@@ -359,7 +359,7 @@ onMounted(() => {
 
     &.feedback {
       background-color: #e6f7ff;
-      color: #1677ff;
+      color: #0a3442;
     }
 
     &.member {
