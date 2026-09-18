@@ -101,12 +101,6 @@ Hao-Topic/
 
 ---
 
-### 🏗️ Spring Cloud 微服务架构
-
-<p align="center"><img src="pic/mermaid.png" width="600"></p>
-
----
-
 ### 📦 MyBatis-Plus 数据持久层
 
 | 特性 | 应用场景 |
