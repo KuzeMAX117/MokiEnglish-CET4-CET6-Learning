@@ -88,6 +88,56 @@ const subSectionName = (key: string) => SUB_SECTION_NAME[key] || key
 
 const sectionName = (key?: string) => (key ? SECTION_NAME[key] || key : '')
 
+/** 判断是否为选词填空类型 */
+const isClozeGroup = (group: PaperSubSectionType) => group.subSection === 'cloze'
+
+/** 词汇池操作：更新词库选项内容 */
+const updateBankOption = (group: PaperSubSectionType, oi: number, content: string) => {
+  if (!group.topics || group.topics.length === 0) return
+  const first = group.topics[0]
+  if (!first.options || !first.options[oi]) return
+  first.options[oi].content = content
+  // 同步到所有题目
+  for (const t of group.topics) {
+    if (t.options && t.options[oi]) {
+      t.options[oi].content = content
+    }
+  }
+}
+
+/** 词汇池操作：添加选项 */
+const addBankOption = (group: PaperSubSectionType) => {
+  if (!group.topics || group.topics.length === 0) return
+  const first = group.topics[0]
+  if (!first.options) first.options = []
+  // 找到下一个字母
+  const used = new Set(first.options.map(o => (o.label || '').trim().toUpperCase()))
+  let nextLabel = ''
+  for (const ch of 'ABCDEFGHIJKLMNO') {
+    if (!used.has(ch)) { nextLabel = ch; break }
+  }
+  if (nextLabel) {
+    first.options.push({ label: nextLabel, content: '' })
+    // 同步到所有题目
+    for (const t of group.topics) {
+      if (!t.options) t.options = []
+      t.options.push({ label: nextLabel, content: '' })
+    }
+  }
+}
+
+/** 词汇池操作：删除选项 */
+const removeBankOption = (group: PaperSubSectionType, oi: number) => {
+  if (!group.topics || group.topics.length === 0) return
+  const first = group.topics[0]
+  if (!first.options) return
+  first.options.splice(oi, 1)
+  // 同步到所有题目
+  for (const t of group.topics) {
+    if (t.options) t.options.splice(oi, 1)
+  }
+}
+
 const applyResult = (data: any) => {
   parsed.value = data?.subSections || []
   warnings.value = data?.warnings || []
@@ -291,39 +341,96 @@ const handleFill = () => {
             <a-textarea v-model:value="group.article" :auto-size="{ minRows: 2, maxRows: 6 }" />
           </div>
 
-          <div v-for="(topic, ti) in group.topics" :key="ti" class="topic-block">
-            <div class="topic-head" @click="expandedRows.includes(gi + '-' + ti)
-              ? (expandedRows = expandedRows.filter((k) => k !== gi + '-' + ti))
-              : expandedRows.push(gi + '-' + ti)">
-              <span class="topic-no">第 {{ topicNos.get(gi + '-' + ti) }} 题</span>
-              <span class="topic-brief">{{ (topic.topicName || '（题干为空）').slice(0, 60) }}</span>
-              <a-tag v-if="topic.warning" color="orange">{{ topic.warning }}</a-tag>
-              <a-tag v-else-if="topic.options && topic.options.length" color="green">{{ topic.correctOption ?
-                '有答案' : '缺答案' }}</a-tag>
-              <a-button size="small" type="text" danger class="del-btn" @click.stop="removeTopic(gi, ti)">删除</a-button>
-            </div>
-
-            <div v-if="expandedRows.includes(gi + '-' + ti)" class="topic-body">
-              <div class="field-tip">题干</div>
-              <a-textarea v-model:value="topic.topicName" :auto-size="{ minRows: 2, maxRows: 6 }" />
-
-              <div class="field-tip">选项（点"答案"按钮设为正确答案）</div>
-              <div v-for="(opt, oi) in topic.options" :key="oi" class="opt-row">
-                <a-input v-model:value="opt.label" class="opt-label" placeholder="A" />
-                <a-input v-model:value="opt.content" placeholder="选项内容" />
-                <a-button size="small" :type="isCorrect(topic, opt.label) ? 'primary' : 'default'"
-                  @click="setCorrect(topic, opt.label)">答案</a-button>
-                <a-button size="small" type="text" danger @click="removeOption(topic, oi)">删</a-button>
+          <!-- ========== 选词填空：词汇池模式 ========== -->
+          <template v-if="isClozeGroup(group)">
+            <!-- 词汇池：统一展示A-O选项 -->
+            <div class="word-bank-pool">
+              <div class="field-tip">词汇池（公共选项池，编辑后自动同步到所有题目）</div>
+              <div class="word-bank-grid">
+                <div v-for="(opt, oi) in (group.topics[0]?.options || [])" :key="oi" class="wb-cell">
+                  <span class="wb-label-tag">{{ opt.label }}</span>
+                  <a-input class="wb-input" :value="opt.content" placeholder="选项内容" size="small"
+                    @input="(e: any) => updateBankOption(group, oi, e.target.value)" />
+                  <a-button size="small" type="text" danger @click="removeBankOption(group, oi)">删</a-button>
+                </div>
               </div>
-              <a-button size="small" type="dashed" @click="addOption(topic)">+ 添加选项</a-button>
-
-              <div class="field-tip">正确答案（如 A / AB / JGOKB，最多 5 字符）</div>
-              <a-input v-model:value="topic.correctOption" style="width: 220px" :maxlength="5" />
-
-              <div class="field-tip">解析（可选）</div>
-              <a-textarea v-model:value="topic.analysis" :auto-size="{ minRows: 1, maxRows: 4 }" />
+              <a-button size="small" type="dashed" @click="addBankOption(group)" style="margin-top: 8px">
+                + 添加选项
+              </a-button>
             </div>
-          </div>
+
+            <!-- 题目列表：每题用下拉框选答案 -->
+            <div v-for="(topic, ti) in group.topics" :key="ti" class="topic-block">
+              <div class="topic-head" @click="expandedRows.includes(gi + '-' + ti)
+                ? (expandedRows = expandedRows.filter((k) => k !== gi + '-' + ti))
+                : expandedRows.push(gi + '-' + ti)">
+                <span class="topic-no">第 {{ topicNos.get(gi + '-' + ti) }} 题</span>
+                <span class="topic-brief">{{ (topic.topicName || '（题干为空）').slice(0, 60) }}</span>
+                <a-tag v-if="topic.warning" color="orange">{{ topic.warning }}</a-tag>
+                <a-tag v-else-if="topic.correctOption" color="green">有答案</a-tag>
+                <a-tag v-else color="red">缺答案</a-tag>
+                <a-button size="small" type="text" danger class="del-btn" @click.stop="removeTopic(gi, ti)">删除</a-button>
+              </div>
+
+              <div v-if="expandedRows.includes(gi + '-' + ti)" class="topic-body">
+                <div class="field-tip">题干</div>
+                <a-textarea v-model:value="topic.topicName" :auto-size="{ minRows: 2, maxRows: 6 }" />
+
+                <div class="field-tip">选择正确答案</div>
+                <a-select
+                  :value="topic.correctOption || undefined"
+                  placeholder="请选择正确答案"
+                  style="width: 100%"
+                  @update:value="(v: any) => { topic.correctOption = v }"
+                  allowClear
+                >
+                  <a-select-option v-for="opt in (group.topics[0]?.options || [])" :key="opt.label" :value="opt.label">
+                    <b>{{ opt.label }}</b> &nbsp; {{ opt.content }}
+                  </a-select-option>
+                </a-select>
+
+                <div class="field-tip">解析（可选）</div>
+                <a-textarea v-model:value="topic.analysis" :auto-size="{ minRows: 1, maxRows: 4 }" />
+              </div>
+            </div>
+          </template>
+
+          <!-- ========== 其他题型：普通选项模式 ========== -->
+          <template v-else>
+            <div v-for="(topic, ti) in group.topics" :key="ti" class="topic-block">
+              <div class="topic-head" @click="expandedRows.includes(gi + '-' + ti)
+                ? (expandedRows = expandedRows.filter((k) => k !== gi + '-' + ti))
+                : expandedRows.push(gi + '-' + ti)">
+                <span class="topic-no">第 {{ topicNos.get(gi + '-' + ti) }} 题</span>
+                <span class="topic-brief">{{ (topic.topicName || '（题干为空）').slice(0, 60) }}</span>
+                <a-tag v-if="topic.warning" color="orange">{{ topic.warning }}</a-tag>
+                <a-tag v-else-if="topic.options && topic.options.length" color="green">{{ topic.correctOption ?
+                  '有答案' : '缺答案' }}</a-tag>
+                <a-button size="small" type="text" danger class="del-btn" @click.stop="removeTopic(gi, ti)">删除</a-button>
+              </div>
+
+              <div v-if="expandedRows.includes(gi + '-' + ti)" class="topic-body">
+                <div class="field-tip">题干</div>
+                <a-textarea v-model:value="topic.topicName" :auto-size="{ minRows: 2, maxRows: 6 }" />
+
+                <div class="field-tip">选项（点"答案"按钮设为正确答案）</div>
+                <div v-for="(opt, oi) in topic.options" :key="oi" class="opt-row">
+                  <a-input v-model:value="opt.label" class="opt-label" placeholder="A" />
+                  <a-input v-model:value="opt.content" placeholder="选项内容" />
+                  <a-button size="small" :type="isCorrect(topic, opt.label) ? 'primary' : 'default'"
+                    @click="setCorrect(topic, opt.label)">答案</a-button>
+                  <a-button size="small" type="text" danger @click="removeOption(topic, oi)">删</a-button>
+                </div>
+                <a-button size="small" type="dashed" @click="addOption(topic)">+ 添加选项</a-button>
+
+                <div class="field-tip">正确答案（如 A / AB / JGOKB，最多 5 字符）</div>
+                <a-input v-model:value="topic.correctOption" style="width: 220px" :maxlength="5" />
+
+                <div class="field-tip">解析（可选）</div>
+                <a-textarea v-model:value="topic.analysis" :auto-size="{ minRows: 1, maxRows: 4 }" />
+              </div>
+            </div>
+          </template>
         </div>
       </div>
 
@@ -494,5 +601,52 @@ const handleFill = () => {
   justify-content: flex-end;
   padding-top: 6px;
   border-top: 1px solid #f0f0f0;
+}
+
+/* 选词填空：词汇池样式 */
+.word-bank-pool {
+  margin: 10px 0;
+  padding: 10px;
+  background: #f6f8fa;
+  border: 1px dashed #d0d7de;
+  border-radius: 8px;
+
+  .field-tip {
+    font-size: 12px;
+    color: #70757a;
+    margin-bottom: 8px;
+  }
+}
+
+.word-bank-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+
+  .wb-cell {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    .wb-label-tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      background: #e6f7ff;
+      border: 1px solid #91d5ff;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #1890ff;
+      flex-shrink: 0;
+    }
+
+    .wb-input {
+      flex: 1;
+      min-width: 0;
+    }
+  }
 }
 </style>
