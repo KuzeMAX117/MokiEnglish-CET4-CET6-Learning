@@ -375,7 +375,7 @@ const handleExport = async () => {
     response = await apiExportUser(params.value, [0])
     
   }
-  FileSaver.saveAs(response, `易题系统用户数据_${new Date().getTime()}.xlsx`) 
+  FileSaver.saveAs(response, `英语学习cet4-6用户数据_${new Date().getTime()}.xlsx`) 
   message.success('导出成功')
   onSelectedRowKeys.value = []
 
@@ -409,7 +409,7 @@ const importTemplate = async () => {
   let response: any = null
   const res = await apiGetExportTemplate()
   response = res
-  FileSaver.saveAs(response, `易题系统用户数据模板_${new Date().getTime()}.xlsx`)
+  FileSaver.saveAs(response, `英语学习cet4-6用户数据模板_${new Date().getTime()}.xlsx`)
 }
 
 const handleBeforeUpload = (file: any) => {

@@ -1,99 +1,67 @@
 <script setup lang="ts">
 import { useUserStore } from '@/stores/modules/user';
-import { useSettingStore } from '@/stores/modules/setting';
-import { ref, onMounted, watch, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import * as echarts from 'echarts';
-import dayjs from 'dayjs';
-import { apiAdminHomeCount, apiAdminHomeCategory, apiTopicTrend, apiUserTrend, apiAiTrend } from '@/api/home';
-import type { AdminLeftDataType, TopicTrendType } from '@/api/home/type';
+import { apiAdminHomeCount, apiUserTrend, apiAiTrend } from '@/api/home';
+import type { AdminLeftDataType } from '@/api/home/type';
 
 const userStore = useUserStore();
-const settingStore = useSettingStore();
 
 const leftData = ref<AdminLeftDataType>();
-const rightData = ref<any>();
-const middleData = ref<TopicTrendType>();
 const userTrend = ref<any>();
 const aiTrend = ref<any>();
 
-const currentTime = ref(dayjs().format('YYYY-MM-DD HH:mm'));
-
-const statCards = computed(() => [
-  { label: '刷题次数', value: leftData.value?.countTodayFrequency || 0, suffix: '次', icon: 'CodeOutlined', trend: leftData.value?.topicGrowthRate || 0, color: '#0a3442' },
-  { label: 'AI调用', value: leftData.value?.aiCount || 0, suffix: '次', icon: 'RobotOutlined', trend: leftData.value?.aiGrowthRate || 0, color: '#104455' },
-  { label: '用户总数', value: leftData.value?.userCount || 0, suffix: '名', icon: 'TeamOutlined', trend: leftData.value?.userGrowthRate || 0, color: '#3ad3cd' },
-  { label: '题目数量', value: leftData.value?.totalTopicCount || 0, suffix: '题', icon: 'FileTextOutlined', color: '#7fffd4' },
-  { label: '专题数量', value: leftData.value?.totalSubjectCount || 0, suffix: '个', icon: 'BookOutlined', color: '#0a3442' },
-  { label: '标签数量', value: leftData.value?.topicLabelCount || 0, suffix: '个', icon: 'TagsOutlined', color: '#104455' }
+const moduleStats = ref([
+  { label: '背单词次数', value: 0, icon: 'book', color: '#2c5a5e' },
+  { label: '作文次数', value: 0, icon: 'edit', color: '#3ad3cd' },
+  { label: '翻译次数', value: 0, icon: 'translate', color: '#6dd5c8' }
 ]);
 
-const miniChartRefs = ref<(HTMLDivElement | null)[]>([]);
+const dataOverview = ref([
+  { label: '收录题目', value: 0, icon: 'file', color: '#2c5a5e' },
+  { label: '收录标签', value: 0, icon: 'tag', color: '#3ad3cd' },
+  { label: '注册用户', value: 0, icon: 'users', color: '#6dd5c8' },
+  { label: 'AI调用次数', value: 0, icon: 'monitor', color: '#2c5a5e' }
+]);
 
-const initMiniChart = (index: number, data: number[], color: string) => {
-  const el = miniChartRefs.value[index];
-  if (!el) return;
-  const chart = echarts.init(el);
-  chart.setOption({
-    grid: { top: 5, right: 5, bottom: 5, left: 5 },
-    xAxis: { type: 'category', show: false, data: data.map((_, i) => i) },
-    yAxis: { type: 'value', show: false },
-    series: [{ type: 'line', smooth: true, symbol: 'none', lineStyle: { width: 2, color }, areaStyle: { color: color + '25' }, data }]
-  });
-  window.addEventListener('resize', () => chart.resize());
-};
-
-const categoryChart = ref<HTMLDivElement | null>(null);
-const topicTrendChart = ref<HTMLDivElement | null>(null);
 const userGrowthChart = ref<HTMLDivElement | null>(null);
 const aiCallChart = ref<HTMLDivElement | null>(null);
-
-const initCategoryChart = () => {
-  if (!categoryChart.value) return;
-  const chart = echarts.init(categoryChart.value);
-  chart.setOption({
-    tooltip: { trigger: 'item', backgroundColor: 'rgba(255,255,255,0.95)', borderColor: '#eee', borderWidth: 1, textStyle: { color: '#333' } },
-    animationDurationUpdate: (idx: number) => idx * 100,
-    animationEasingUpdate: 'bounceIn' as const,
-    series: [{
-      type: 'graph', layout: 'force', force: { repulsion: 120, edgeLength: 15 },
-      label: { show: true, formatter: ['{c|{c}}', '{b|{b}}'].join('\n'), fontSize: 12, color: '#fff', rich: { b: { fontSize: 11, color: '#fff', padding: [0, 0, 2, 0], align: 'center', width: 60 }, c: { fontSize: 14, color: '#fff', fontWeight: 'bold', align: 'center', width: 60 } } },
-      itemStyle: { color: '#0a3442', opacity: 0.85, borderWidth: 2, borderColor: '#fff', shadowBlur: 10, shadowColor: 'rgba(10,52,66,0.3)' },
-      data: (rightData.value || []).map((cat: any) => ({ name: cat.categoryName, value: cat.count, symbolSize: (cat.count === 0 ? 5 : cat.count) * 2.2, draggable: true }))
-    }]
-  });
-  window.addEventListener('resize', () => chart.resize());
-};
-
-const initTopicTrendChart = () => {
-  if (!topicTrendChart.value || !middleData.value) return;
-  const chart = echarts.init(topicTrendChart.value);
-  const isDark = settingStore.isDark;
-  chart.setOption({
-    backgroundColor: 'transparent',
-    tooltip: { trigger: 'axis', backgroundColor: isDark ? '#1f1f1f' : '#fff', borderColor: isDark ? '#333' : '#eee', textStyle: { color: isDark ? '#fff' : '#333' } },
-    legend: { data: ['刷题人数', '题目数量'], right: '5%', top: '2%', textStyle: { color: isDark ? '#aaa' : '#8c8c8c' } },
-    grid: { top: '12%', left: '3%', right: '4%', bottom: '8%', containLabel: true },
-    xAxis: { type: 'category', boundaryGap: false, data: middleData.value.dateList, axisLine: { lineStyle: { color: isDark ? '#333' : '#E0E6F1' } }, axisLabel: { color: isDark ? '#aaa' : '#666' } },
-    yAxis: { type: 'value', axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: isDark ? '#aaa' : '#666' }, splitLine: { lineStyle: { color: isDark ? '#222' : '#E0E6F1', type: 'dashed' } } },
-    series: [
-      { name: '刷题人数', type: 'line', smooth: true, symbol: 'circle', symbolSize: 8, lineStyle: { width: 3, color: '#0a3442' }, itemStyle: { color: '#0a3442', borderColor: '#fff', borderWidth: 2 }, areaStyle: { color: 'rgba(10,52,66,0.15)' }, data: middleData.value.countUserList },
-      { name: '题目数量', type: 'line', smooth: true, symbol: 'triangle', symbolSize: 8, lineStyle: { width: 3, color: '#3ad3cd' }, itemStyle: { color: '#3ad3cd', borderColor: '#fff', borderWidth: 2 }, areaStyle: { color: 'rgba(58,211,205,0.15)' }, data: middleData.value.countTopicList }
-    ]
-  });
-  window.addEventListener('resize', () => chart.resize());
-};
 
 const initUserGrowthChart = () => {
   if (!userGrowthChart.value || !userTrend.value) return;
   const chart = echarts.init(userGrowthChart.value);
-  const isDark = settingStore.isDark;
   chart.setOption({
     backgroundColor: 'transparent',
-    tooltip: { trigger: 'axis', axisPointer: { type: 'cross', label: { backgroundColor: '#0a3442' } }, backgroundColor: isDark ? '#1f1f1f' : '#fff', borderColor: isDark ? '#333' : '#eee', textStyle: { color: isDark ? '#fff' : '#333' } },
-    grid: { top: '10%', left: '3%', right: '7%', bottom: '15%', containLabel: true },
-    xAxis: { type: 'category', boundaryGap: false, data: userTrend.value.dateList, axisLine: { lineStyle: { color: isDark ? '#333' : '#E0E6F1' } }, axisLabel: { color: isDark ? '#aaa' : '#666' } },
-    yAxis: { type: 'value', axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: isDark ? '#aaa' : '#666' }, splitLine: { lineStyle: { color: isDark ? '#222' : '#E0E6F1', type: 'dashed' } } },
-    series: [{ name: '用户增长', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3, color: '#0a3442' }, itemStyle: { color: '#0a3442', borderColor: '#fff', borderWidth: 2 }, areaStyle: { color: 'rgba(10,52,66,0.15)' }, data: userTrend.value.countList }]
+    tooltip: { trigger: 'axis', axisPointer: { type: 'cross', label: { backgroundColor: '#2c5a5e' } }, backgroundColor: '#fff', borderColor: '#eee', textStyle: { color: '#333' } },
+    grid: { top: '15%', left: '5%', right: '5%', bottom: '20%', containLabel: true },
+    xAxis: {
+      type: 'category', boundaryGap: false,
+      data: userTrend.value.dateList,
+      axisLine: { lineStyle: { color: '#E0E6F1' } },
+      axisLabel: { color: '#666', fontSize: 11 },
+      axisTick: { show: false }
+    },
+    yAxis: {
+      type: 'value',
+      axisLine: { show: false },
+      axisTick: { show: false },
+      axisLabel: { color: '#666', fontSize: 11 },
+      splitLine: { lineStyle: { color: '#E0E6F1', type: 'dashed' } }
+    },
+    series: [{
+      name: '用户增长',
+      type: 'line',
+      smooth: true,
+      symbol: 'none',
+      lineStyle: { width: 3, color: '#3ad3cd' },
+      areaStyle: {
+        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+          { offset: 0, color: 'rgba(58, 211, 205, 0.3)' },
+          { offset: 1, color: 'rgba(58, 211, 205, 0.02)' }
+        ])
+      },
+      data: userTrend.value.countList
+    }]
   });
   window.addEventListener('resize', () => chart.resize());
 };
@@ -101,36 +69,53 @@ const initUserGrowthChart = () => {
 const initAiCallChart = () => {
   if (!aiCallChart.value || !aiTrend.value) return;
   const chart = echarts.init(aiCallChart.value);
-  const isDark = settingStore.isDark;
   chart.setOption({
     backgroundColor: 'transparent',
-    tooltip: { trigger: 'axis', axisPointer: { type: 'cross', label: { backgroundColor: '#104455' } }, backgroundColor: isDark ? '#1f1f1f' : '#fff', borderColor: isDark ? '#333' : '#eee', textStyle: { color: isDark ? '#fff' : '#333' } },
-    grid: { top: '10%', left: '3%', right: '7%', bottom: '15%', containLabel: true },
-    xAxis: { type: 'category', boundaryGap: false, data: aiTrend.value.dateList, axisLine: { lineStyle: { color: isDark ? '#333' : '#E0E6F1' } }, axisLabel: { color: isDark ? '#aaa' : '#666' } },
-    yAxis: { type: 'value', axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: isDark ? '#aaa' : '#666' }, splitLine: { lineStyle: { color: isDark ? '#222' : '#E0E6F1', type: 'dashed' } } },
-    series: [{ name: '调用次数', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3, color: '#104455' }, itemStyle: { color: '#104455', borderColor: '#fff', borderWidth: 2 }, areaStyle: { color: 'rgba(16,68,85,0.15)' }, data: aiTrend.value.countList }]
+    tooltip: { trigger: 'axis', axisPointer: { type: 'cross', label: { backgroundColor: '#2c5a5e' } }, backgroundColor: '#fff', borderColor: '#eee', textStyle: { color: '#333' } },
+    grid: { top: '15%', left: '5%', right: '5%', bottom: '20%', containLabel: true },
+    xAxis: {
+      type: 'category', boundaryGap: false,
+      data: aiTrend.value.dateList,
+      axisLine: { lineStyle: { color: '#E0E6F1' } },
+      axisLabel: { color: '#666', fontSize: 11 },
+      axisTick: { show: false }
+    },
+    yAxis: {
+      type: 'value',
+      axisLine: { show: false },
+      axisTick: { show: false },
+      axisLabel: { color: '#666', fontSize: 11 },
+      splitLine: { lineStyle: { color: '#E0E6F1', type: 'dashed' } }
+    },
+    series: [{
+      name: '调用次数',
+      type: 'line',
+      smooth: true,
+      symbol: 'none',
+      lineStyle: { width: 3, color: '#3ad3cd' },
+      areaStyle: {
+        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+          { offset: 0, color: 'rgba(58, 211, 205, 0.3)' },
+          { offset: 1, color: 'rgba(58, 211, 205, 0.02)' }
+        ])
+      },
+      data: aiTrend.value.countList
+    }]
   });
   window.addEventListener('resize', () => chart.resize());
 };
 
-watch(() => settingStore.isDark, () => { initCategoryChart(); initTopicTrendChart(); initUserGrowthChart(); initAiCallChart(); });
-
 const getAllData = async () => {
-  const [leftRes, categoryRes, topicRes, userRes, aiRes] = await Promise.all([apiAdminHomeCount(), apiAdminHomeCategory(), apiTopicTrend(), apiUserTrend(), apiAiTrend()]);
-  if (leftRes.data) leftData.value = leftRes.data;
-  if (categoryRes.data) { rightData.value = categoryRes.data; initCategoryChart(); }
-  if (topicRes.data) { middleData.value = topicRes.data; initTopicTrendChart(); }
+  const [leftRes, userRes, aiRes] = await Promise.all([apiAdminHomeCount(), apiUserTrend(), apiAiTrend()]);
+  if (leftRes.data) {
+    leftData.value = leftRes.data;
+    dataOverview.value[0].value = leftData.value?.totalTopicCount || 0;
+    dataOverview.value[1].value = leftData.value?.topicLabelCount || 0;
+    dataOverview.value[2].value = leftData.value?.userCount || 0;
+    dataOverview.value[3].value = leftData.value?.aiCount || 0;
+  }
   if (userRes.data) { userTrend.value = userRes.data; initUserGrowthChart(); }
   if (aiRes.data) { aiTrend.value = aiRes.data; initAiCallChart(); }
-
-  setTimeout(() => {
-    initMiniChart(0, [3, 5, 8, 6, 9, 7, 11, 10, 13, 12], '#0a3442');
-    initMiniChart(1, [2, 4, 3, 6, 5, 8, 7, 10, 9, 12], '#104455');
-    initMiniChart(2, [1, 3, 2, 5, 4, 7, 6, 9, 8, 11], '#3ad3cd');
-    initMiniChart(3, [5, 7, 6, 9, 8, 11, 10, 13, 12, 15], '#7fffd4');
-    initMiniChart(4, [4, 6, 5, 8, 7, 10, 9, 12, 11, 14], '#0a3442');
-    initMiniChart(5, [3, 5, 4, 7, 6, 9, 8, 11, 10, 13], '#104455');
-  }, 100);
 };
 
 onMounted(() => { getAllData(); });
@@ -139,56 +124,113 @@ onMounted(() => { getAllData(); });
 <template>
   <div class="admin-dashboard">
     <div class="welcome-banner">
-      <div class="welcome-content">
+      <div class="welcome-left">
+        <div class="user-avatar">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="48" height="48">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+          </svg>
+        </div>
         <div class="welcome-text">
-          <h1 class="welcome-title">欢迎回来，{{ userStore.userInfo.nickname || userStore.userInfo.account }}</h1>
-          <p class="welcome-subtitle">这是您的管理控制台，今天是 {{ currentTime }}</p>
-        </div>
-        <div class="admin-badge">
-          <span class="badge-icon">&#128081;</span>
-          <span class="badge-text">管理员</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="stats-grid">
-      <div v-for="(card, index) in statCards" :key="index" class="stat-card" :style="{ '--card-accent': card.color }">
-        <div class="stat-card-header">
-          <div class="stat-icon"><component :is="card.icon" /></div>
-          <div class="stat-mini-chart" :ref="el => { if (el) miniChartRefs[index] = el as HTMLDivElement }"></div>
-        </div>
-        <div class="stat-card-body">
-          <div class="stat-value">
-            <span class="stat-number">{{ card.value.toLocaleString() }}</span>
-            <span class="stat-suffix">{{ card.suffix }}</span>
+          <p class="welcome-subtitle">欢迎回来</p>
+          <h1 class="welcome-title">{{ userStore.userInfo.nickname || userStore.userInfo.account }}</h1>
+          <div class="admin-badge">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+              <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+            </svg>
+            <span>管理员</span>
           </div>
-          <div class="stat-label">{{ card.label }}</div>
         </div>
-        <div v-if="card.trend !== undefined" class="stat-card-footer">
-          <span :class="['trend-indicator', card.trend >= 0 ? 'trend-up' : 'trend-down']">{{ card.trend >= 0 ? '+' : '' }} {{ card.trend }}</span>
-          <span class="trend-label">较昨日</span>
+      </div>
+      <div class="welcome-right">
+        <div class="banner-stat">
+          <span class="banner-stat-value">{{ leftData?.userCount || 0 }}</span>
+          <span class="banner-stat-label">注册用户</span>
+        </div>
+        <div class="banner-stat">
+          <span class="banner-stat-value">{{ leftData?.totalTopicCount || 0 }}</span>
+          <span class="banner-stat-label">收录题目</span>
+        </div>
+        <div class="banner-stat">
+          <span class="banner-stat-value">{{ leftData?.aiCount || 0 }}</span>
+          <span class="banner-stat-label">AI调用</span>
         </div>
       </div>
     </div>
 
-    <div class="charts-section">
-      <div class="chart-card chart-card-full">
-        <div class="chart-card-header"><h3 class="chart-title">刷题趋势</h3></div>
-        <div ref="topicTrendChart" class="chart-container"></div>
+    <div class="section-header">
+      <div class="section-indicator"></div>
+      <h2 class="section-title">数据概览</h2>
+    </div>
+    <div class="data-overview-grid">
+      <div v-for="(item, index) in dataOverview" :key="index" class="overview-card">
+        <div class="overview-icon" :style="{ background: item.color }">
+          <svg v-if="item.icon === 'file'" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+            <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+          </svg>
+          <svg v-else-if="item.icon === 'tag'" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+            <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/>
+          </svg>
+          <svg v-else-if="item.icon === 'users'" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+          </svg>
+          <svg v-else viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+            <path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/>
+          </svg>
+        </div>
+        <div class="overview-content">
+          <span class="overview-value">{{ item.value }}</span>
+          <span class="overview-label">{{ item.label }}</span>
+        </div>
       </div>
     </div>
 
-    <div class="charts-section">
-      <div class="chart-card">
-        <div class="chart-card-header"><h3 class="chart-title">分类概览</h3></div>
-        <div ref="categoryChart" class="chart-container"></div>
+    <div class="section-header">
+      <div class="section-indicator"></div>
+      <h2 class="section-title">模块使用统计</h2>
+    </div>
+    <div class="module-stats-grid">
+      <div v-for="(item, index) in moduleStats" :key="index" class="module-card">
+        <div class="module-icon" :style="{ background: item.color }">
+          <svg v-if="item.icon === 'book'" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+            <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/>
+          </svg>
+          <svg v-else-if="item.icon === 'edit'" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+          </svg>
+          <svg v-else viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+            <path d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/>
+          </svg>
+        </div>
+        <div class="module-content">
+          <span class="module-value">{{ item.value }}</span>
+          <span class="module-label">{{ item.label }}</span>
+        </div>
+        <div class="module-progress">
+          <svg viewBox="0 0 36 36" class="circular-chart">
+            <path class="circle-bg" d="M18 2.0845
+              a 15.9155 15.9155 0 0 1 0 31.831
+              a 15.9155 15.9155 0 0 1 0 -31.831"/>
+            <path class="circle" :stroke-dasharray="`${item.value > 0 ? 100 : 0}, 100`" d="M18 2.0845
+              a 15.9155 15.9155 0 0 1 0 31.831
+              a 15.9155 15.9155 0 0 1 0 -31.831"/>
+          </svg>
+        </div>
       </div>
+    </div>
+
+    <div class="charts-row">
       <div class="chart-card">
-        <div class="chart-card-header"><h3 class="chart-title">用户增长</h3></div>
+        <div class="chart-card-header">
+          <div class="chart-dot"></div>
+          <h3 class="chart-title">用户增长趋势</h3>
+        </div>
         <div ref="userGrowthChart" class="chart-container"></div>
       </div>
       <div class="chart-card">
-        <div class="chart-card-header"><h3 class="chart-title">AI调用统计</h3></div>
+        <div class="chart-card-header">
+          <div class="chart-dot ai"></div>
+          <h3 class="chart-title">AI调用次数趋势</h3>
+        </div>
         <div ref="aiCallChart" class="chart-container"></div>
       </div>
     </div>
@@ -204,134 +246,352 @@ onMounted(() => { getAllData(); });
 }
 
 .welcome-banner {
-  background: #0a3442;
+  background: linear-gradient(135deg, #2c5a5e 0%, #1a3a3d 100%);
   border-radius: 16px;
   padding: 32px;
   color: #fff;
-  position: relative;
-  overflow: hidden;
-  &::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -20%;
-    width: 400px;
-    height: 400px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 50%;
-  }
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -30%;
-    left: -10%;
-    width: 300px;
-    height: 300px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 50%;
-  }
-}
-
-.welcome-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
   position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+  }
+}
+
+.welcome-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: relative;
   z-index: 1;
+}
+
+.user-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: 48px;
+    height: 48px;
+    opacity: 0.9;
+  }
+}
+
+.welcome-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.welcome-subtitle {
+  font-size: 14px;
+  opacity: 0.8;
+  margin: 0;
 }
 
 .welcome-title {
   font-size: 28px;
   font-weight: 700;
-  margin: 0 0 8px 0;
-}
-
-.welcome-subtitle {
-  font-size: 16px;
-  opacity: 0.9;
   margin: 0;
 }
 
 .admin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(58, 211, 205, 0.2);
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  width: fit-content;
+  margin-top: 4px;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    fill: #3ad3cd;
+  }
+}
+
+.welcome-right {
+  display: flex;
+  gap: 40px;
+  position: relative;
+  z-index: 1;
+}
+
+.banner-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.banner-stat-value {
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.banner-stat-label {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.section-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  padding: 12px 20px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  .badge-icon { font-size: 24px; }
-  .badge-text { font-size: 16px; font-weight: 600; }
 }
 
-.stats-grid {
+.section-indicator {
+  width: 4px;
+  height: 20px;
+  background: #3ad3cd;
+  border-radius: 2px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.data-overview-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 20px;
 }
 
-.stat-card {
+.overview-card {
   background: #fff;
-  border-radius: 16px;
+  border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 4px 20px rgba(10, 52, 66, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-  &:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(10, 52, 66, 0.15); }
-  &::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--card-accent); border-radius: 0 4px 4px 0; }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
 }
 
-.stat-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+.overview-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-.stat-icon {
-  width: 48px; height: 48px; border-radius: 12px; background: var(--card-accent);
-  display: flex; align-items: center; justify-content: center; font-size: 24px; color: #fff;
+  svg {
+    width: 28px;
+    height: 28px;
+    fill: #fff;
+  }
 }
 
-.stat-mini-chart { width: 80px; height: 40px; }
-.stat-card-body { margin-bottom: 12px; }
+.overview-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
 
-.stat-value { display: flex; align-items: baseline; gap: 4px; margin-bottom: 4px; }
-.stat-number { font-size: 32px; font-weight: 700; color: #1a1a1a; line-height: 1; }
-.stat-suffix { font-size: 14px; color: #8c8c8c; }
-.stat-label { font-size: 14px; color: #666; }
+.overview-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
 
-.stat-card-footer { display: flex; align-items: center; gap: 8px; padding-top: 12px; border-top: 1px solid #f0f0f0; }
-.trend-indicator { font-size: 13px; font-weight: 600; &.trend-up { color: #52c41a; } &.trend-down { color: #ff4d4f; } }
-.trend-label { font-size: 12px; color: #8c8c8c; }
+.overview-label {
+  font-size: 14px;
+  color: #666;
+}
 
-.charts-section { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.module-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.module-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.module-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: 28px;
+    height: 28px;
+    fill: #fff;
+  }
+}
+
+.module-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.module-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.module-label {
+  font-size: 14px;
+  color: #666;
+}
+
+.module-progress {
+  width: 48px;
+  height: 48px;
+
+  .circular-chart {
+    width: 100%;
+    height: 100%;
+  }
+
+  .circle-bg {
+    fill: none;
+    stroke: #e6f7f5;
+    stroke-width: 3;
+  }
+
+  .circle {
+    fill: none;
+    stroke-width: 3;
+    stroke: #3ad3cd;
+    stroke-linecap: round;
+    animation: progress 1s ease-out forwards;
+  }
+}
+
+@keyframes progress {
+  0% {
+    stroke-dasharray: 0 100;
+  }
+}
+
+.charts-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
 
 .chart-card {
-  background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(10, 52, 66, 0.08);
-  overflow: hidden; transition: all 0.3s ease;
-  &:hover { box-shadow: 0 8px 30px rgba(10, 52, 66, 0.15); }
-  &.chart-card-full { grid-column: 1 / -1; }
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
 }
 
-.chart-card-header { padding: 20px 24px 0; }
+.chart-card-header {
+  padding: 20px 24px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chart-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #3ad3cd;
+
+  &.ai {
+    background: #2c5a5e;
+  }
+}
 
 .chart-title {
-  font-size: 18px; font-weight: 600; color: #1a1a1a; margin: 0;
-  position: relative; padding-left: 12px;
-  &::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 4px; height: 18px; background: #0a3442; border-radius: 2px; }
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
 }
 
-.chart-container { width: 100%; height: 300px; padding: 0 24px 24px; }
-
-@media (max-width: 1600px) {
-  .stats-grid { grid-template-columns: repeat(3, 1fr); }
-  .charts-section { grid-template-columns: repeat(2, 1fr); }
+.chart-container {
+  width: 100%;
+  height: 280px;
+  padding: 16px;
 }
+
 @media (max-width: 1200px) {
-  .stats-grid { grid-template-columns: repeat(2, 1fr); }
-  .charts-section { grid-template-columns: 1fr; }
+  .data-overview-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .module-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .charts-row {
+    grid-template-columns: 1fr;
+  }
+  .welcome-right {
+    gap: 24px;
+  }
 }
+
 @media (max-width: 768px) {
-  .stats-grid { grid-template-columns: 1fr; }
-  .welcome-content { flex-direction: column; align-items: flex-start; gap: 16px; }
-  .welcome-title { font-size: 22px; }
+  .data-overview-grid {
+    grid-template-columns: 1fr;
+  }
+  .module-stats-grid {
+    grid-template-columns: 1fr;
+  }
+  .welcome-banner {
+    flex-direction: column;
+    gap: 24px;
+    text-align: center;
+  }
+  .welcome-left {
+    flex-direction: column;
+  }
+  .admin-badge {
+    margin: 0 auto;
+  }
 }
 </style>

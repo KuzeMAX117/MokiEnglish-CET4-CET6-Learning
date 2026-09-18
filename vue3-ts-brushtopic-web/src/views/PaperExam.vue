@@ -155,6 +155,11 @@
           </div>
 
           <div v-show="showQuestions" class="question-inner">
+            <div v-if="poolWords.length" class="word-pool">
+              <div class="word-pool-grid">
+                <span v-for="(word, i) in poolWords" :key="i" class="word-tag">{{ word }}</span>
+              </div>
+            </div>
             <div class="question-scroll">
               <div
                 v-for="(topic, tIdx) in currentSection.topics"
@@ -163,19 +168,10 @@
                 :class="{ active: currentTopicIndex === tIdx }"
                 @click="currentTopicIndex = tIdx"
               >
-                <div class="question-tag">
-                  <span class="question-no">第 {{ topic.sorted }} 题</span>
-                  <CheckCircleOutlined v-if="answers.has(topic.topicId) && answers.get(topic.topicId)" class="status-icon correct" />
-                  <CloseCircleOutlined v-else-if="answers.has(topic.topicId) && !answers.get(topic.topicId)" class="status-icon wrong" />
-                  <span v-else-if="selections.has(topic.topicId)" class="answered-tag">已作答</span>
-                </div>
-                <div class="question-name">{{ topic.topicName }}</div>
-
-                <!-- 选项列表 -->
-                <div v-if="getOptions(topic).length > 0" class="option-list">
-                  <!-- 匹配题/选词填空使用下拉框，避免15个选项撑爆页面 -->
-                  <template v-if="getOptions(topic).length > 5">
-                    <div class="select-wrapper">
+                <template v-if="currentTopicIndex === tIdx">
+                  <div class="question-row-active">
+                    <span class="question-no">{{ topic.sorted }}</span>
+                    <div v-if="getOptions(topic).length > 0" class="select-wrapper">
                       <a-select
                         :value="selections.get(topic.topicId) || undefined"
                         placeholder="请选择"
@@ -188,54 +184,39 @@
                         </a-select-option>
                       </a-select>
                     </div>
-                  </template>
-                  <template v-else>
-                    <div
-                      v-for="opt in getOptions(topic)"
-                      :key="opt.label"
-                      class="option-item"
-                      :class="optionClass(topic, opt.label)"
-                      @click.stop="selectOption(topic, opt.label)"
-                    >
-                      <span class="option-label">{{ opt.label }}</span>
-                      <span class="option-content">{{ opt.content }}</span>
-                      <CheckOutlined
-                        v-if="getResultState(topic) === 'correct' && getResult(topic)?.correctOption === opt.label"
-                        class="opt-mark correct"
-                      />
-                      <CloseOutlined
-                        v-if="getResultState(topic) === 'wrong' && getResult(topic)?.selected === opt.label"
-                        class="opt-mark wrong"
-                      />
-                      <CheckOutlined
-                        v-if="revealedIds.has(topic.topicId) && getResultState(topic) === 'none' && topic.correctOption === opt.label"
-                        class="opt-mark reveal-correct"
-                      />
-                    </div>
-                  </template>
-                </div>
-
-                <!-- 解析 -->
-                <div v-if="getResultState(topic) !== 'none'" class="analysis-box" :class="getResultState(topic)">
-                  <div class="analysis-title">
-                    <CheckCircleOutlined v-if="getResultState(topic) === 'correct'" />
-                    <CloseCircleOutlined v-else />
-                    {{ getResultState(topic) === 'correct' ? '回答正确' : `回答错误，正确答案是 ${getResult(topic)?.correctOption}` }}
                   </div>
-                  <div v-if="getResult(topic)?.analysis" class="analysis-content">{{ getResult(topic).analysis }}</div>
-                </div>
 
-                <!-- 对答案模式（未作答的题目） -->
-                <div v-if="revealedIds.has(topic.topicId) && getResultState(topic) === 'none'" class="reveal-box">
-                  <template v-if="topic.correctOption">
-                    <div class="reveal-answer">
-                      <span class="reveal-label">正确答案:</span>
-                      <span class="reveal-value">{{ topic.correctOption }}</span>
+                  <!-- 解析 -->
+                  <div v-if="getResultState(topic) !== 'none'" class="analysis-box" :class="getResultState(topic)">
+                    <div class="analysis-title">
+                      <CheckCircleOutlined v-if="getResultState(topic) === 'correct'" />
+                      <CloseCircleOutlined v-else />
+                      {{ getResultState(topic) === 'correct' ? '回答正确' : `回答错误，正确答案是 ${getResult(topic)?.correctOption}` }}
                     </div>
-                    <div v-if="topic.analysis" class="reveal-analysis">{{ topic.analysis }}</div>
-                  </template>
-                  <div v-else class="reveal-empty">暂无参考答案</div>
-                </div>
+                    <div v-if="getResult(topic)?.analysis" class="analysis-content">{{ getResult(topic).analysis }}</div>
+                  </div>
+
+                  <!-- 对答案模式（未作答的题目） -->
+                  <div v-if="revealedIds.has(topic.topicId) && getResultState(topic) === 'none'" class="reveal-box">
+                    <template v-if="topic.correctOption">
+                      <div class="reveal-answer">
+                        <span class="reveal-label">正确答案:</span>
+                        <span class="reveal-value">{{ topic.correctOption }}</span>
+                      </div>
+                      <div v-if="topic.analysis" class="reveal-analysis">{{ topic.analysis }}</div>
+                    </template>
+                    <div v-else class="reveal-empty">暂无参考答案</div>
+                  </div>
+                </template>
+                <template v-else>
+                  <div class="question-tag">
+                    <span class="question-no">第 {{ topic.sorted }} 题</span>
+                    <CheckCircleOutlined v-if="answers.has(topic.topicId) && answers.get(topic.topicId)" class="status-icon correct" />
+                    <CloseCircleOutlined v-else-if="answers.has(topic.topicId) && !answers.get(topic.topicId)" class="status-icon wrong" />
+                    <span v-else-if="selections.has(topic.topicId)" class="answered-tag">已作答</span>
+                  </div>
+                  <div class="question-name">{{ topic.topicName }}</div>
+                </template>
               </div>
             </div>
 
@@ -365,6 +346,17 @@ const currentArticle = computed(() => {
     if (t.article && t.article.trim().length > 0) return t.article
   }
   return ''
+})
+
+const poolWords = computed(() => {
+  if (!currentSection.value) return []
+  const words = new Set<string>()
+  for (const topic of currentSection.value.topics) {
+    for (const opt of getOptions(topic)) {
+      if (opt.content) words.add(opt.content)
+    }
+  }
+  return Array.from(words).slice(0, 15)
 })
 
 const flatTopics = computed(() =>
@@ -905,6 +897,34 @@ onMounted(() => {
     overflow: hidden;
   }
 
+  .word-pool {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(66, 87, 178, 0.04);
+    flex-shrink: 0;
+
+    .word-pool-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+
+      .word-tag {
+        text-align: center;
+        padding: 6px 4px;
+        border-radius: 6px;
+        background: rgba(66, 87, 178, 0.08);
+        color: var(--primary);
+        font-size: calc(12px + var(--font-offset, 0px));
+        font-weight: 500;
+        opacity: 0.55;
+        border: 1px dashed rgba(66, 87, 178, 0.2);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+
   .question-scroll {
     flex: 1;
     overflow-y: auto;
@@ -928,6 +948,26 @@ onMounted(() => {
     &.active {
       border-color: var(--primary);
       background: rgba(66, 87, 178, 0.03);
+      padding: 10px 14px;
+      margin-bottom: 8px;
+    }
+
+    .question-row-active {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .question-no {
+        font-size: calc(14px + var(--font-offset, 0px));
+        font-weight: 600;
+        color: var(--primary);
+        flex-shrink: 0;
+      }
+
+      .select-wrapper {
+        flex: 1;
+        min-width: 0;
+      }
     }
 
     .question-tag {

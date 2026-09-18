@@ -49,7 +49,7 @@ handleTime()
         </div>
         
         <div class="screen-header-title">
-            <i class="screen-header-text"> 易题系统数据实时大屏 </i>
+            <i class="screen-header-text"> 英语学习cet4-6数据实时大屏 </i>
         </div>
         
         <div class="screen-header-side">

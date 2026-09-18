@@ -196,7 +196,7 @@ const handleExport = async () => {
     
     response = await apiExportCategory(params.value, [0])
   }
-  FileSaver.saveAs(response, `易题系统题目分类数据_${new Date().getTime()}.xlsx`) 
+  FileSaver.saveAs(response, `英语学习cet4-6题目分类数据_${new Date().getTime()}.xlsx`) 
   message.success('导出成功')
   onSelectedRowKeys.value = []
   tableLoading.value = false
@@ -239,7 +239,7 @@ const importTemplate = async () => {
   let response: any = null
   const res = await apiGetExportTemplate()
   response = res
-  FileSaver.saveAs(response, `易题系统题目分类数据模板_${new Date().getTime()}.xlsx`)
+  FileSaver.saveAs(response, `英语学习cet4-6题目分类数据模板_${new Date().getTime()}.xlsx`)
 }
 
 const handleBeforeUpload = (file: any) => {

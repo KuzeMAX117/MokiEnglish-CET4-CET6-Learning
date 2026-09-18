@@ -195,7 +195,7 @@ const onSave = () => {
       drawer.value = false
       message.success(mes)
     } catch (error: any) {
-      message.error(error.getMessage())
+      message.error(error.message)
     }
   }).catch(() => {
     message.error('信息有误')

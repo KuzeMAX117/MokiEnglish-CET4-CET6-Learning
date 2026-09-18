@@ -51,14 +51,14 @@ export const constantRoute = [
         path: '/system/role',
         component: () => import('@/views/system/role/index.vue'),
         meta: {
-          title: '菜单管理',
+          title: '角色管理',
         },
       },
       {
         path: '/system/menu',
         component: () => import('@/views/system/menu/index.vue'),
         meta: {
-          title: '角色管理',
+          title: '菜单管理',
         },
       },
       {
@@ -102,13 +102,6 @@ export const constantRoute = [
         },
       },
       {
-        path: '/topic/subject',
-        component: () => import('@/views/topic/subject/index.vue'),
-        meta: {
-          title: '专题管理',
-        },
-      },
-      {
         path: '/topic/paper',
         component: () => import('@/views/topic/paper/index.vue'),
         meta: {
@@ -118,6 +111,67 @@ export const constantRoute = [
       {
         path: '/topic/paper/editor/:id',
         component: () => import('@/views/topic/paper/editor.vue'),
+        meta: {
+          title: '试卷编辑',
+          hidden: true,
+        },
+      }
+    ]
+  },
+  
+  {
+    path: '/content',
+    redirect: '/content/article',
+    meta: {
+      title: '内容管理',
+    },
+    component: () => import('../layout/index.vue'),
+    children: [
+      {
+        path: '/content/article',
+        component: () => import('@/views/content/article/index.vue'),
+        meta: {
+          title: '文章管理',
+        },
+      },
+      {
+        path: '/content/essay',
+        component: () => import('@/views/content/essay/index.vue'),
+        meta: {
+          title: '作文管理',
+        },
+      },
+      {
+        path: '/content/translation',
+        component: () => import('@/views/content/translation/index.vue'),
+        meta: {
+          title: '翻译管理',
+        },
+      },
+      {
+        path: '/content/wordbook',
+        component: () => import('@/views/content/wordbook/index.vue'),
+        meta: {
+          title: '词书管理',
+        },
+      },
+      {
+        path: '/content/writing',
+        component: () => import('@/views/content/writing/index.vue'),
+        meta: {
+          title: '作文记录',
+        },
+      },
+      {
+        path: '/content/paper',
+        component: () => import('@/views/content/paper/index.vue'),
+        meta: {
+          title: '试卷管理',
+        },
+      },
+      {
+        path: '/content/paper/editor/:id',
+        component: () => import('@/views/content/paper/editor.vue'),
         meta: {
           title: '试卷编辑',
           hidden: true,
