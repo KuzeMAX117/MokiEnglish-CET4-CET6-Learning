@@ -76,20 +76,12 @@ const SUB_SECTION_NAME: Record<string, string> = {
   translation: '翻译'
 }
 
-/** 组级文章子板块：文章挂在子板块上，组内共用 */
 const GROUP_ARTICLE_SECTIONS = new Set(['cloze', 'matching', 'reading_1', 'reading_2'])
-
-/** 题级文章子板块：每题自带听力材料/原文 */
 const TOPIC_ARTICLE_SECTIONS = new Set(['news', 'conversation', 'passage'])
 
-/** 选词填空和长篇匹配使用固定词库卡片 + 下拉框 */
+/** 选词填空 / 长篇匹配 */
 const useWordBank = (group: PaperSubSectionType) => {
-  const sub = group.subSection
-  if ((sub === 'cloze' || sub === 'matching') && group.topics.length > 0) {
-    const firstOpts = group.topics[0].options || []
-    if (firstOpts.length > 5) return true
-  }
-  return false
+  return group.subSection === 'cloze' || group.subSection === 'matching'
 }
 
 const statusMap: any = {
@@ -108,10 +100,7 @@ const previewOpen = ref(true)
 const previewIndex = ref(0)
 const lastWarnings = ref<string[]>([])
 
-/** 编辑器状态：大板块 -> 子板块组列表 */
 const sectionGroups = ref<Record<string, PaperSubSectionType[]>>({})
-
-/** 未保存标记 */
 const dirtyMap = ref<Record<string, boolean>>({})
 
 const dirtySections = computed(() =>
@@ -226,7 +215,7 @@ const moveTopic = (gi: number, ti: number, delta: number) => {
 
 const nextLabel = (topic: PaperTopicItemType) => {
   const used = new Set((topic.options || []).map((o) => (o.label || '').trim().toUpperCase()))
-  for (const ch of ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']) {
+  for (const ch of 'ABCDEFGHIJKLMNO') {
     if (!used.has(ch)) return ch
   }
   return ''
@@ -254,6 +243,55 @@ const setCorrect = (topic: PaperTopicItemType, optLabel: string) => {
     return
   }
   topic.correctOption = optLabel.trim().toUpperCase()
+  markDirty()
+}
+
+/* ============ 词库操作 ============ */
+
+const syncWordBankToTopics = (group: PaperSubSectionType) => {
+  if (!useWordBank(group) || group.topics.length === 0) return
+  const bankOpts = group.topics[0].options || []
+  for (const t of group.topics) {
+    t.options = bankOpts.map((o) => ({ ...o }))
+  }
+}
+
+const addWordBankOption = (group: PaperSubSectionType) => {
+  if (group.topics.length === 0) return
+  const first = group.topics[0]
+  if (!first.options) first.options = []
+  const label = nextLabel(first)
+  if (label) {
+    first.options.push({ label, content: '' })
+    syncWordBankToTopics(group)
+    markDirty()
+  }
+}
+
+const removeWordBankOption = (group: PaperSubSectionType, oi: number) => {
+  if (group.topics.length === 0) return
+  const first = group.topics[0]
+  if (!first.options) return
+  first.options.splice(oi, 1)
+  syncWordBankToTopics(group)
+  markDirty()
+}
+
+const updateWordBankOption = (group: PaperSubSectionType, oi: number, content: string) => {
+  if (group.topics.length === 0) return
+  const first = group.topics[0]
+  if (!first.options || !first.options[oi]) return
+  first.options[oi].content = content
+  syncWordBankToTopics(group)
+  markDirty()
+}
+
+const updateWordBankLabel = (group: PaperSubSectionType, oi: number, label: string) => {
+  if (group.topics.length === 0) return
+  const first = group.topics[0]
+  if (!first.options || !first.options[oi]) return
+  first.options[oi].label = label.trim().toUpperCase()
+  syncWordBankToTopics(group)
   markDirty()
 }
 
@@ -291,7 +329,6 @@ const switchSection = (key: string) => {
 
 const deepClone = <T,>(v: T): T => JSON.parse(JSON.stringify(v))
 
-/** 保存成功后刷新：当前板块用服务器数据，其余板块保留本地（避免丢未保存内容） */
 const reloadKeepOthers = async (savedSection: string) => {
   const res = await apiGetPaperManageDetail(paperId)
   detail.value = res.data
@@ -475,7 +512,6 @@ const openParse = (subSection: string, mode: 'text' | 'docx') => {
   parseVisible.value = true
 }
 
-/** 解析结果填入编辑器（按大板块分发，未保存状态） */
 const handleParseFill = (groups: PaperSubSectionType[]) => {
   const applyFill = (replace: boolean) => {
     let added = 0
@@ -505,7 +541,7 @@ const handleParseFill = (groups: PaperSubSectionType[]) => {
       affected.add(secKey)
     }
     affected.forEach((k) => (dirtyMap.value[k] = true))
-    message.success(`解析内容已填入编辑器（共 ${added} 题），请核对后点击“保存本板块”`)
+    message.success(`解析内容已填入编辑器（共 ${added} 题），请核对后点击"保存本板块"`)
   }
 
   const targetSubs = new Set(groups.map((g) => g.subSection))
@@ -557,7 +593,6 @@ const previewSections = computed<PaperManageSectionType[]>(() => {
   return result
 })
 
-/** 预览定位到当前编辑板块的第一个组 */
 const locatePreview = () => {
   const idx = previewSections.value.findIndex((s) => s.section === activeSection.value)
   previewIndex.value = idx >= 0 ? idx : 0
@@ -602,7 +637,6 @@ onMounted(() => {
 <template>
   <div class="editor-page">
     <a-spin :spinning="loading" wrapper-class-name="editor-spin">
-      <!-- 顶部操作栏 -->
       <div class="editor-head">
         <a-button size="small" @click="onBack">
           <LeftOutlined /> 返回列表
@@ -627,9 +661,7 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- 主体：左侧导航 + 编辑区 + 右侧预览 -->
       <div class="editor-main">
-        <!-- 板块导航 -->
         <div class="section-nav">
           <div v-for="s in SECTION_LIST" :key="s.key" class="nav-item"
             :class="{ active: activeSection === s.key }" @click="switchSection(s.key)">
@@ -645,9 +677,7 @@ onMounted(() => {
           <div class="nav-tip">达标线：写作1 / 听力25 / 阅读30 / 翻译1</div>
         </div>
 
-        <!-- 编辑区 -->
         <div class="edit-area">
-          <!-- 警告提示条 -->
           <div v-if="lastWarnings.length > 0" class="warn-bar">
             <WarningOutlined class="warn-icon" />
             <div class="warn-list">
@@ -662,95 +692,137 @@ onMounted(() => {
               <span class="group-count">{{ group.topics.length }} 题</span>
             </div>
 
-            <!-- 组级文章（阅读类：本子板块共用） -->
+            <!-- 组级文章 -->
             <div v-if="GROUP_ARTICLE_SECTIONS.has(group.subSection)" class="group-article">
               <div class="field-label">文章原文（本子板块所有题目共用）</div>
               <a-textarea v-model:value="group.article" :auto-size="{ minRows: 3, maxRows: 10 }" @input="markDirty()"
                 placeholder="粘贴文章原文，保存后前台左侧文章面板显示" />
             </div>
 
-            <!-- 固定选项卡片（选词填空/长篇匹配专用） -->
-            <div v-if="useWordBank(group)" class="word-bank">
-              <div class="field-label">选项词库（固定在上方，题目使用下拉框选择）</div>
-              <div class="word-tags">
-                <span v-for="opt in (group.topics[0]?.options || [])" :key="opt.label" class="word-tag">
-                  <b>{{ opt.label }}</b> {{ opt.content }}
-                </span>
-              </div>
-            </div>
+            <!-- ========== 选词填空 / 长篇匹配：question-scroll 模式 ========== -->
+            <div v-if="useWordBank(group)" class="question-scroll">
 
-            <!-- 题目卡片 -->
-            <div v-for="(topic, ti) in group.topics" :key="ti" class="topic-card">
-              <div class="topic-head">
-                <span class="topic-no">第 {{ topicNo(gi, ti) }} 题</span>
-                <a-space :size="2">
-                  <a-button size="small" type="text" :icon="h(ArrowUpOutlined)" :disabled="ti === 0"
-                    @click="moveTopic(gi, ti, -1)" />
-                  <a-button size="small" type="text" :icon="h(ArrowDownOutlined)"
-                    :disabled="ti === group.topics.length - 1" @click="moveTopic(gi, ti, 1)" />
-                  <a-button size="small" type="text" danger :icon="h(DeleteOutlined)"
-                    @click="removeTopic(gi, ti)" />
-                </a-space>
-              </div>
-
-              <a-textarea v-model:value="topic.topicName" :auto-size="{ minRows: 2, maxRows: 6 }" @input="markDirty()"
-                :placeholder="topicNamePlaceholder(group.subSection)" />
-
-              <!-- 题级文章（听力类：每题自带材料） -->
-              <div v-if="TOPIC_ARTICLE_SECTIONS.has(group.subSection)" class="topic-article">
-                <div class="field-label">听力材料（本题对应的原文）</div>
-                <a-textarea v-model:value="topic.article" :auto-size="{ minRows: 2, maxRows: 8 }"
-                  @input="markDirty()" placeholder="该题对应的听力材料原文（对话题/新闻稿/篇章）" />
-              </div>
-
-              <!-- 选项编辑 -->
-              <div v-if="useWordBank(group) && (topic.options?.length || 0) > 5" class="word-bank-select">
-                <div class="field-label">选择答案（下拉框）</div>
-                <a-select
-                  :value="topic.correctOption || undefined"
-                  placeholder="请选择正确答案"
-                  style="width: 100%"
-                  @update:value="(v: any) => { topic.correctOption = v; markDirty() }"
-                  allowClear
-                >
-                  <a-select-option v-for="opt in topic.options" :key="opt.label" :value="opt.label">
-                    <b>{{ opt.label }}</b> &nbsp; {{ opt.content }}
-                  </a-select-option>
-                </a-select>
-                <a-button size="small" type="dashed" :icon="h(PlusOutlined)" @click="addOption(topic)" style="margin-top: 6px">添加选项</a-button>
-              </div>
-              <div v-else class="options-editor">
-                <div v-for="(opt, oi) in topic.options" :key="oi" class="option-row">
-                  <a-input class="opt-label" v-model:value="opt.label" @input="markDirty()" placeholder="A" />
-                  <a-input class="opt-content" v-model:value="opt.content" @input="markDirty()" placeholder="选项内容" />
-                  <a-button size="small" class="opt-ans"
-                    :type="isCorrectOpt(topic, opt.label) ? 'primary' : 'default'" @click="setCorrect(topic, opt.label)">
-                    <CheckOutlined v-if="isCorrectOpt(topic, opt.label)" />
-                    <span v-else>设答案</span>
-                  </a-button>
-                  <a-button size="small" type="text" danger :icon="h(DeleteOutlined)"
-                    @click="removeOption(topic, oi)" />
+              <!-- 选项池：半透明固定展示，5个一行 -->
+              <div class="word-bank-pool">
+                <div class="field-label">选项词库（公共选项池，编辑后自动同步到所有题目）</div>
+                <div class="word-bank-grid">
+                  <div v-for="(opt, oi) in (group.topics[0]?.options || [])" :key="oi" class="wb-cell">
+                    <span class="wb-label-tag">{{ opt.label }}</span>
+                    <a-input class="wb-input" :value="opt.content" placeholder="选项内容" size="small"
+                      @input="(e: any) => updateWordBankOption(group, oi, e.target.value)" />
+                  </div>
                 </div>
-                <a-button size="small" type="dashed" :icon="h(PlusOutlined)" @click="addOption(topic)">添加选项</a-button>
+                <a-button size="small" type="dashed" :icon="h(PlusOutlined)" @click="addWordBankOption(group)"
+                  style="margin-top: 8px">
+                  添加选项
+                </a-button>
               </div>
 
-              <!-- 答案与解析 -->
-              <div class="answer-row">
-                <span class="field-label">正确答案</span>
-                <a-input v-model:value="topic.correctOption" @input="markDirty()"
-                  placeholder="如 A / AB / JGOKB，最多5个字符" style="width: 230px" />
-              </div>
-              <div class="answer-textarea-row">
-                <div class="field-label">参考答案（可选）</div>
-                <a-textarea v-model:value="topic.answer" :auto-size="{ minRows: 2, maxRows: 6 }" @input="markDirty()"
-                  placeholder="主观题参考答案，支持多行输入" />
-              </div>
-              <div class="analysis-row">
-                <div class="field-label">解析（可选）</div>
-                <a-textarea v-model:value="topic.analysis" :auto-size="{ minRows: 1, maxRows: 4 }" @input="markDirty()"
-                  placeholder="题目解析" />
+              <!-- 题目列表：每题用下拉框选答案 -->
+              <div v-for="(topic, ti) in group.topics" :key="ti" class="topic-card">
+                <div class="topic-head">
+                  <span class="topic-no">第 {{ topicNo(gi, ti) }} 题</span>
+                  <a-space :size="2">
+                    <a-button size="small" type="text" :icon="h(ArrowUpOutlined)" :disabled="ti === 0"
+                      @click="moveTopic(gi, ti, -1)" />
+                    <a-button size="small" type="text" :icon="h(ArrowDownOutlined)"
+                      :disabled="ti === group.topics.length - 1" @click="moveTopic(gi, ti, 1)" />
+                    <a-button size="small" type="text" danger :icon="h(DeleteOutlined)"
+                      @click="removeTopic(gi, ti)" />
+                  </a-space>
+                </div>
+
+                <a-textarea v-model:value="topic.topicName" :auto-size="{ minRows: 2, maxRows: 6 }" @input="markDirty()"
+                  placeholder="题干" />
+
+                <!-- 下拉框选答案 -->
+                <div class="word-bank-select">
+                  <div class="field-label">选择正确答案</div>
+                  <a-select
+                    :value="topic.correctOption || undefined"
+                    placeholder="请选择正确答案"
+                    style="width: 100%"
+                    @update:value="(v: any) => { topic.correctOption = v; markDirty() }"
+                    allowClear
+                  >
+                    <a-select-option v-for="opt in (group.topics[0]?.options || [])" :key="opt.label" :value="opt.label">
+                      <b>{{ opt.label }}</b> &nbsp; {{ opt.content }}
+                    </a-select-option>
+                  </a-select>
+                </div>
+
+                <div class="answer-textarea-row">
+                  <div class="field-label">参考答案（可选）</div>
+                  <a-textarea v-model:value="topic.answer" :auto-size="{ minRows: 2, maxRows: 6 }" @input="markDirty()"
+                    placeholder="主观题参考答案，支持多行输入" />
+                </div>
+                <div class="analysis-row">
+                  <div class="field-label">解析（可选）</div>
+                  <a-textarea v-model:value="topic.analysis" :auto-size="{ minRows: 1, maxRows: 4 }" @input="markDirty()"
+                    placeholder="题目解析" />
+                </div>
               </div>
             </div>
+
+            <!-- ========== 其他板块：普通模式 ========== -->
+            <template v-else>
+              <div v-for="(topic, ti) in group.topics" :key="ti" class="topic-card">
+                <div class="topic-head">
+                  <span class="topic-no">第 {{ topicNo(gi, ti) }} 题</span>
+                  <a-space :size="2">
+                    <a-button size="small" type="text" :icon="h(ArrowUpOutlined)" :disabled="ti === 0"
+                      @click="moveTopic(gi, ti, -1)" />
+                    <a-button size="small" type="text" :icon="h(ArrowDownOutlined)"
+                      :disabled="ti === group.topics.length - 1" @click="moveTopic(gi, ti, 1)" />
+                    <a-button size="small" type="text" danger :icon="h(DeleteOutlined)"
+                      @click="removeTopic(gi, ti)" />
+                  </a-space>
+                </div>
+
+                <a-textarea v-model:value="topic.topicName" :auto-size="{ minRows: 2, maxRows: 6 }" @input="markDirty()"
+                  :placeholder="topicNamePlaceholder(group.subSection)" />
+
+                <!-- 题级文章 -->
+                <div v-if="TOPIC_ARTICLE_SECTIONS.has(group.subSection)" class="topic-article">
+                  <div class="field-label">听力材料（本题对应的原文）</div>
+                  <a-textarea v-model:value="topic.article" :auto-size="{ minRows: 2, maxRows: 8 }"
+                    @input="markDirty()" placeholder="该题对应的听力材料原文（对话题/新闻稿/篇章）" />
+                </div>
+
+                <!-- 选项编辑 -->
+                <div class="options-editor">
+                  <div v-for="(opt, oi) in topic.options" :key="oi" class="option-row">
+                    <a-input class="opt-label" v-model:value="opt.label" @input="markDirty()" placeholder="A" />
+                    <a-input class="opt-content" v-model:value="opt.content" @input="markDirty()" placeholder="选项内容" />
+                    <a-button size="small" class="opt-ans"
+                      :type="isCorrectOpt(topic, opt.label) ? 'primary' : 'default'" @click="setCorrect(topic, opt.label)">
+                      <CheckOutlined v-if="isCorrectOpt(topic, opt.label)" />
+                      <span v-else>设答案</span>
+                    </a-button>
+                    <a-button size="small" type="text" danger :icon="h(DeleteOutlined)"
+                      @click="removeOption(topic, oi)" />
+                  </div>
+                  <a-button size="small" type="dashed" :icon="h(PlusOutlined)" @click="addOption(topic)">添加选项</a-button>
+                </div>
+
+                <!-- 答案与解析 -->
+                <div class="answer-row">
+                  <span class="field-label">正确答案</span>
+                  <a-input v-model:value="topic.correctOption" @input="markDirty()"
+                    placeholder="如 A / AB / JGOKB，最多5个字符" style="width: 230px" />
+                </div>
+                <div class="answer-textarea-row">
+                  <div class="field-label">参考答案（可选）</div>
+                  <a-textarea v-model:value="topic.answer" :auto-size="{ minRows: 2, maxRows: 6 }" @input="markDirty()"
+                    placeholder="主观题参考答案，支持多行输入" />
+                </div>
+                <div class="analysis-row">
+                  <div class="field-label">解析（可选）</div>
+                  <a-textarea v-model:value="topic.analysis" :auto-size="{ minRows: 1, maxRows: 4 }" @input="markDirty()"
+                    placeholder="题目解析" />
+                </div>
+              </div>
+            </template>
 
             <!-- 组操作 -->
             <div class="group-actions">
@@ -762,17 +834,14 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- 前台样式预览 -->
         <div v-if="previewOpen" class="preview-area">
           <PaperPreview :sections="previewSections" v-model:active-index="previewIndex" :paper-title="detail?.title" />
         </div>
       </div>
 
-      <!-- 解析面板 -->
       <ParsePanel v-model:open="parseVisible" :paper-id="paperId" :section="activeSection" :sub-section="parseSubSection"
         :mode="parseMode" @fill="handleParseFill" />
 
-      <!-- 修改基本信息 -->
       <a-modal v-model:open="infoModal" title="修改试卷信息" :confirm-loading="infoSaving" @ok="saveInfo" :width="560">
         <a-form :label-col="{ span: 5 }" :wrapper-col="{ span: 18 }">
           <a-form-item label="级别">
@@ -980,38 +1049,92 @@ onMounted(() => {
       margin-bottom: 12px;
     }
 
-    .word-bank {
-      margin-bottom: 12px;
+    /* ===== question-scroll：选词填空 / 长篇匹配 ===== */
+    .question-scroll {
       background: #fff;
-      border: 1px dashed #d9d9d9;
-      border-radius: 8px;
-      padding: 10px;
+      border: 1px solid #e8eaed;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 10px;
 
-      .word-tags {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
+      /* 选项池 */
+      .word-bank-pool {
+        background: rgba(66, 87, 178, 0.04);
+        border: 1px dashed #adc6ff;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 14px;
+
+        .word-bank-grid {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+
+        .wb-cell {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          width: calc(20% - 7px);
+          min-width: 140px;
+
+          .wb-label-tag {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            border-radius: 4px;
+            background: #4257b2;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            flex-shrink: 0;
+          }
+
+          .wb-input {
+            flex: 1;
+            min-width: 0;
+          }
+        }
       }
 
-      .word-tag {
-        padding: 4px 10px;
-        background: #f0f5ff;
-        border: 1px solid #adc6ff;
-        border-radius: 4px;
-        font-size: 13px;
-        color: #1a1a1a;
+      /* 题目卡片 */
+      .topic-card {
+        background: #fff;
+        border: 1px solid #e8eaed;
+        border-radius: 10px;
+        padding: 12px;
+        margin-bottom: 10px;
 
-        b {
-          color: #4257b2;
-          margin-right: 4px;
+        .topic-head {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 8px;
+
+          .topic-no {
+            font-size: 12px;
+            font-weight: 600;
+            color: #4257b2;
+          }
+        }
+
+        .word-bank-select {
+          margin-top: 8px;
+        }
+
+        .answer-textarea-row {
+          margin-top: 8px;
+        }
+
+        .analysis-row {
+          margin-top: 8px;
         }
       }
     }
 
-    .word-bank-select {
-      margin-top: 8px;
-    }
-
+    /* ===== 普通模式 ===== */
     .topic-card {
       background: #fff;
       border: 1px solid #e8eaed;

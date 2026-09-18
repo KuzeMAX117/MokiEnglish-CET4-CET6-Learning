@@ -1,5 +1,5 @@
 -- 试卷管理模块菜单脚本（幂等，可重复执行）
--- 用法：mysql --default-character-set=utf8mb4 -e "source D:/202401/study/Topic/sql/paper_manage_menu.sql"
+-- 用法：mysql --default-character-set=utf8mb4 -e "source D:/202401/study/Hao-Topic/sql/paper_manage_menu.sql"
 USE brushtopic;
 
 -- 1. 新增"试卷管理"菜单（挂到"题库管理"id=12 下，sorted=5）

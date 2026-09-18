@@ -198,17 +198,17 @@ const aiMode = reactive([
     label: '系统模式',
     value: 'system',
     icon: RobotOutlined,
-    desc: userStore.userInfo.identity === 1 ? 'AI从系统题库和会员自定义题库中随机提取题目，AI会校验你的回答' : 'AI从系统题库中随机提取题目，AI会校验你的回答'
+    desc: userStore.userInfo.identity === 1 ? 'AI从系统题库和会员自定义题库中随机提取题目HaoAi会校验你的回答' : 'AI从系统题库中随机提取题目HaoAi会校验你的回答'
   }, {
     label: '模型模式',
     value: 'model',
     icon: ApiOutlined,
-    desc: '完全使用AI生成的题目，AI会校验你的回答'
+    desc: '完全使用AI生成的题目HaoAi会校验你的回答'
   }, {
     label: '混合模式',
     value: 'mix',
     icon: AppstoreOutlined,
-    desc: 'AI随机混合系统题库和AI生成题目，AI会校验你的回答'
+    desc: 'AI随机混合系统题库和AI生成题目HaoAi会校验你的回答'
   },
 ])
 
@@ -277,13 +277,13 @@ const sendPrompt = async () => {
       }).then(response => {
         
         if (!response.ok) {
-          message.error("AI回复出现点问题请稍后再试！")
+          message.error("HaoAi回复出现点问题请稍后再试！")
         }
         
         return response.body;
       }).then(async body => {
         if (!body) {
-          message.error("AI回复出现点问题请稍后再试！")
+          message.error("HaoAi回复出现点问题请稍后再试！")
           return
         }
         
@@ -357,7 +357,7 @@ const messageList = reactive<any>([
     prompt: "我是" + userStore.userInfo.account,
     chatId: currentRecordId.value, 
     model: aiModeValue.value,
-    content: '你好，我是AI 1.0，你的学习AI助手！',
+    content: '你好，我是HaoAi 1.0，你的面试题AI助手！',
     memoryId: aiId.value
   }
 ])
@@ -370,7 +370,7 @@ const restoreDefaultRecord = () => {
     prompt: "我是" + userStore.userInfo.account,
     chatId: currentRecordId.value, 
     model: aiModeValue.value,
-    content: '你好，我是AI 1.0，你的学习AI助手！',
+    content: '你好，我是HaoAi 1.0，你的面试题AI助手！',
   })
 }
 
@@ -379,10 +379,10 @@ const isSpeaking = ref(false);
 let currentAudio: HTMLAudioElement | null = null;
 
 const loadingTextArr = [
-  "正在召唤AI发声中...",
-  "AI正在努力变声，请稍等~",
+  "正在召唤HaoAi发声中...",
+  "HaoAi正在努力变声，请稍等~",
   "语音合成中，马上就能听到啦！",
-  "AI正在认真朗读你的内容...",
+  "HaoAi正在认真朗读你的内容...",
   "别着急，精彩马上开始！"
 ];
 
@@ -623,13 +623,13 @@ const handleAiModeChange = (ev: any) => {
         </div>
       </ul>
       
-      <a-spin tip="AI正在搜寻你的历史记录哦" v-else></a-spin>
+      <a-spin tip="HaoAi正在搜寻你的历史记录哦" v-else></a-spin>
     </div>
 
     
     <div class="model-print">
       
-      <h2 class="title">AI<i class="version">1.0</i></h2>
+      <h2 class="title">HaoAi<i class="version">1.0</i></h2>
       
       <div class="reply-box">
         <ul class="infinite-list-reply" ref="contentRef" v-if="!chatLoading">
@@ -647,7 +647,7 @@ const handleAiModeChange = (ev: any) => {
                     <a-avatar class="avatar" :src="userStore.userInfo.avatar" />
                   </template>
                   <template v-else>
-                    <a-avatar class="avatar" :style="{ backgroundColor: '#0a3442', fontSize: '20px' }">
+                    <a-avatar class="avatar" :style="{ backgroundColor: '#1677ff', fontSize: '20px' }">
                       {{ userStore.userInfo.account?.charAt(0)?.toUpperCase() }}
                     </a-avatar>
                   </template>
@@ -689,7 +689,7 @@ const handleAiModeChange = (ev: any) => {
           </template>
         </ul>
         
-        <a-spin tip="AI正在查询对话记录" v-else></a-spin>
+        <a-spin tip="HaoAi正在查询对话记录" v-else></a-spin>
         
         <a-spin :tip="loadingText" v-if="readAloudLoading"></a-spin>
         
@@ -792,9 +792,9 @@ const handleAiModeChange = (ev: any) => {
             }
 
             &.ant-radio-button-wrapper-checked {
-              border-color: #0a3442;
+              border-color: #1677ff;
               background: #e6f4ff;
-              color: #0a3442;
+              color: #1677ff;
             }
           }
         }
@@ -827,7 +827,7 @@ const handleAiModeChange = (ev: any) => {
             cursor: pointer;
 
             &:hover {
-              color: #0a3442;
+              color: #1677ff;
             }
           }
         }
@@ -835,7 +835,7 @@ const handleAiModeChange = (ev: any) => {
         .right-icons {
           .send-icon {
             font-size: 25px;
-            color: #0a3442;
+            color: #1677ff;
             cursor: pointer;
 
             &.disabled {
@@ -844,11 +844,11 @@ const handleAiModeChange = (ev: any) => {
             }
 
             &:not(.disabled):hover {
-              color: #3ad3cd;
+              color: #4096ff;
             }
 
             &:hover {
-              color: #3ad3cd;
+              color: #4096ff;
             }
           }
 
@@ -965,7 +965,7 @@ const handleAiModeChange = (ev: any) => {
           cursor: pointer;
 
           &:hover {
-            color: #0a3442;
+            color: #1677ff;
           }
 
         }
@@ -1040,7 +1040,7 @@ const handleAiModeChange = (ev: any) => {
             cursor: pointer;
 
             &:hover {
-              color: #0a3442;
+              color: #1677ff;
             }
           }
         }

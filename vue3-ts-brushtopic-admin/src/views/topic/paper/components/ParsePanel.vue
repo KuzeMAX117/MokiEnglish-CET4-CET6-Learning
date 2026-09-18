@@ -171,7 +171,7 @@ const setCorrect = (topic: PaperTopicItemType, label: string) => {
 
 const nextLabel = (topic: PaperTopicItemType) => {
   const used = new Set((topic.options || []).map((o) => (o.label || '').trim().toUpperCase()))
-  for (const ch of ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']) {
+  for (const ch of 'ABCDEFGHIJKLMNO') {
     if (!used.has(ch)) return ch
   }
   return ''

@@ -21,7 +21,7 @@ const userStore = useUserStore()
 
 const { VITE_SERVE } = import.meta.env
 
-const uploadUrl = '/api/system/user/avatar'
+const uploadUrl = VITE_SERVE + '/api/system/user/avatar'
 
 const headers = { authorization: userStore.token };
 
@@ -396,7 +396,7 @@ const upload = reactive({
   
   uploadLoading: false,
   
-  url: "/api/system/user/import",
+  url: VITE_SERVE + "/api/system/user/import",
   
   uploadFileList: [],
   
@@ -521,7 +521,7 @@ onMounted(() => {
                 <a-image :width="48" :src="record.avatar" />
               </template>
               <template v-else>
-                <a-avatar :size="48" :style="{ backgroundColor: '#0a3442', fontSize: '20px' }">
+                <a-avatar :size="48" :style="{ backgroundColor: '#1677ff', fontSize: '20px' }">
                   {{ record.account?.charAt(0)?.toUpperCase() }}
                 </a-avatar>
               </template>

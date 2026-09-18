@@ -10,13 +10,11 @@ import java.util.Map;
 public interface TopicDataService {
     Map<String, Object> webHomeCount();
 
-    List<TopicUserRankVo> rank();
+    List<TopicUserRankVo> rank(Integer type);
 
-    TopicUserRankVo userRank();
+    TopicUserRankVo userRank(Integer type);
 
     Map<String, Object> adminHomeCount();
-    
-    Map<String, Object> adminModuleCount();
 
     List<TopicCategoryDataVo> adminHomeCategory();
 

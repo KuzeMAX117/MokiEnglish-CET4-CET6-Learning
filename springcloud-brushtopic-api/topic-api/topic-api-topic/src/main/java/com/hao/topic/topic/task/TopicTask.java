@@ -41,9 +41,12 @@ public class TopicTask {
     public void refreshRankingToRedis() {
         log.info("refreshRankingToRedis===========>我执行了");
         
-        List<TopicUserRankVo> countRank = topicDataService.rank();
+        List<TopicUserRankVo> countRank = topicRecordMapper.getCountRank(null);
         if (CollectionUtils.isNotEmpty(countRank)) {
-            log.info("refreshRankingToRedis===========>排行数据已刷新，共{}条", countRank.size());
+            
+            topicDataService.readRankTodayCache(countRank);
+            
+            topicDataService.readRankCache(countRank);
         }
     }
 

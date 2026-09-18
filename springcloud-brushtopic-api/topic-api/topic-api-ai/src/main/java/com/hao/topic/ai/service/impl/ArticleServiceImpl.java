@@ -3,9 +3,7 @@ package com.hao.topic.ai.service.impl;
 import com.alibaba.fastjson2.JSON;
 import com.hao.topic.ai.config.ArticleFunctionConfig;
 import com.hao.topic.ai.constant.ArticlePromptConstant;
-import com.hao.topic.ai.service.AiModuleRecordService;
 import com.hao.topic.ai.service.ArticleService;
-import com.hao.topic.common.security.utils.SecurityUtils;
 import com.hao.topic.model.dto.ai.ArticleGenerateDto;
 import com.hao.topic.model.vo.ai.ArticleEvaluation;
 import com.hao.topic.model.vo.ai.ArticlePlan;
@@ -48,7 +46,7 @@ import java.util.stream.Collectors;
  * └──────────────────────────────────────────────────────┘
  * </pre>
  *
- * @author Admin
+ * @author Hao
  */
 @Service
 @Slf4j
@@ -56,8 +54,6 @@ import java.util.stream.Collectors;
 public class ArticleServiceImpl implements ArticleService {
 
     private final ChatClient chatClient;
-
-    private final AiModuleRecordService aiModuleRecordService;
 
     /** 定向补词循环最大轮数（每轮针对代码实测出的缺失词精准修补） */
     private static final int MAX_PATCH = 3;
@@ -77,15 +73,6 @@ public class ArticleServiceImpl implements ArticleService {
                 dto.getWords() != null ? dto.getWords() : Collections.emptyList();
         log.info("📝 [{}] 开始多阶段短文生成 Pipeline, 单词数: {}, 等级: {}",
                 pipelineId, allWords.size(), dto.getLevel());
-        
-        // 记录背单词模块使用
-        try {
-            Long userId = SecurityUtils.getCurrentId();
-            String nickname = SecurityUtils.getCurrentName();
-            aiModuleRecordService.recordModuleUsage(userId, nickname, "word");
-        } catch (Exception e) {
-            log.warn("记录背单词模块使用失败: {}", e.getMessage());
-        }
 
         return Flux.defer(() -> {
             long pipelineStart = System.currentTimeMillis();

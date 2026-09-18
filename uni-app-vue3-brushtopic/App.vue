@@ -1,0 +1,25 @@
+<script>
+import { isLogin } from '@/utils/auth'
+export default {
+	onLaunch: function () {
+		console.log('App Launch')
+		setTimeout(() => {
+			isLogin()
+		}, 100)
+	},
+	onShow: function () {
+		console.log('App Show')
+
+	},
+	onHide: function () {
+		console.log('App Hide')
+	},
+	onLoad: function () {
+
+	},
+}
+</script>
+
+<style>
+
+</style>

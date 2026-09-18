@@ -279,7 +279,7 @@ const upload = reactive({
   
   uploadLoading: false,
   
-  url: (identity === 1 ? "/api/topic/topic/memberImport" : "/api/topic/topic/adminImport"),
+  url: VITE_SERVE + (identity === 1 ? "/api/topic/topic/memberImport" : "/api/topic/topic/adminImport"),
   
   uploadFileList: [],
   

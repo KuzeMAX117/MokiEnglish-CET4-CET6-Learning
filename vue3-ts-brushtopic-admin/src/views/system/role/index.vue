@@ -230,7 +230,7 @@ const onSave = () => {
       }
       clearFormData()
     } catch (error: any) {
-      message.error(error.message)
+      message.error(error.getMessage())
     }
   }).catch(() => {
     message.error('信息有误')

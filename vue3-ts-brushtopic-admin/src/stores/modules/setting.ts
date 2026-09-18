@@ -8,7 +8,7 @@ export const useSettingStore = defineStore('setting', () => {
   
   const fold = ref(false)
   
-  const themeColor = ref('#0a3442')
+  const themeColor = ref('#1677ff')
   
   const isDark = ref(false)
   

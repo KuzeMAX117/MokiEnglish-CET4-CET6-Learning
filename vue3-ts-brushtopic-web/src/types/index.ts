@@ -29,29 +29,6 @@ export interface WebHomeCount {
   userCount?: number
 }
 
-export interface TopicTrendVo {
-  dateList: string[]
-  countUserList: number[]
-  countTopicList: number[]
-}
-
-export interface UserTrendVo {
-  dateList: string[]
-  countList: number[]
-}
-
-export interface CategoryDataVo {
-  categoryName: string
-  count: number
-  [key: string]: any
-}
-
-export interface UserTopicCountVo {
-  date: string
-  count: number
-  [key: string]: any
-}
-
 export interface TodayTopicVo {
   id: number
   topicId: number
@@ -234,46 +211,4 @@ export interface TranslationCorrectPayload {
   level: number
   topic: string
   items: { source: string; reference: string; userTranslation: string }[]
-}
-
-/** 作文批改 —— 提交参数 */
-export interface EssayCorrectPayload {
-  essay: string
-  topic: string
-  level: number
-}
-
-/** 作文批改 —— 语法错误 */
-export interface EssayGrammarError {
-  type: string
-  severity: string
-  original: string
-  correction: string
-  explanation: string
-  impact: string
-}
-
-/** 作文批改 —— 词汇建议 */
-export interface EssayVocabularySuggestion {
-  original: string
-  suggestion: string
-  reason: string
-}
-
-/** 作文批改 —— AI 评分结果 */
-export interface EssayCorrectionResult {
-  score: number
-  band: number
-  bandLabel: string
-  bandDescription: string
-  bandReason: string
-  levelScene: string
-  overall: string
-  content: number
-  language: number
-  vocabulary: number
-  structure: number
-  grammarErrors: EssayGrammarError[]
-  vocabularySuggestions: EssayVocabularySuggestion[]
-  selfCheckList: string[]
 }

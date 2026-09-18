@@ -10,8 +10,6 @@ import com.alibaba.fastjson2.util.DateUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.hao.topic.ai.agent.EssayAgent;
-import com.hao.topic.ai.agent.EssayAgentResult;
 import com.hao.topic.ai.constant.AiConstant;
 import com.hao.topic.ai.constant.PromptConstant;
 import com.hao.topic.ai.constant.ResultConstant;
@@ -21,7 +19,6 @@ import com.hao.topic.ai.mapper.AiHistoryMapper;
 import com.hao.topic.ai.mapper.AiRecordMapper;
 import com.hao.topic.ai.mapper.AiUserMapper;
 import com.hao.topic.ai.properties.TtsProperties;
-import com.hao.topic.ai.service.AiModuleRecordService;
 import com.hao.topic.ai.service.ModelService;
 import com.hao.topic.api.utils.enums.StatusEnums;
 import com.hao.topic.client.system.SystemFeignClient;
@@ -32,7 +29,6 @@ import com.hao.topic.common.exception.TopicException;
 import com.hao.topic.common.security.utils.SecurityUtils;
 import com.hao.topic.model.dto.ai.AiHistoryDto;
 import com.hao.topic.model.dto.ai.ChatDto;
-import com.hao.topic.model.dto.ai.EssayCorrectDto;
 import com.hao.topic.model.dto.ai.TranslationCorrectDto;
 import com.hao.topic.model.dto.ai.TtsDto;
 import com.hao.topic.model.dto.audit.TopicAudit;
@@ -51,7 +47,6 @@ import com.hao.topic.model.entity.topic.TopicSubject;
 import com.hao.topic.model.vo.ai.AiHistoryContent;
 import com.hao.topic.model.vo.ai.AiHistoryListVo;
 import com.hao.topic.model.vo.ai.AiHistoryVo;
-import com.hao.topic.model.vo.ai.EssayCorrectionVo;
 import com.hao.topic.model.vo.ai.TranslationCorrectionVo;
 import com.hao.topic.model.vo.topic.TopicDataVo;
 import com.hao.topic.model.vo.topic.TopicSubjectVo;
@@ -104,12 +99,6 @@ public class ModelServiceImpl implements ModelService {
 
     @Autowired
     private AiRecordMapper aiRecordMapper;
-
-    @Autowired
-    private com.hao.topic.ai.service.AiModuleRecordService aiModuleRecordService;
-
-    @Autowired
-    private EssayAgent essayAgent;
 
     
 
@@ -200,7 +189,7 @@ public class ModelServiceImpl implements ModelService {
             
             if (AiStatusEnums.SEND_TOPIC.getCode().equals(status)) {
                 
-                prompt = "你提出了题目：" + aiHistory.getContent()
+                prompt = "你提出面试题：" + aiHistory.getContent()
                         + "用户回答：" + chatDto.getPrompt() + "  " + PromptConstant.EVALUATE
                         + "结尾最后一定要一定要返回下面这句话\n" +
                         " > 请输入'**继续**'或者输入新的**题目类型**'";
@@ -278,7 +267,7 @@ public class ModelServiceImpl implements ModelService {
             
             if (AiStatusEnums.SEND_TOPIC.getCode().equals(status)) {
                 
-                prompt = "你提出了题目：" + aiHistory.getContent()
+                prompt = "你提出面试题：" + aiHistory.getContent()
                         + "用户回答：" + chatDto.getPrompt() + "  " + PromptConstant.EVALUATE
                         + "结尾最后一定要一定要返回下面这句话\n" +
                         " > 请输入'**继续**'或者输入新的**题目类型**'";
@@ -328,12 +317,12 @@ public class ModelServiceImpl implements ModelService {
                         .map(AiHistory::getOriginalTitle) 
                         .filter(title -> title != null && !title.trim().isEmpty()) 
                         .collect(Collectors.joining("\n")); 
-                prompt = PromptConstant.CHECK_TOPIC_TYPE + "当前对话记录已经出过的题目\n【：" + promptBuffer + "】" + "就不可以在出了\n用户输入的题目类型：【" + chatDto.getPrompt() + "】";
+                prompt = PromptConstant.CHECK_TOPIC_TYPE + "当前对话记录已经出过的面试题\n【：" + promptBuffer + "】" + "就不可以在出了\n用户输入的面试题类型：【" + chatDto.getPrompt() + "】";
 
             }
             log.info("verifyPrompt================>?: {}", prompt);
         } else {
-            prompt = PromptConstant.CHECK_TOPIC_TYPE + "\n用户输入的题目类型：【" + chatDto.getPrompt() + "】";
+            prompt = PromptConstant.CHECK_TOPIC_TYPE + "\n用户输入的面试题类型：【" + chatDto.getPrompt() + "】";
         }
         
         String content = this.chatClient.prompt()
@@ -349,7 +338,7 @@ public class ModelServiceImpl implements ModelService {
         
         
         prompt = "### 【" + chatDto.getPrompt() + "】类型 💡\n\n" +
-                "## 题目：\n" +
+                "## 面试题目：\n" +
                 "**" + content + "**\n\n" +
                 "> " + getRandomEncouragement();
 
@@ -391,7 +380,7 @@ public class ModelServiceImpl implements ModelService {
             
             if (AiStatusEnums.SEND_TOPIC.getCode().equals(status)) {
                 
-                prompt = "你提出了题目：" + aiHistory.getContent()
+                prompt = "你提出面试题：" + aiHistory.getContent()
                         + "用户回答：" + chatDto.getPrompt() + "  " + PromptConstant.EVALUATE
                         + "结尾最后一定要一定要返回下面这句话\n" +
                         " > 请输入'**继续**'或者输入新的**题目类型**'";
@@ -473,7 +462,7 @@ public class ModelServiceImpl implements ModelService {
         }
         
         String prompt = "### 【" + chatDto.getPrompt() + "】专题 💡\n\n" +
-                "## 题目：\n" +
+                "## 面试题目：\n" +
                 "**" + randomTopic.getTopicName() + "**\n\n" +
                 "> " + getRandomEncouragement();
 
@@ -1033,8 +1022,8 @@ public class ModelServiceImpl implements ModelService {
         String answer = topicAudit.getAnswer();
         
         String prompt = PromptConstant.AUDIT_TOPIC + "\n" +
-                "题目名称: 【" + topicName + "】\n" +
-                "用户输入的题目答案: 【" + answer + "】\n" +
+                "面试题名称: 【" + topicName + "】\n" +
+                "用户输入的面试题答案: 【" + answer + "】\n" +
                 "关联标签可以有多个他们是通过':'分割的: 【" + labelName + "】\n" +
                 "所属专题: 【" + subjectName + "】\n";
         
@@ -1084,7 +1073,7 @@ public class ModelServiceImpl implements ModelService {
     public void generateAnswer(TopicAudit topicAudit) {
         
         String prompt = PromptConstant.GENERATE_ANSWER + "\n" +
-                "题目: 【" + topicAudit.getTopicName() + "】";
+                "面试题: 【" + topicAudit.getTopicName() + "】";
         
         String aiContent = getAiContent(prompt, topicAudit.getAccount(), topicAudit.getUserId());
         Topic topic = new Topic();
@@ -1175,16 +1164,7 @@ public class ModelServiceImpl implements ModelService {
             throw new TopicException("批改内容不能为空");
         }
 
-        // 记录翻译模块使用
-        try {
-            Long userId = SecurityUtils.getCurrentId();
-            String nickname = SecurityUtils.getCurrentName();
-            aiModuleRecordService.recordModuleUsage(userId, nickname, "translation", dto.getTranslationId(), "translation");
-        } catch (Exception e) {
-            log.warn("记录翻译模块使用失败: {}", e.getMessage());
-        }
-
-        // 人格设定已内置在 System Prompt 中（Teacher 英语语法与翻译批改专家）
+        // 人格设定已内置在 System Prompt 中（HaoTeacher 英语语法与翻译批改专家）
         String systemPrompt = PromptConstant.TRANSLATION_CORRECT_SYSTEM;
 
         // 逐句内容序列化为 JSON 数组，避免拼接歧义
@@ -1210,139 +1190,6 @@ public class ModelServiceImpl implements ModelService {
         normalizeCorrection(vo, dto);
         return vo;
     }
-
-    @Override
-    public EssayCorrectionVo correctEssay(EssayCorrectDto dto) {
-        if (dto == null || dto.getEssay() == null || dto.getEssay().isBlank()) {
-            throw new TopicException("作文内容不能为空");
-        }
-        if (dto.getTopic() == null || dto.getTopic().isBlank()) {
-            throw new TopicException("作文题目不能为空");
-        }
-        Integer level = dto.getLevel() != null ? dto.getLevel() : 4;
-
-        log.info("作文批改请求：topic={}, level={}, essayLength={}",
-                dto.getTopic(), level, dto.getEssay().length());
-
-        EssayAgentResult agentResult = essayAgent.execute(dto.getEssay(), dto.getTopic(), level);
-
-        EssayCorrectionVo vo = new EssayCorrectionVo();
-        vo.setScore(agentResult.getScore() != null ? agentResult.getScore().doubleValue() : 0D);
-        vo.setBand(agentResult.getBand());
-        vo.setBandDescription(agentResult.getBandDescription());
-        vo.setOverall(agentResult.getOverall());
-
-        // 维度分
-        if (agentResult.getDimensions() != null) {
-            Object contentVal = agentResult.getDimensions().get("content");
-            Object languageVal = agentResult.getDimensions().get("language");
-            Object vocabVal = agentResult.getDimensions().get("vocabulary");
-            Object structVal = agentResult.getDimensions().get("structure");
-            vo.setContent(contentVal instanceof Number ? ((Number) contentVal).doubleValue() : 0D);
-            vo.setLanguage(languageVal instanceof Number ? ((Number) languageVal).doubleValue() : 0D);
-            vo.setVocabulary(vocabVal instanceof Number ? ((Number) vocabVal).doubleValue() : 0D);
-            vo.setStructure(structVal instanceof Number ? ((Number) structVal).doubleValue() : 0D);
-        }
-
-        // 语法错误
-        if (agentResult.getGrammarErrors() != null) {
-            List<EssayCorrectionVo.GrammarError> grammarErrors = agentResult.getGrammarErrors().stream()
-                    .map(m -> {
-                        EssayCorrectionVo.GrammarError err = new EssayCorrectionVo.GrammarError();
-                        err.setType(m.getOrDefault("type", "grammar"));
-                        err.setSeverity(m.getOrDefault("severity", "minor"));
-                        err.setOriginal(m.getOrDefault("original", ""));
-                        err.setCorrection(m.getOrDefault("correction", ""));
-                        err.setExplanation(m.getOrDefault("explanation", ""));
-                        err.setImpact(m.getOrDefault("impact", "仅小幅扣分，不影响档次"));
-                        return err;
-                    })
-                    .toList();
-            vo.setGrammarErrors(grammarErrors);
-        } else {
-            vo.setGrammarErrors(new ArrayList<>());
-        }
-
-        // 词汇建议
-        if (agentResult.getVocabularySuggestions() != null) {
-            List<EssayCorrectionVo.VocabularySuggestion> vocabSuggestions = agentResult.getVocabularySuggestions().stream()
-                    .map(m -> {
-                        EssayCorrectionVo.VocabularySuggestion sug = new EssayCorrectionVo.VocabularySuggestion();
-                        sug.setOriginal(m.getOrDefault("original", ""));
-                        sug.setSuggestion(m.getOrDefault("suggestion", ""));
-                        sug.setReason(m.getOrDefault("reason", ""));
-                        return sug;
-                    })
-                    .toList();
-            vo.setVocabularySuggestions(vocabSuggestions);
-        } else {
-            vo.setVocabularySuggestions(new ArrayList<>());
-        }
-
-        // 考生自查清单
-        List<String> selfCheckList = new ArrayList<>();
-        if (agentResult.getStrengths() != null) {
-            selfCheckList.addAll(agentResult.getStrengths());
-        }
-        if (agentResult.getWeaknesses() != null) {
-            selfCheckList.addAll(agentResult.getWeaknesses());
-        }
-        vo.setSelfCheckList(selfCheckList);
-
-        // 档次标签和分数校准
-        int band = normalizeEssayBand(vo.getBand(), vo.getScore());
-        vo.setBand(band);
-        vo.setBandLabel(ESSAY_BAND_LABELS.getOrDefault(band, band + "分档"));
-        vo.setBandDescription(vo.getBandDescription() != null ? vo.getBandDescription() : "");
-        vo.setBandReason(String.format("基于 %d 个语法错误和 %d 个词汇建议综合评定",
-                vo.getGrammarErrors().size(), vo.getVocabularySuggestions().size()));
-        vo.setLevelScene(level == 6 ? "六级" : "四级");
-
-        // score 钳制到档次区间
-        double[] range = ESSAY_BAND_RANGES.getOrDefault(band, new double[]{0, 15});
-        double score = vo.getScore() == null ? 0D : Math.max(0, Math.min(vo.getScore(), 15));
-        vo.setScore(Math.max(range[0], Math.min(score, range[1])));
-
-        // 维度分钳制 0-5
-        vo.setContent(clampScore(vo.getContent(), 5));
-        vo.setLanguage(clampScore(vo.getLanguage(), 5));
-        vo.setVocabulary(clampScore(vo.getVocabulary(), 5));
-        vo.setStructure(clampScore(vo.getStructure(), 5));
-
-        log.info("作文批改完成：score={}, band={}", vo.getScore(), vo.getBand());
-        return vo;
-    }
-
-    private int normalizeEssayBand(Integer band, Double score) {
-        if (band != null && ESSAY_BAND_RANGES.containsKey(band)) {
-            return band;
-        }
-        double s = score == null ? 0 : score;
-        if (s >= 13) return 14;
-        if (s >= 10) return 11;
-        if (s >= 7) return 8;
-        if (s >= 4) return 5;
-        if (s >= 1) return 2;
-        return 0;
-    }
-
-    private static final Map<Integer, String> ESSAY_BAND_LABELS = Map.of(
-            14, "14分档（13-15分）",
-            11, "11分档（10-12分）",
-            8, "8分档（7-9分）",
-            5, "5分档（4-6分）",
-            2, "2分档（1-3分）",
-            0, "0分档"
-    );
-
-    private static final Map<Integer, double[]> ESSAY_BAND_RANGES = Map.of(
-            14, new double[]{13, 15},
-            11, new double[]{10, 12},
-            8, new double[]{7, 9},
-            5, new double[]{4, 6},
-            2, new double[]{1, 3},
-            0, new double[]{0, 0}
-    );
 
     /**
      * 解析 AI 返回的批改 JSON，容错处理 markdown 代码块包裹等情况。

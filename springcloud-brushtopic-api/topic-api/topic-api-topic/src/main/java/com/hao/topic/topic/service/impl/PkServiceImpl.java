@@ -1,21 +1,15 @@
 package com.hao.topic.topic.service.impl;
 
-import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hao.topic.common.constant.RedisConstant;
-import com.hao.topic.common.enums.ResultCodeEnum;
 import com.hao.topic.common.exception.TopicException;
-import com.hao.topic.common.security.utils.SecurityUtils;
 import com.hao.topic.model.entity.topic.PkRecord;
 import com.hao.topic.model.entity.topic.PkUserLevel;
 import com.hao.topic.model.entity.topic.Topic;
-import com.hao.topic.model.entity.topic.TopicRecord;
 import com.hao.topic.model.vo.topic.PkRankVo;
 import com.hao.topic.topic.mapper.PkRecordMapper;
 import com.hao.topic.topic.mapper.PkUserLevelMapper;
-import com.hao.topic.topic.mapper.PkWordItemMapper;
 import com.hao.topic.topic.mapper.TopicMapper;
-import com.hao.topic.topic.mapper.TopicRecordMapper;
 import com.hao.topic.topic.service.PkService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,8 +35,6 @@ public class PkServiceImpl implements PkService {
     private final PkRecordMapper pkRecordMapper;
     private final PkUserLevelMapper pkUserLevelMapper;
     private final TopicMapper topicMapper;
-    private final TopicRecordMapper topicRecordMapper;
-    private final PkWordItemMapper pkWordItemMapper;
 
     private static final org.springframework.data.redis.core.script.DefaultRedisScript<Long> SECKILL_SCRIPT;
 

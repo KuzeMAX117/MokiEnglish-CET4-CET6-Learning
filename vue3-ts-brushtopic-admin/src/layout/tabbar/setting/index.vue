@@ -4,7 +4,7 @@ const userStore = useUserStore()
 import { useSettingStore } from '@/stores/modules/setting';
 import { apiGetNoticeList, apiGetNoticeHas, apiReadNotice } from '@/api/system/notice'
 const settingStore = useSettingStore()
-import Logo from '@/assets/images/H.png'
+import Hao from '@/assets/images/H.png'
 import { ref, h, onMounted } from 'vue'
 import { message } from 'ant-design-vue';
 import { BellOutlined, DownOutlined, SettingOutlined, MenuFoldOutlined, MenuUnfoldOutlined, FullscreenOutlined, ReloadOutlined } from '@ant-design/icons-vue';
@@ -45,7 +45,7 @@ const viewSetting = () => {
 }
 
 const defaultTheme = ref({
-  themeColor: '#0a3442',
+  themeColor: '#1677ff',
   isDark: false,
   fold: false,
   isCompact: false,
@@ -74,7 +74,7 @@ const resetTheme = () => {
 }
 
 const handleErrorImg = (event: any) => {
-  event.target.src = Logo
+  event.target.src = Hao
 };
 
 const notifications = ref<any[]>([]);
@@ -254,7 +254,7 @@ onMounted(() => {
       <img class="user-avatar" @error="handleErrorImg" :src="userStore.userInfo.avatar" alt="" />
     </template>
     <template v-else>
-      <a-avatar class="user-avatar" :style="{ backgroundColor: '#0a3442' }">
+      <a-avatar class="user-avatar" :style="{ backgroundColor: '#1677ff' }">
         {{ userStore.userInfo?.account?.charAt(0)?.toUpperCase() }}
       </a-avatar>
     </template>
@@ -311,7 +311,7 @@ onMounted(() => {
 
     &:hover {
       cursor: pointer;
-      color: #0a3442;
+      color: #1677ff;
     }
   }
 }
@@ -359,7 +359,7 @@ onMounted(() => {
 
     &.feedback {
       background-color: #e6f7ff;
-      color: #0a3442;
+      color: #1677ff;
     }
 
     &.member {

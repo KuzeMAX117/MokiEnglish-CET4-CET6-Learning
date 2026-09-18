@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 
 public enum AiStatusEnums {
     
-    SEND_TOPIC(0, "发送题目"),
+    SEND_TOPIC(0, "发送面试题"),
     
     EVALUATE_ANSWER(1, "评估答案");
 

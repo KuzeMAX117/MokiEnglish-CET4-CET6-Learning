@@ -40,7 +40,7 @@
               <SafetyCertificateOutlined />
               
               账号状态：
-              <a-tag :color="userInfo.status === 0 ? '#0a3442' : 'error'">
+              <a-tag :color="userInfo.status === 0 ? '#1677ff' : 'error'">
                 <CheckCircleOutlined v-if="userInfo.status === 0" />
                 <CloseCircleOutlined v-else />
                 {{ userInfo.status === 0 ? '正常' : '停用' }}
@@ -119,7 +119,7 @@ import type { UploadChangeParam, UploadProps } from 'ant-design-vue';
 
 const { VITE_SERVE } = import.meta.env
 
-const uploadUrl = '/api/system/user/avatar'
+const uploadUrl = VITE_SERVE + '/api/system/user/avatar'
 
 const headers = { authorization: userStore.token };
 

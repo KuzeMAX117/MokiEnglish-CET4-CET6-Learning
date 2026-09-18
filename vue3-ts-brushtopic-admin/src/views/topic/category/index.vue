@@ -220,7 +220,7 @@ const upload = reactive({
   
   uploadLoading: false,
   
-  url: "/api/topic/category/import",
+  url: VITE_SERVE + "/api/topic/category/import",
   
   uploadFileList: [],
   

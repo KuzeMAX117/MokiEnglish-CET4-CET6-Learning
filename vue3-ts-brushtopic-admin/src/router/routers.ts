@@ -51,14 +51,14 @@ export const constantRoute = [
         path: '/system/role',
         component: () => import('@/views/system/role/index.vue'),
         meta: {
-          title: '角色管理',
+          title: '菜单管理',
         },
       },
       {
         path: '/system/menu',
         component: () => import('@/views/system/menu/index.vue'),
         meta: {
-          title: '菜单管理',
+          title: '角色管理',
         },
       },
       {
@@ -86,6 +86,14 @@ export const constantRoute = [
           title: '题目管理',
         },
       },
+
+      {
+        path: '/topic/category',
+        component: () => import('@/views/topic/category/index.vue'),
+        meta: {
+          title: '分类管理',
+        },
+      },
       {
         path: '/topic/label',
         component: () => import('@/views/topic/label/index.vue'),
@@ -94,10 +102,10 @@ export const constantRoute = [
         },
       },
       {
-        path: '/topic/category',
-        component: () => import('@/views/topic/category/index.vue'),
+        path: '/topic/subject',
+        component: () => import('@/views/topic/subject/index.vue'),
         meta: {
-          title: '分类管理',
+          title: '专题管理',
         },
       },
       {
@@ -119,79 +127,8 @@ export const constantRoute = [
   },
   
   {
-    path: '/content',
-    redirect: '/content/article',
-    meta: {
-      title: '内容管理',
-    },
-    component: () => import('../layout/index.vue'),
-    children: [
-      {
-        path: '/content/article',
-        component: () => import('@/views/content/article/index.vue'),
-        meta: {
-          title: '文章管理',
-        },
-      },
-      {
-        path: '/content/essay',
-        component: () => import('@/views/content/essay/index.vue'),
-        meta: {
-          title: '作文管理',
-        },
-      },
-      {
-        path: '/content/translation',
-        component: () => import('@/views/content/translation/index.vue'),
-        meta: {
-          title: '翻译管理',
-        },
-      },
-      {
-        path: '/content/wordbook',
-        component: () => import('@/views/content/wordbook/index.vue'),
-        meta: {
-          title: '词书管理',
-        },
-      },
-      {
-        path: '/content/writing',
-        component: () => import('@/views/content/writing/index.vue'),
-        meta: {
-          title: '作文记录',
-        },
-      }
-    ]
-  },
-  
-  {
-    path: '/pk',
-    redirect: '/pk/rank',
-    meta: {
-      title: 'PK管理',
-    },
-    component: () => import('../layout/index.vue'),
-    children: [
-      {
-        path: '/pk/rank',
-        component: () => import('@/views/pk/rank/index.vue'),
-        meta: {
-          title: 'PK排行榜',
-        },
-      },
-      {
-        path: '/pk/record',
-        component: () => import('@/views/pk/record/index.vue'),
-        meta: {
-          title: '对战记录',
-        },
-      },
-    ]
-  },
-  
-  {
     path: '/ai',
-    component: () => import('../layout/index.vue'),
+    component: () => import('@/layout/index.vue'),
     redirect: '/ai/manage',
     meta: {
       title: '模型管理',

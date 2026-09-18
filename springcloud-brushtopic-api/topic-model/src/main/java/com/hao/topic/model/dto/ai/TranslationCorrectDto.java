@@ -23,9 +23,6 @@ public class TranslationCorrectDto {
     /** 题目标题（用于 AI 了解语境） */
     private String topic;
 
-    /** 关联翻译ID（用于追踪AI使用记录） */
-    private Long translationId;
-
     /** 逐句翻译内容 */
     private List<Item> items;
 

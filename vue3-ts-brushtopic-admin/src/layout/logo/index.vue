@@ -8,14 +8,14 @@ const settingStore = useSettingStore();
   <div class="logo" :style="{ 'paddingLeft': settingStore.fold ? '30px' : '21px' }">
     <img src="../../assets/images/logo.png" alt="">
     <p v-if="!settingStore.fold" :class="{ 'text-hidden': settingStore.fold, 'text-preview': !settingStore.fold }">
-      英语学习cet4-6管理后台</p>
+      易题后台管理系统</p>
   </div>
 </template>
 <style lang="scss" scoped>
 .logo {
   width: 100%;
   height: $base-menu-logo-height;
-  color: #0a3442;
+  color: #1677ff;
   display: flex;
   align-items: center;
   transition: all 0.3s ease;

@@ -196,7 +196,7 @@ onMounted(() => {
         </template>
         <template v-if="column.key === 'status'">
           <div class="tag-box">
-            <a-tag v-if="record.status === 0" color="#0a3442">正常</a-tag>
+            <a-tag v-if="record.status === 0" color="#1677ff">正常</a-tag>
             <a-tag v-if="record.status === 1" color="red">停用</a-tag>
           </div>
         </template>
