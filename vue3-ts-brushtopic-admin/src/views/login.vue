@@ -97,17 +97,11 @@ onMounted(() => {
 </script>
 <template>
   <div class="login-body">
-    
     <div class="login-box">
-      
-      <div class="login-left"></div>
-      
-      <div class="login-right">
-        
+      <div class="login-center">
         <div class="title">
           <h1>易题后台管理系统</h1>
         </div>
-        
         <div class="form-member">
           <a-form :model="formData" ref="adminRef" :rules="formRule" layout="vertical">
             <a-form-item label="账户" name="username">
@@ -131,7 +125,6 @@ onMounted(() => {
                     <CheckCircleOutlined />
                   </template>
                 </a-input>
-                
                 <img @click="getCaptchaImage" :src="codeImage" alt="验证码" class="login-code" />
               </div>
             </a-form-item>
@@ -145,7 +138,6 @@ onMounted(() => {
           </a-form>
         </div>
       </div>
-      
       <div class="login-bottom">
         <p>©易题后台管理系统 2025 如有侵权请联系QQ：3655161743</p>
         <p>赣ICP备2024033867号</p>
@@ -158,29 +150,25 @@ onMounted(() => {
   width: 100%;
   height: 100vh;
   background-color: $base-background;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   .login-box {
     width: 100%;
     height: 100%;
-    padding: 100px;
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
 
-    .login-left {
-      width: 54%;
-      height: 500px;
-      background-image: url('../assets/images/bg.png');
-      background-size: contain;
-      background-repeat: no-repeat;
-    }
-
-    .login-right {
-      margin: 35px 0 0 90px;
-      background-color: $base-login-background; 
+    .login-center {
+      background-color: $base-login-background;
       text-align: center;
-      padding: 30px;
-      width: 410px;
-      height: 448px;
-      box-shadow: 0px 0px 3px 0px rgba(0, 0, 0, .2);
+      padding: 40px;
+      width: 420px;
+      box-shadow: 0px 0px 12px 0px rgba(0, 0, 0, .1);
       border-radius: 12px;
 
       ::v-deep(.check-item) {
@@ -191,38 +179,23 @@ onMounted(() => {
       }
 
       .title {
-
+        margin-bottom: 30px;
         h1 {
-          font-size: 20px;
+          font-size: 22px;
           color: $base-personal-color;
-
         }
       }
 
       .code-box {
         display: flex;
         align-items: center;
-      }
-
-      .login-image {
-        border: 1px solid #409eff;
-        width: 26%;
-        margin-left: 18px;
-        height: 38px;
-        float: right;
-        overflow: hidden;
-
-        img {
-          cursor: pointer;
-          vertical-align: middle;
-        }
 
         .login-code {
-          margin-left: 10px;
+          margin-left: 12px;
           cursor: pointer;
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
+          height: 40px;
+          border-radius: 6px;
+          border: 1px solid #d9d9d9;
         }
       }
     }
@@ -230,39 +203,25 @@ onMounted(() => {
     .login-bottom {
       position: absolute;
       bottom: 2%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 600px;
-      height: 60px;
       text-align: center;
-      padding: 20px;
-      width: fit-content;
       font-size: 14px;
       color: #b3b3b3;
 
       p {
-        line-height: 1em;
+        line-height: 1.5em;
       }
     }
 
     .check {
       color: #b0adb5;
     }
-
   }
 }
 
 @media (max-width: 792px) {
   .login-box {
-    flex-direction: column;
-    height: auto;
-
-    .login-left {
-      display: none;
-    }
-
-    .login-right {
-      width: 500px;
+    .login-center {
+      width: 90%;
       padding: 20px;
     }
   }
