@@ -50,7 +50,7 @@ const getSubjectDetail = async (id) => {
 					<span class="desc">{{ subjectDetail.subjectDesc }}</span>
 					<p class="count">{{ subjectDetail.viewCount
 						}}次浏览
-						· {{ subjectDetail?.topicNameVos?.length }}个面试题
+						· {{ subjectDetail?.topicNameVos?.length }}个题目
 					</p>
 				</view>
 			</view>

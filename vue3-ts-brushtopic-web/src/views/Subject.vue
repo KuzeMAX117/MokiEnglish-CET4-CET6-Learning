@@ -29,7 +29,7 @@
             <div class="count">
               <EyeOutlined /> {{ subjectDetail.viewCount || 0 }} 次浏览
               <span class="dot">·</span>
-              <FileTextOutlined /> {{ subjectDetail.topicNameVos?.length || 0 }} 个面试题
+              <FileTextOutlined /> {{ subjectDetail.topicNameVos?.length || 0 }} 个题目
             </div>
           </div>
         </div>

@@ -33,7 +33,7 @@
 					</view>
 					<view class="bar-text">
 						<text class="t1">{{ role === 1 ? '永久会员特权' : '开通永久会员' }}</text>
-						<text class="t2">{{ role === 1 ? '尊享全站 100% 刷题功能' : '解锁无限AI面试、自定义题库等' }}</text>
+						<text class="t2">{{ role === 1 ? '尊享全站 100% 刷题功能' : '解锁无限AI学习、自定义题库等' }}</text>
 					</view>
 				</view>
 				<view class="bar-btn" :style="{ background: themeConfig.accent }">查看</view>
@@ -131,7 +131,7 @@
 					</view>
 					<view class="p-item">
 						<uni-icons type="checkbox-filled" size="16" color="#D97706"></uni-icons>
-						<text>AI 智能面试解析助手</text>
+						<text>AI 智能学习解析助手</text>
 					</view>
 					<view class="p-item">
 						<uni-icons type="checkbox-filled" size="16" color="#D97706"></uni-icons>

@@ -4,21 +4,21 @@ import BoxPlate from './BoxPlate.vue'
 import * as echarts from 'echarts'
 
 const LEVELS = [
-  { name: '面试新手', color: '#8c8c8c', min: 0, max: 99 },
-  { name: '面试新秀', color: '#52c41a', min: 100, max: 299 },
-  { name: '面试高手', color: '#0a3442', min: 300, max: 499 },
-  { name: '面试达人', color: '#fa8c16', min: 500, max: 799 },
-  { name: '面试专家', color: '#f5222d', min: 800, max: 999 },
-  { name: '面试之神', color: '#722ed1', min: 1000, max: Infinity }
+  { name: '学习新手', color: '#8c8c8c', min: 0, max: 99 },
+  { name: '学习新秀', color: '#52c41a', min: 100, max: 299 },
+  { name: '学习高手', color: '#0a3442', min: 300, max: 499 },
+  { name: '学习达人', color: '#fa8c16', min: 500, max: 799 },
+  { name: '学习专家', color: '#f5222d', min: 800, max: 999 },
+  { name: '学习之神', color: '#722ed1', min: 1000, max: Infinity }
 ]
 
 const userLevels = ref([
-  { name: '面试新手', value: 0 },
-  { name: '面试新秀', value: 0 },
-  { name: '面试高手', value: 0 },
-  { name: '面试达人', value: 0 },
-  { name: '面试专家', value: 0 },
-  { name: '面试之神', value: 0 }
+  { name: '学习新手', value: 0 },
+  { name: '学习新秀', value: 0 },
+  { name: '学习高手', value: 0 },
+  { name: '学习达人', value: 0 },
+  { name: '学习专家', value: 0 },
+  { name: '学习之神', value: 0 }
 ])
 
 const color = ['#8c8c8c', '#52c41a', '#0a3442', '#fa8c16', '#f5222d', '#722ed1']

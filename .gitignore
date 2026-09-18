@@ -38,3 +38,30 @@ application-local.yaml
 # 配置文件（含敏感信息，不上传）
 配置文件/common-config.yaml
 配置文件/common-minio-config.yaml
+
+# 大文件 / 数据文件
+logo.png
+celst-4
+word
+qc
+query
+
+# 词库原始数据
+word_data/
+
+# 数据导入脚本和缓存
+cet_import/
+
+# SQL 大文件（保留小型 SQL 脚本）
+sql/import_dictionary.sql
+sql/import_vocabulary.sql
+sql/update_cet4_examples.sql
+sql/topic.sql
+sql/cet4_2026_first_half.sql
+
+# Nginx 配置
+nginx/
+
+# Python 缓存
+__pycache__/
+*.pyc

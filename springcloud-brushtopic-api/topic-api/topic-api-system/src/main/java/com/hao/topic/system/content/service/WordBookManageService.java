@@ -2,7 +2,9 @@ package com.hao.topic.system.content.service;
 
 import com.hao.topic.model.dto.content.WordBookDto;
 import com.hao.topic.model.dto.content.WordBookListDto;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Map;
 
 public interface WordBookManageService {
@@ -10,4 +12,5 @@ public interface WordBookManageService {
     void add(WordBookDto dto);
     void update(WordBookDto dto);
     void delete(Long[] ids);
+    String importExcel(Long bookId, MultipartFile multipartFile) throws IOException;
 }

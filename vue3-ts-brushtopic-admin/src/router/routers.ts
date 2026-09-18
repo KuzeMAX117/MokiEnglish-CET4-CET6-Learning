@@ -51,14 +51,14 @@ export const constantRoute = [
         path: '/system/role',
         component: () => import('@/views/system/role/index.vue'),
         meta: {
-          title: '菜单管理',
+          title: '角色管理',
         },
       },
       {
         path: '/system/menu',
         component: () => import('@/views/system/menu/index.vue'),
         meta: {
-          title: '角色管理',
+          title: '菜单管理',
         },
       },
       {
@@ -84,6 +84,20 @@ export const constantRoute = [
         component: () => import('@/views/topic/topic/index.vue'),
         meta: {
           title: '题目管理',
+        },
+      },
+      {
+        path: '/topic/label',
+        component: () => import('@/views/topic/label/index.vue'),
+        meta: {
+          title: '标签管理',
+        },
+      },
+      {
+        path: '/topic/category',
+        component: () => import('@/views/topic/category/index.vue'),
+        meta: {
+          title: '分类管理',
         },
       },
       {

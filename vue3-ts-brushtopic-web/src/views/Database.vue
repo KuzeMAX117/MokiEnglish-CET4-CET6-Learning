@@ -6,7 +6,7 @@
         <DatabaseOutlined class="head-icon" />
         <span>题库中心</span>
       </div>
-      <div class="head-sub">海量面试题，按需挑选</div>
+      <div class="head-sub">海量题目，按需挑选</div>
     </div>
 
     

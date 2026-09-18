@@ -4,9 +4,11 @@ import {
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
-  ExclamationCircleOutlined
+  ExclamationCircleOutlined,
+  UploadOutlined,
+  DownloadOutlined
 } from '@ant-design/icons-vue'
-import { apiGetWordBookList, apiAddWordBook, apiUpdateWordBook, apiDeleteWordBook } from '@/api/content/wordbook'
+import { apiGetWordBookList, apiAddWordBook, apiUpdateWordBook, apiDeleteWordBook, apiImportWordBook } from '@/api/content/wordbook'
 import type { WordBookQueryType } from '@/api/content/wordbook/type';
 import { message, Modal } from 'ant-design-vue';
 
@@ -97,6 +99,59 @@ const onSave = () => {
 }
 const onClose = () => { clearFormData(); drawer.value = false }
 
+// 导入相关
+const importModalVisible = ref(false)
+const importBookId = ref<number | null>(null)
+const importBookName = ref('')
+const importFile = ref<File | null>(null)
+const importLoading = ref(false)
+
+const handleImport = (record: any) => {
+  importBookId.value = record.id
+  importBookName.value = record.name
+  importFile.value = null
+  importModalVisible.value = true
+}
+
+const handleFileChange = (info: any) => {
+  importFile.value = info.file
+}
+
+const handleImportSubmit = async () => {
+  if (!importFile.value) {
+    message.warning('请选择要导入的Excel文件')
+    return
+  }
+  importLoading.value = true
+  try {
+    await apiImportWordBook(importBookId.value!, importFile.value)
+    message.success('导入成功')
+    importModalVisible.value = false
+    getList()
+  } catch (error: any) {
+    message.error(error.message || '导入失败')
+  } finally {
+    importLoading.value = false
+  }
+}
+
+const handleImportCancel = () => {
+  importModalVisible.value = false
+  importFile.value = null
+}
+
+const handleDownloadTemplate = () => {
+  // 创建一个示例Excel模板供下载
+  const templateContent = '单词/词组,音标,释义,例句,例句翻译\nhello,həˈləʊ,你好,"Hello, how are you?",你好，你好吗？'
+  const blob = new Blob([templateContent], { type: 'text/csv;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = '单词导入模板.csv'
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 onMounted(() => { getList() })
 </script>
 <template>
@@ -142,6 +197,7 @@ onMounted(() => { getList() })
       :row-selection="{ selectedRowKeys: onSelectedRowKeys, onChange: onSelectChange, fixed: true }">
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'operation'">
+          <a-button type="link" size="small" :icon="h(UploadOutlined)" @click="handleImport(record)">导入</a-button>
           <a-button type="link" size="small" :icon="h(EditOutlined)" @click="handleEdit(record)">修改</a-button>
           <a-button type="link" size="small" :icon="h(DeleteOutlined)" @click="handleDelete(record)">删除</a-button>
         </template>
@@ -173,6 +229,21 @@ onMounted(() => { getList() })
         </a-space>
       </template>
     </a-drawer>
+
+    <a-modal v-model:open="importModalVisible" title="导入单词" @cancel="handleImportCancel">
+      <p>词书名称：{{ importBookName }}</p>
+      <p>请上传Excel文件，格式包含：单词/词组、音标、释义、例句、例句翻译</p>
+      <a-upload :before-upload="handleFileChange" :max-count="1" :file-list="importFile ? [importFile] : []">
+        <a-button :icon="h(UploadOutlined)">选择文件</a-button>
+      </a-upload>
+      <template #footer>
+        <a-space>
+          <a-button @click="handleDownloadTemplate" :icon="h(DownloadOutlined)">下载模板</a-button>
+          <a-button @click="handleImportCancel">取消</a-button>
+          <a-button type="primary" :loading="importLoading" @click="handleImportSubmit">导入</a-button>
+        </a-space>
+      </template>
+    </a-modal>
   </div>
 </template>
 <style lang="scss" scoped>

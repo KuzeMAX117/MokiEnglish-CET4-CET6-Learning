@@ -173,28 +173,46 @@
 
                 <!-- 选项列表 -->
                 <div v-if="getOptions(topic).length > 0" class="option-list">
-                  <div
-                    v-for="opt in getOptions(topic)"
-                    :key="opt.label"
-                    class="option-item"
-                    :class="optionClass(topic, opt.label)"
-                    @click.stop="selectOption(topic, opt.label)"
-                  >
-                    <span class="option-label">{{ opt.label }}</span>
-                    <span class="option-content">{{ opt.content }}</span>
-                    <CheckOutlined
-                      v-if="getResultState(topic) === 'correct' && getResult(topic)?.correctOption === opt.label"
-                      class="opt-mark correct"
-                    />
-                    <CloseOutlined
-                      v-if="getResultState(topic) === 'wrong' && getResult(topic)?.selected === opt.label"
-                      class="opt-mark wrong"
-                    />
-                    <CheckOutlined
-                      v-if="revealedIds.has(topic.topicId) && getResultState(topic) === 'none' && topic.correctOption === opt.label"
-                      class="opt-mark reveal-correct"
-                    />
-                  </div>
+                  <!-- 匹配题/选词填空使用下拉框，避免15个选项撑爆页面 -->
+                  <template v-if="getOptions(topic).length > 5">
+                    <div class="select-wrapper">
+                      <a-select
+                        :value="selections.get(topic.topicId) || undefined"
+                        placeholder="请选择"
+                        style="width: 100%"
+                        :disabled="revealedIds.has(topic.topicId)"
+                        @update:value="v => selectOption(topic, v)"
+                      >
+                        <a-select-option v-for="opt in getOptions(topic)" :key="opt.label" :value="opt.label">
+                          <span class="opt-label">{{ opt.label }}</span> &nbsp; {{ opt.content }}
+                        </a-select-option>
+                      </a-select>
+                    </div>
+                  </template>
+                  <template v-else>
+                    <div
+                      v-for="opt in getOptions(topic)"
+                      :key="opt.label"
+                      class="option-item"
+                      :class="optionClass(topic, opt.label)"
+                      @click.stop="selectOption(topic, opt.label)"
+                    >
+                      <span class="option-label">{{ opt.label }}</span>
+                      <span class="option-content">{{ opt.content }}</span>
+                      <CheckOutlined
+                        v-if="getResultState(topic) === 'correct' && getResult(topic)?.correctOption === opt.label"
+                        class="opt-mark correct"
+                      />
+                      <CloseOutlined
+                        v-if="getResultState(topic) === 'wrong' && getResult(topic)?.selected === opt.label"
+                        class="opt-mark wrong"
+                      />
+                      <CheckOutlined
+                        v-if="revealedIds.has(topic.topicId) && getResultState(topic) === 'none' && topic.correctOption === opt.label"
+                        class="opt-mark reveal-correct"
+                      />
+                    </div>
+                  </template>
                 </div>
 
                 <!-- 解析 -->
@@ -958,6 +976,10 @@ onMounted(() => {
   }
 
   .option-list {
+    .select-wrapper {
+      padding: 4px 0;
+    }
+
     .option-item {
       display: flex;
       align-items: center;

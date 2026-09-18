@@ -357,7 +357,7 @@ const messageList = reactive<any>([
     prompt: "我是" + userStore.userInfo.account,
     chatId: currentRecordId.value, 
     model: aiModeValue.value,
-    content: '你好，我是AI 1.0，你的面试题AI助手！',
+    content: '你好，我是AI 1.0，你的学习AI助手！',
     memoryId: aiId.value
   }
 ])
@@ -370,7 +370,7 @@ const restoreDefaultRecord = () => {
     prompt: "我是" + userStore.userInfo.account,
     chatId: currentRecordId.value, 
     model: aiModeValue.value,
-    content: '你好，我是AI 1.0，你的面试题AI助手！',
+    content: '你好，我是AI 1.0，你的学习AI助手！',
   })
 }
 

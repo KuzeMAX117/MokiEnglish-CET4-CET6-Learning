@@ -82,6 +82,16 @@ const GROUP_ARTICLE_SECTIONS = new Set(['cloze', 'matching', 'reading_1', 'readi
 /** 题级文章子板块：每题自带听力材料/原文 */
 const TOPIC_ARTICLE_SECTIONS = new Set(['news', 'conversation', 'passage'])
 
+/** 选词填空和长篇匹配使用固定词库卡片 + 下拉框 */
+const useWordBank = (group: PaperSubSectionType) => {
+  const sub = group.subSection
+  if ((sub === 'cloze' || sub === 'matching') && group.topics.length > 0) {
+    const firstOpts = group.topics[0].options || []
+    if (firstOpts.length > 5) return true
+  }
+  return false
+}
+
 const statusMap: any = {
   0: { text: '已发布', color: 'green' },
   1: { text: '已下架', color: 'red' },
@@ -659,6 +669,16 @@ onMounted(() => {
                 placeholder="粘贴文章原文，保存后前台左侧文章面板显示" />
             </div>
 
+            <!-- 固定选项卡片（选词填空/长篇匹配专用） -->
+            <div v-if="useWordBank(group)" class="word-bank">
+              <div class="field-label">选项词库（固定在上方，题目使用下拉框选择）</div>
+              <div class="word-tags">
+                <span v-for="opt in (group.topics[0]?.options || [])" :key="opt.label" class="word-tag">
+                  <b>{{ opt.label }}</b> {{ opt.content }}
+                </span>
+              </div>
+            </div>
+
             <!-- 题目卡片 -->
             <div v-for="(topic, ti) in group.topics" :key="ti" class="topic-card">
               <div class="topic-head">
@@ -684,7 +704,22 @@ onMounted(() => {
               </div>
 
               <!-- 选项编辑 -->
-              <div class="options-editor">
+              <div v-if="useWordBank(group) && (topic.options?.length || 0) > 5" class="word-bank-select">
+                <div class="field-label">选择答案（下拉框）</div>
+                <a-select
+                  :value="topic.correctOption || undefined"
+                  placeholder="请选择正确答案"
+                  style="width: 100%"
+                  @update:value="(v: any) => { topic.correctOption = v; markDirty() }"
+                  allowClear
+                >
+                  <a-select-option v-for="opt in topic.options" :key="opt.label" :value="opt.label">
+                    <b>{{ opt.label }}</b> &nbsp; {{ opt.content }}
+                  </a-select-option>
+                </a-select>
+                <a-button size="small" type="dashed" :icon="h(PlusOutlined)" @click="addOption(topic)" style="margin-top: 6px">添加选项</a-button>
+              </div>
+              <div v-else class="options-editor">
                 <div v-for="(opt, oi) in topic.options" :key="oi" class="option-row">
                   <a-input class="opt-label" v-model:value="opt.label" @input="markDirty()" placeholder="A" />
                   <a-input class="opt-content" v-model:value="opt.content" @input="markDirty()" placeholder="选项内容" />
@@ -943,6 +978,38 @@ onMounted(() => {
 
     .group-article {
       margin-bottom: 12px;
+    }
+
+    .word-bank {
+      margin-bottom: 12px;
+      background: #fff;
+      border: 1px dashed #d9d9d9;
+      border-radius: 8px;
+      padding: 10px;
+
+      .word-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .word-tag {
+        padding: 4px 10px;
+        background: #f0f5ff;
+        border: 1px solid #adc6ff;
+        border-radius: 4px;
+        font-size: 13px;
+        color: #1a1a1a;
+
+        b {
+          color: #4257b2;
+          margin-right: 4px;
+        }
+      }
+    }
+
+    .word-bank-select {
+      margin-top: 8px;
     }
 
     .topic-card {

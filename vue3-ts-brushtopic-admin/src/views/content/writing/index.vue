@@ -39,7 +39,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
-import request from '@/utils/request'
+import { apiGetEssayRecordList } from '@/api/ai/essay'
 
 const loading = ref(false)
 const tableData = ref<any[]>([])
@@ -61,7 +61,11 @@ const columns = [
 const loadData = async () => {
   loading.value = true
   try {
-    const res: any = await request.get('/ai/essay/list', { params: { page: pagination.current, size: pagination.pageSize, keyword: searchKeyword.value } })
+    const res: any = await apiGetEssayRecordList({
+      pageNum: pagination.current,
+      pageSize: pagination.pageSize,
+      keyword: searchKeyword.value
+    })
     if (res.code === 200) {
       tableData.value = res.data?.records || res.data || []
       pagination.total = res.data?.total || 0

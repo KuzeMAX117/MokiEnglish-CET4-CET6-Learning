@@ -18,3 +18,9 @@ export const apiUpdateWordBook = (data: any) => {
 export const apiDeleteWordBook = (ids: number[]) => {
   return request({ url: prefix + "delete/" + ids, method: "delete" });
 };
+
+export const apiImportWordBook = (bookId: number, file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  return request({ url: prefix + "import/" + bookId, method: "post", data: formData, headers: { "Content-Type": "multipart/form-data" } });
+};

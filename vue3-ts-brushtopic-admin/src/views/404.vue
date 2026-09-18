@@ -13,7 +13,7 @@ const $router = useRouter()
     <div class="no-right">
       <h1>404错误！</h1>
       <h2>还没有这个网页！</h2>
-      <a-button class="btn" type="primary" @click="$router.push('/login')">返回首页</a-button>
+      <a-button class="btn" type="primary" @click="$router.push('/home')">返回首页</a-button>
     </div>
   </div>
 </template>
