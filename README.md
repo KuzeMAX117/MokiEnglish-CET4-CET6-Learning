@@ -312,33 +312,3 @@ NACOS_PASSWORD=your_password
 # RabbitMQ 配置
 RABBITMQ_DEFAULT_PASS=your_password
 ```
-
----
-
-## 📝 更新日志
-
-详见 [CHANGELOG.md](CHANGELOG.md)
-
----
-
-## 🤝 参与贡献
-
-1. Fork 本仓库
-2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 创建 Pull Request
-
----
-
-## 📄 许可证
-
-本项目基于 [MIT License](LICENSE) 开源。
-
----
-
-<div align="center">
-
-**⭐ 如果觉得有帮助，欢迎给个 Star 支持一下！⭐**
-
-</div>
