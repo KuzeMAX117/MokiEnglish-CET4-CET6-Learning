@@ -189,7 +189,7 @@ public class ModelServiceImpl implements ModelService {
             
             if (AiStatusEnums.SEND_TOPIC.getCode().equals(status)) {
                 
-                prompt = "你提出面试题：" + aiHistory.getContent()
+                prompt = "你提出了题目：" + aiHistory.getContent()
                         + "用户回答：" + chatDto.getPrompt() + "  " + PromptConstant.EVALUATE
                         + "结尾最后一定要一定要返回下面这句话\n" +
                         " > 请输入'**继续**'或者输入新的**题目类型**'";
@@ -267,7 +267,7 @@ public class ModelServiceImpl implements ModelService {
             
             if (AiStatusEnums.SEND_TOPIC.getCode().equals(status)) {
                 
-                prompt = "你提出面试题：" + aiHistory.getContent()
+                prompt = "你提出了题目：" + aiHistory.getContent()
                         + "用户回答：" + chatDto.getPrompt() + "  " + PromptConstant.EVALUATE
                         + "结尾最后一定要一定要返回下面这句话\n" +
                         " > 请输入'**继续**'或者输入新的**题目类型**'";
@@ -317,12 +317,12 @@ public class ModelServiceImpl implements ModelService {
                         .map(AiHistory::getOriginalTitle) 
                         .filter(title -> title != null && !title.trim().isEmpty()) 
                         .collect(Collectors.joining("\n")); 
-                prompt = PromptConstant.CHECK_TOPIC_TYPE + "当前对话记录已经出过的面试题\n【：" + promptBuffer + "】" + "就不可以在出了\n用户输入的面试题类型：【" + chatDto.getPrompt() + "】";
+                prompt = PromptConstant.CHECK_TOPIC_TYPE + "当前对话记录已经出过的题目\n【：" + promptBuffer + "】" + "就不可以在出了\n用户输入的题目类型：【" + chatDto.getPrompt() + "】";
 
             }
             log.info("verifyPrompt================>?: {}", prompt);
         } else {
-            prompt = PromptConstant.CHECK_TOPIC_TYPE + "\n用户输入的面试题类型：【" + chatDto.getPrompt() + "】";
+            prompt = PromptConstant.CHECK_TOPIC_TYPE + "\n用户输入的题目类型：【" + chatDto.getPrompt() + "】";
         }
         
         String content = this.chatClient.prompt()
@@ -338,7 +338,7 @@ public class ModelServiceImpl implements ModelService {
         
         
         prompt = "### 【" + chatDto.getPrompt() + "】类型 💡\n\n" +
-                "## 面试题目：\n" +
+                "## 题目：\n" +
                 "**" + content + "**\n\n" +
                 "> " + getRandomEncouragement();
 
@@ -380,7 +380,7 @@ public class ModelServiceImpl implements ModelService {
             
             if (AiStatusEnums.SEND_TOPIC.getCode().equals(status)) {
                 
-                prompt = "你提出面试题：" + aiHistory.getContent()
+                prompt = "你提出了题目：" + aiHistory.getContent()
                         + "用户回答：" + chatDto.getPrompt() + "  " + PromptConstant.EVALUATE
                         + "结尾最后一定要一定要返回下面这句话\n" +
                         " > 请输入'**继续**'或者输入新的**题目类型**'";
@@ -462,7 +462,7 @@ public class ModelServiceImpl implements ModelService {
         }
         
         String prompt = "### 【" + chatDto.getPrompt() + "】专题 💡\n\n" +
-                "## 面试题目：\n" +
+                "## 题目：\n" +
                 "**" + randomTopic.getTopicName() + "**\n\n" +
                 "> " + getRandomEncouragement();
 
@@ -1022,8 +1022,8 @@ public class ModelServiceImpl implements ModelService {
         String answer = topicAudit.getAnswer();
         
         String prompt = PromptConstant.AUDIT_TOPIC + "\n" +
-                "面试题名称: 【" + topicName + "】\n" +
-                "用户输入的面试题答案: 【" + answer + "】\n" +
+                "题目名称: 【" + topicName + "】\n" +
+                "用户输入的题目答案: 【" + answer + "】\n" +
                 "关联标签可以有多个他们是通过':'分割的: 【" + labelName + "】\n" +
                 "所属专题: 【" + subjectName + "】\n";
         
@@ -1073,7 +1073,7 @@ public class ModelServiceImpl implements ModelService {
     public void generateAnswer(TopicAudit topicAudit) {
         
         String prompt = PromptConstant.GENERATE_ANSWER + "\n" +
-                "面试题: 【" + topicAudit.getTopicName() + "】";
+                "题目: 【" + topicAudit.getTopicName() + "】";
         
         String aiContent = getAiContent(prompt, topicAudit.getAccount(), topicAudit.getUserId());
         Topic topic = new Topic();

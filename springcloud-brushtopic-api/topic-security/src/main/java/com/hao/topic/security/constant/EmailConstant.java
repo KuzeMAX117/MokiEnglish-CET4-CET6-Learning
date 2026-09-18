@@ -8,13 +8,13 @@ public enum EmailConstant {
     EMAIL_SEND_SUCCESS("验证码已发送，请注意查收邮件"),
 
     
-    EMAIL_MESSAGE("您的 HaoAi刷题 平台验证码为："),
+    EMAIL_MESSAGE("您的 学习平台 验证码为："),
 
     
     EMAIL_OUT_TIME("，验证码有效期为5分钟，请及时填写。"),
 
     
-    EMAIL_TITLE("HaoAi刷题 邮箱验证码"),
+    EMAIL_TITLE("学习平台 邮箱验证码"),
 
     
     EMAIL_CODE("haoai:email:code:"),

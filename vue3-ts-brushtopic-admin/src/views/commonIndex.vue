@@ -16,12 +16,12 @@ const trendData = ref<any>();
 
 const getUserIdentity = computed(() => {
   const totalProblems = leftData.value?.topicFrequencyCount || 0;
-  if (totalProblems >= 1000) return { name: '面试之神', color: '#722ed1' };
-  if (totalProblems >= 800) return { name: '面试专家', color: '#f5222d' };
-  if (totalProblems >= 500) return { name: '面试达人', color: '#fa8c16' };
-  if (totalProblems >= 300) return { name: '面试高手', color: '#0a3442' };
-  if (totalProblems >= 100) return { name: '面试新秀', color: '#52c41a' };
-  return { name: '面试新手', color: '#8c8c8c' };
+  if (totalProblems >= 1000) return { name: '学习之神', color: '#722ed1' };
+  if (totalProblems >= 800) return { name: '学习专家', color: '#f5222d' };
+  if (totalProblems >= 500) return { name: '学习达人', color: '#fa8c16' };
+  if (totalProblems >= 300) return { name: '学习高手', color: '#0a3442' };
+  if (totalProblems >= 100) return { name: '学习新秀', color: '#52c41a' };
+  return { name: '学习新手', color: '#8c8c8c' };
 });
 
 const statCards = computed(() => [
