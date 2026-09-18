@@ -57,30 +57,7 @@
 
 ---
 
-## 📦 项目结构
-
-```
-Hao-Topic/
-├── springcloud-brushtopic-api/         # 后端微服务集群
-│   ├── topic-gateway/                  # 网关层
-│   │   ├── admin-gateway/              #   管理后台网关 (9992)
-│   │   └── web-gateway/                #   用户端网关 (9993)
-│   ├── topic-security/                 # 认证服务 (9999)
-│   ├── topic-api/                      # 业务服务层
-│   │   ├── topic-api-system/           #   系统服务
-│   │   └── topic-api-topic/            #   题库服务
-│   ├── topic-client/                   # OpenFeign 客户端
-│   ├── topic-common/                   # 公共模块
-│   └── topic-model/                    # 模型层
-├── vue3-ts-brushtopic-web/             # PC 网页端 (9990)
-├── vue3-ts-brushtopic-admin/           # 管理后台 (9991)
-├── sql/                                # 数据库脚本
-├── 配置文件/                            # Nacos 配置
-├── docker-compose.yml                  # Docker 编排
-└── deploy.sh                           # 部署脚本
-```
-
----
+## 🌟 核心亮点
 
 | 🏗️ Spring Cloud 微服务架构 | 📦 MyBatis-Plus | ⚡ Redis |
 |:---:|:---:|:---:|
