@@ -82,21 +82,6 @@ Hao-Topic/
 
 ---
 
-## 🛠️ 技术栈
-
-<div align="center">
-
-| Spring Cloud 微服务架构 | MyBatis-Plus | Redis |
-|:---:|:---:|:---:|
-| ☁️ 微服务架构 | 📦 高效 ORM | ⚡ 高性能缓存 |
-| OpenFeign / Gateway / Nacos | CRUD 增强 / 分页 / 代码生成 | 排行榜 / 分布式锁 / 会话缓存 |
-
-</div>
-
----
-
-### 🌟 核心亮点
-
 | 🏗️ Spring Cloud 微服务架构 | 📦 MyBatis-Plus | ⚡ Redis |
 |:---:|:---:|:---:|
 | 微服务架构 | 高效持久化 | 高性能缓存 |
