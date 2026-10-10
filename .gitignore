@@ -41,3 +41,12 @@ application-local.yaml
 
 # 嵌套的旧克隆仓库（本地保留，勿提交）
 MokiEnglish-CET4-CET6-Learning/
+
+# 临时/测试文件（本地保留，勿提交）
+/qc
+/query
+/word
+cet_import/_*
+cet_import/check_*.py
+cet_import/debug_*.py
+cet_import/precheck_setup*.sql
