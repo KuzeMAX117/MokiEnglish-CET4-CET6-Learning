@@ -38,3 +38,6 @@ application-local.yaml
 # 配置文件（含敏感信息，不上传）
 配置文件/common-config.yaml
 配置文件/common-minio-config.yaml
+
+# 嵌套的旧克隆仓库（本地保留，勿提交）
+MokiEnglish-CET4-CET6-Learning/
